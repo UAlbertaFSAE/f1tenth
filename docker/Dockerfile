@@ -1,0 +1,38 @@
+FROM ros:humble
+
+# using devcontainer is nice cause it'll remap uid's/gid's for us
+ARG USERNAME=autonomous
+ARG USER_UID=1000
+ARG USER_GID=${USER_UID}
+
+SHELL ["/bin/bash", "-c"]
+
+# Create the user
+RUN groupadd --gid ${USER_GID} ${USERNAME} \
+    && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME}
+
+# install apt packages
+COPY docker/deps/packages.txt deps/packages.txt
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+    $(cat deps/packages.txt) \
+    && rm -rf /var/lib/apt/lists/* && apt-get clean
+
+# install python packages TODO: figure out why these aren't showing up in pip freeze
+COPY docker/deps/requirements.txt deps/requirements.txt
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
+
+# f1tenth gym base environment
+RUN git clone https://github.com/f1tenth/f1tenth_gym && \
+    cd f1tenth_gym && \
+    python3 -m pip install -e .
+
+# setup initialization script
+COPY docker/setup.bash setup.bash
+RUN chmod +x setup.bash
+USER ${USERNAME}
+ENTRYPOINT ["/bin/bash", "setup.bash"]

@@ -1,0 +1,17 @@
+services:
+  dev:
+    container_name: f1tenth_dev
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+      network: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST,
+      - ROS_DOMAIN_ID=42
+    volumes:
+      - ..:/f1tenth:cached
+      - /dev:/dev
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    tty: true
+    stdin_open: true

@@ -1,0 +1,15 @@
+clang
+clang-format
+clang-tidy
+clang-tools
+clangd
+
+vim
+tmux
+python3-pip
+libeigen3-dev
+
+ros-humble-turtlesim
+ros-humble-rviz2
+ros-humble-ackermann-msgs
+ros-humble-teleop-twist-keyboard

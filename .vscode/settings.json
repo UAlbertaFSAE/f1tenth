@@ -1,0 +1,120 @@
+{
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "editor.formatOnPaste": true,
+  "files.trimFinalNewlines": true,
+  "editor.tabSize": 4,
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "files.associations": {
+    ".inputrc": "shellscript",
+    "iostream": "cpp",
+    "ostream": "cpp",
+    "array": "cpp",
+    "atomic": "cpp",
+    "bit": "cpp",
+    "*.tcc": "cpp",
+    "cctype": "cpp",
+    "chrono": "cpp",
+    "clocale": "cpp",
+    "cmath": "cpp",
+    "codecvt": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "condition_variable": "cpp",
+    "csignal": "cpp",
+    "cstdarg": "cpp",
+    "cstddef": "cpp",
+    "cstdint": "cpp",
+    "cstdio": "cpp",
+    "cstdlib": "cpp",
+    "cstring": "cpp",
+    "ctime": "cpp",
+    "cwchar": "cpp",
+    "cwctype": "cpp",
+    "deque": "cpp",
+    "list": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "vector": "cpp",
+    "exception": "cpp",
+    "algorithm": "cpp",
+    "functional": "cpp",
+    "iterator": "cpp",
+    "memory": "cpp",
+    "memory_resource": "cpp",
+    "numeric": "cpp",
+    "optional": "cpp",
+    "random": "cpp",
+    "ratio": "cpp",
+    "string_view": "cpp",
+    "system_error": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "future": "cpp",
+    "initializer_list": "cpp",
+    "iomanip": "cpp",
+    "iosfwd": "cpp",
+    "istream": "cpp",
+    "limits": "cpp",
+    "mutex": "cpp",
+    "new": "cpp",
+    "numbers": "cpp",
+    "semaphore": "cpp",
+    "shared_mutex": "cpp",
+    "sstream": "cpp",
+    "stdexcept": "cpp",
+    "stop_token": "cpp",
+    "streambuf": "cpp",
+    "thread": "cpp",
+    "cinttypes": "cpp",
+    "typeindex": "cpp",
+    "typeinfo": "cpp",
+    "variant": "cpp"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.detectIndentation": false,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "black-formatter.args": [
+    "--line-length=100",
+    "--target-version=py310"
+  ],
+  "python.languageServer": "Pylance",
+  "python.analysis.extraPaths": [
+    "/opt/ros/humble/lib/python3.10/site-packages"
+  ],
+  "[cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.detectIndentation": false
+  },
+  "C_Cpp.default.cStandard": "c11",
+  "C_Cpp.default.cppStandard": "c++17",
+  "C_Cpp.default.compilerPath": "/usr/bin/clang",
+  "C_Cpp.intelliSenseEngine": "default",
+  "C_Cpp.files.exclude": {
+    "/usr/include/ignition/**": true
+  },
+  "files.exclude": {
+    "usr/include/ignition/**": true
+  },
+  "search.exclude": {
+    "usr/include/ignition/**": true
+  },
+  "[dockerfile]": {
+    "editor.detectIndentation": false,
+  },
+  "[cmake]": {
+    "editor.detectIndentation": false,
+  },
+  "ros.distro": "humble",
+  "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
+  "mypy.configFile": "mypy.ini"
+}
