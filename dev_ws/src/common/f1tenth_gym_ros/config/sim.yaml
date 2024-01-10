@@ -36,13 +36,13 @@ bridge:
 
     # transform related
     scan_distance_to_base_link: 0.0
-    
+
     # laserscan parameters
     scan_fov: 4.7
     scan_beams: 1080
 
     # map parameters
-    map_path: '/sim_ws/src/f1tenth_gym_ros/maps/levine'
+    map_path: '/f1tenth/dev_ws/src/common/f1tenth_gym_ros/maps/levine'
     map_img_ext: '.png'
 
     # opponent parameters

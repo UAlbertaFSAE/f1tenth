@@ -1,5 +1,5 @@
 {
-    "name": "Onboarding",
+    "name": "f1tenth",
     "service": "dev",
     "dockerComposeFile": "../docker/compose.yml",
     "workspaceFolder": "/f1tenth",
@@ -18,6 +18,5 @@
                 "matangover.mypy"
             ]
         }
-    },
-    "postCreateCommand": "bash docker/setup.bash"
+    }
 }

@@ -31,8 +31,5 @@ RUN git clone https://github.com/f1tenth/f1tenth_gym && \
     cd f1tenth_gym && \
     python3 -m pip install -e .
 
-# setup initialization script
-COPY docker/setup.bash setup.bash
-RUN chmod +x setup.bash
 USER ${USERNAME}
-ENTRYPOINT ["/bin/bash", "setup.bash"]
+ENTRYPOINT [ "/bin/bash" ]
