@@ -26,10 +26,5 @@ COPY docker/deps/requirements.txt deps/requirements.txt
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
 
-# f1tenth gym base environment
-RUN git clone https://github.com/f1tenth/f1tenth_gym && \
-    cd f1tenth_gym && \
-    python3 -m pip install -e .
-
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]

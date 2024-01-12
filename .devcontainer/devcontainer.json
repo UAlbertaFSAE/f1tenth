@@ -18,5 +18,6 @@
                 "matangover.mypy"
             ]
         }
-    }
+    },
+    "postCreateCommand": "bash docker/setup.bash"
 }
