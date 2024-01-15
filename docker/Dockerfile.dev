@@ -10,14 +10,14 @@ SHELL ["/bin/bash", "-c"]
 # Create the user
 RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
-    && apt-get update \
-    && apt-get install -y sudo \
+    && apt update \
+    && apt install -y sudo \
     && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
     && chmod 0440 /etc/sudoers.d/${USERNAME}
 
 # install apt packages
 COPY docker/deps/packages.txt deps/packages.txt
-RUN apt-get update && apt-get install -q -y --no-install-recommends \
+RUN apt update && apt install -q -y --no-install-recommends \
     $(cat deps/packages.txt) \
     && rm -rf /var/lib/apt/lists/* && apt-get clean
 
