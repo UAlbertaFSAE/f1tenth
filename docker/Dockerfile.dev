@@ -26,7 +26,5 @@ COPY docker/deps/requirements.txt deps/requirements.txt
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
 
-RUN pre-commit install
-
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]
