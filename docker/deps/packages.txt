@@ -13,3 +13,4 @@ ros-humble-turtlesim
 ros-humble-rviz2
 ros-humble-ackermann-msgs
 ros-humble-teleop-twist-keyboard
+ros-humble-diagnostic-updater
