@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-echo -e "\nsource /opt/ros/humble/setup.bash" >>~/.bashrc
-# echo "source /f1tenth/dev_ws/install/local_setup.bash" >> ~/.bashrc
+source /opt/ros/humble/setup.bash
+# source /f1tenth/dev_ws/install/local_setup.bash
 
 export FORMULA_HOME=$(
 	cd "$(dirname "${BASH_SOURCE[0]}")/.."
