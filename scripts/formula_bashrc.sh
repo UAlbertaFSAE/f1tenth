@@ -13,6 +13,9 @@ alias rc_home="cd $FORMULA_HOME"
 export HISTFILESIZE=
 export HISTSIZE=
 
+export AMENT_PREFIX_PATH=""
+export CMAKE_PREFIX_PATH=""
+
 rc_clean() {
 	cd $FORMULA_HOME/dev_ws && rm -rf build install log
 }
