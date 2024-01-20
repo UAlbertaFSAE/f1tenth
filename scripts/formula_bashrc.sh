@@ -8,3 +8,7 @@ export FORMULA_HOME=$(
 # unlimited bash history size
 export HISTFILESIZE=
 export HISTSIZE=
+
+rc_clean() {
+	cd $FORMULA_HOME/dev_ws && rm -rf build install log
+}
