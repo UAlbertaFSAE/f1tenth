@@ -26,5 +26,8 @@ COPY docker/deps/requirements.txt deps/requirements.txt
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
 
+# setup bashrc
+RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> ~/.bashrc
+
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]
