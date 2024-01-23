@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source /opt/ros/humble/setup.bash
-# source /f1tenth/dev_ws/install/local_setup.bash
-
 export FORMULA_HOME=$(
 	cd "$(dirname "${BASH_SOURCE[0]}")/.."
 	pwd -P
@@ -40,3 +37,6 @@ rc_build() {
 alias rc_all='rc_clean && rc_build && rc_source'
 
 pre-commit install
+
+source /opt/ros/humble/setup.bash
+# source /f1tenth/dev_ws/install/local_setup.bash
