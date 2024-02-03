@@ -3,6 +3,7 @@
     "service": "dev",
     "dockerComposeFile": "../docker/compose.yml",
     "workspaceFolder": "/f1tenth",
+    "initializeCommand": "ls",
     "customizations": {
         "vscode": {
             "extensions": [
