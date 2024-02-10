@@ -1,3 +1,4 @@
-echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-echo "source /f1tenth/dev_ws/install/local_setup.bash" >> ~/.bashrc
+#!/usr/bin/env bash
+
+echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >>~/.bashrc
 source ~/.bashrc

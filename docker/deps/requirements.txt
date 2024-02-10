@@ -1,3 +1,4 @@
 transforms3d
 mypy
 ultralytics
+pre-commit
