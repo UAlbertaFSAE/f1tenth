@@ -1,0 +1,7 @@
+image: cps_2023_old.pgm
+mode: trinary
+resolution: 0.1
+origin: [-9.26, -15.7, 0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25
