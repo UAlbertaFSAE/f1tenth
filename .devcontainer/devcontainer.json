@@ -1,23 +1,24 @@
 {
-  "name": "f1tenth",
-  "service": "dev",
-  "dockerComposeFile": "../docker/compose.yml",
-  "workspaceFolder": "/f1tenth",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-vscode.cpptools",
-        "twxs.cmake",
-        "eamodio.gitlens",
-        "ms-iot.vscode-ros",
-        "ms-python.python",
-        "ms-python.black-formatter",
-        "ms-python.vscode-pylance",
-        "xaver.clang-format",
-        "ms-python.isort",
-        "matangover.mypy"
-      ]
-    }
-  },
-  "postCreateCommand": "bash docker/setup.bash"
+    "name": "f1tenth",
+    "service": "dev",
+    "dockerComposeFile": "../docker/compose.yml",
+    "workspaceFolder": "/f1tenth",
+    "initializeCommand": "ls",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "twxs.cmake",
+                "eamodio.gitlens",
+                "ms-iot.vscode-ros",
+                "ms-python.python",
+                "ms-python.black-formatter",
+                "ms-python.vscode-pylance",
+                "xaver.clang-format",
+                "ms-python.isort",
+                "matangover.mypy"
+            ]
+        }
+    },
+    "postCreateCommand": "bash docker/setup.bash"
 }

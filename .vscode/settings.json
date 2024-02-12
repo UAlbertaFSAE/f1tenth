@@ -84,25 +84,12 @@
     }
   },
   "black-formatter.args": [
-    "--line-length=88",
+    "--line-length=100",
     "--target-version=py310"
   ],
   "python.languageServer": "Pylance",
-  "python.autoComplete.extraPaths": [
-    "/opt/ros/humble/lib/python3.10/site-packages",
-    "/f1tenth/onboarding_ws/install/py_pubsub/lib/python3.10/site-packages",
-    "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy",
-    "/opt/ros/humble/share/rclpy",
-    "/opt/ros/humble/lib",
-    "/opt/ros/humble/bin"
-  ],
   "python.analysis.extraPaths": [
-    "/opt/ros/humble/lib/python3.10/site-packages",
-    "/f1tenth/onboarding_ws/install/py_pubsub/lib/python3.10/site-packages",
-    "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy",
-    "/opt/ros/humble/share/rclpy",
-    "/opt/ros/humble/lib",
-    "/opt/ros/humble/bin"
+    "/opt/ros/humble/lib/python3.10/site-packages"
   ],
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools",
@@ -129,7 +116,5 @@
   },
   "ros.distro": "humble",
   "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
-  "mypy.configFile": "mypy.ini",
-  "python.analysis.autoImportCompletions": true,
-  "python.analysis.completeFunctionParens": true
+  "mypy.configFile": "mypy.ini"
 }
