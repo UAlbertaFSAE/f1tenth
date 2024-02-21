@@ -7,7 +7,8 @@ services:
       network: host
     environment:
       - DISPLAY=${DISPLAY}
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST,
+      - LIBGL_ALWAYS_INDIRECT=0
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
     volumes:
       - ..:/f1tenth:cached
@@ -22,7 +23,8 @@ services:
       network: host
     environment:
       - DISPLAY=${DISPLAY}
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST,
+      - LIBGL_ALWAYS_INDIRECT=0
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -34,7 +36,6 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
-      - /tmp/.X11-unix/:/tmp/.X11-unix
       - /dev:/dev
     image: f1tenth/focal-l4t-foxy:f1tenth-stack
     stdin_open: true
