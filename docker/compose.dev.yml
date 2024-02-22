@@ -30,13 +30,3 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
     stdin_open: true
-  hardware:
-    privileged: true
-    network_mode: host
-    environment:
-      - DISPLAY=${DISPLAY}
-    volumes:
-      - /dev:/dev
-    image: f1tenth/focal-l4t-foxy:f1tenth-stack
-    stdin_open: true
-    tty: true

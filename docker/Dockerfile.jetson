@@ -1,0 +1,47 @@
+FROM ros:humble
+
+# using devcontainer is nice cause it'll remap uid's/gid's for us
+ARG USERNAME=autonomous
+ARG USER_UID=1000
+ARG USER_GID=${USER_UID}
+
+SHELL ["/bin/bash", "-c"]
+
+# Create the user
+RUN groupadd --gid ${USER_GID} ${USERNAME} \
+    && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
+    && apt update \
+    && apt install -y sudo \
+    && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME}
+
+# install apt packages
+COPY docker/deps/packages.txt deps/packages.txt
+COPY docker/deps/packages-jetson.txt deps/packages-jetson.txt
+RUN apt update && apt install -q -y --no-install-recommends \
+    $(cat deps/packages.txt) \
+    $(cat deps/packages-jetson.txt) \
+    && rm -rf /var/lib/apt/lists/* && apt-get clean
+
+# install python packages TODO: figure out why these aren't showing up in pip freeze
+COPY docker/deps/requirements.txt deps/requirements.txt
+COPY docker/deps/requirements-jetson.txt deps/requirements-jetson.txt
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements-jetson.txt
+RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
+
+# install ZED SDK
+RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-release wget less udev sudo apt-transport-https zstd && \
+    wget -q --no-check-certificate -O ZED_SDK_Linux.run https://download.stereolabs.com/zedsdk/4.0/l4t35.3/jetsons && \
+    chmod +x ZED_SDK_Linux.run ; ./ZED_SDK_Linux.run silent skip_tools && \
+    rm -rf /usr/local/zed/resources/* \
+    rm -rf ZED_SDK_Linux.run && \
+    rm -rf /var/lib/apt/lists/* && apt-get clean
+
+RUN sudo chmod -R 777 /usr/local/lib/python3.10/dist-packages/
+
+# setup bashrc
+RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.bashrc
+
+USER ${USERNAME}
+ENTRYPOINT [ "/bin/bash" ]
