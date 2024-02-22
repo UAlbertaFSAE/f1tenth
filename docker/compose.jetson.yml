@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   jetson:
     container_name: f1tenth_jetson
@@ -9,10 +11,10 @@ services:
     privileged: true
     runtime: nvidia
     environment:
-      - SSH_AUTH_SOCK: /ssh-agent
-      - DISPLAY: ${DISPLAY}
-      - ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
-      - ROS_DOMAIN_ID: 42
+      - SSH_AUTH_SOCK=/ssh-agent
+      - DISPLAY=${DISPLAY}
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=42
     volumes:
       - ..:/f1tenth:cached
       - /dev:/dev
