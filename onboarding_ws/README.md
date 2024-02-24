@@ -121,10 +121,20 @@ If everything is working, you can move on to the actual tasks (get used to that 
 
 You should see a window open and not run into any errors. If you get any errors, let us know. If no errors, Congrats on setting up your ROS2 environment 🎉 -->
 
-### ROS2 Learning
+### Software Learning
 
+If you don't have any experience with programming, git, or the ROS framework, listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
+
+
+#### Linux
+We use the Linux OS to interace with almost all of our software so we highly advise if you don't have experience using
+a CLI more specifically within Linux then here is a great resource.
+
+- [Introduction to Linux](https://app.theconstructsim.com/courses/linux-for-robotics-40/)
+
+#### Git
 This is a great time to introduce git. You have a local instance of our repository on your computer, and so far you have probably been on the main branch. You will learn quickly to never be on the main branch, bad things happen often if your not careful. If you have never worked with git before, here are some resources to get you started:
-
+- [Introduction to Git](https://www.youtube.com/watch?v=tRZGeaHPoaw)
 - [official git documentation](https://git-scm.com/docs/gittutorial)
 - [a nice interactive tutorial for git branching](https://learngitbranching.js.org/)
 
@@ -134,6 +144,13 @@ You will want to create your own branch by running `git switch -c <your initials
 
 **NOTE**: you should complete all of the tasks below while in the devcontainer
 
+#### Python
+Listed below is an introduction to object orientated programming, a concept we use a ton throughout our codebase.
+which we use alot throughout our codebase
+
+[Introduction to OOP](https://www.youtube.com/watch?v=Ej_02ICOIgs)
+
+#### ROS
 We will start by learning the core concepts of ROS2:
 
 1. Review ROS Basic Concepts (focus on nodes, interfaces, topics, parameters, and launch for now)
@@ -141,28 +158,30 @@ We will start by learning the core concepts of ROS2:
 2. Complete the beginner turtle sim tutorial
    - https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Introducing-Turtlesim/Introducing-Turtlesim.html
 
+If you are struggling at all during this process, do not sweat it. Software stuff is confusing, especially when you are first starting out. I encourage you to try and seek out information on your own, as that is the single most important skill you can gain as a software engineer. Nonetheless, if you are hard stuck, feel free to reach out to the co-leads for help, we don't bite (well, Ryder might sometimes, so watch out).
+
+Let us know if you find any other helpful resources, we will add them to this list.
+
+Listed below are a few more resources that go into more detail regarding ROS if you feel you need extra
+- [ROS Basics](https://app.theconstructsim.com/courses/ros2-basics-in-5-days-python-118/)
+- [Python Robotics](https://app.theconstructsim.com/courses/python-3-for-robotics-58/)
+
+### Onboarding Task
+
 Once done those tutorials, you will be tasked with building your own [ros2 package](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html) and writing nodes, publishers, and subscribers, following the requirements in [this f1tenth lab](https://github.com/f1tenth/f1tenth_lab1_template/tree/24f7320ebf1b9a325a2039d4208204da4454d1ab) (start from section 3 and onwards, and switch any foxy instances with humble as we use humble for our ros2 distribution).
 
 **NOTE:** Make sure you are on your own branch when doing this work, and do everything within the onboarding_ws/src folder!
 
 When you are done the lab, you can push your branch to the remote repository on github and make a pull request! Get a co-lead to review it, and if all looks good, you are done the onboarding task! Welcome aboard :)
 
-### Resources
-
-If you are struggling at all during this process, do not sweat it. Software stuff is confusing, especially when you are first starting out. I encourage you to try and seek out information on your own, as that is the single most important skill you can gain as a software engineer. Nonetheless, if you are hard stuck, feel free to reach out to the co-leads for help, we don't bite (well, Ryder might sometimes, so watch out).
-
 Here is a list of resources that may prove to be helpful during this process:
 
-- [tutorial for python+cpp compatible package](https://roboticsbackend.com/ros2-package-for-both-python-and-cpp-nodes/)
 - [ros2 humble documentation (super good)](https://docs.ros.org/en/humble/index.html)
-- [f1tenth learning modules](https://f1tenth.org/learn.html)
 
-Let us know if you find any other helpful resources, we will add them to this list.
+## Github (Project Management)
 
-## Linear
-
-Some notes on our project management tool Linear:
-
-- it's an agile-based tool where we define our high level projects and tasks within those projects
-  - this is where you will go to see what tasks are assigned for you to complete
-- Access will be granted when you finish onboarding
+Some notes on our project management workflow:
+- For keeping track of all our high level projects and tasks we use Github's Project board
+- The project board (Projects) can be found by going to the f1tenth repository and then it is listed as one of the 
+  navigation items
+- This is where you will go to see what tasks are assigned for you to complete
