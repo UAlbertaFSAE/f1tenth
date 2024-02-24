@@ -86,63 +86,19 @@ You will need to set up an SSH key to authenticate your computer with Github so 
 
 Log into github and click on your profile icon in the top right corner > click settings > click SSH and GPG keys > click add new SSH key. Add an informative title such as "Ubuntu VM" or "WSL" (just giving information on where the key was generated basically, if you ever end up with more keys in the future), and then paste the public key you copied into the necessary area. You should be all set up for cloning and pushing code :)
 
-## Onboarding
-
-Now that you hopefully have everything set up (and again, if we missed any important steps in this document let us know) it's time for some fun!
-
-**NOTE**: This onboarding task is catered towards those with basic understanding of the Linux bash terminal and Python (or C++ if you so please). If you are unfamiliar with either, check out the free Linux for Robotics and Python3 for Robotics classes on [The Construct](https://www.theconstructsim.com/robotigniteacademy_learnros/ros-courses-library/) before beginning.
-
-Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
-
-- Ensure you have Github setup under your UAlberta email (if you already have Github, you can just add your UAlberta address to your account)
-- Give your UAlberta email address to one of the autonomous leads and we will grant you access to the RC car repository
-  - Once you have access, you should be able to view this repository: https://github.com/UAlbertaFSAE/f1tenth
-
-Once you have access to the f1tenth repository, follow the next steps:
-
-1. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
-2. Make sure docker is installed and running in the background (either as docker desktop start it through terminal commands, you can check by running `docker --version` in a terminal in your linux instance)
-3. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well)
-
-```
-git clone git@github.com:UAlbertaFSAE/f1tenth.git
-```
-
-4. Change into that directory with `cd f1tenth` and then run `code .` . This will open up a vscode instance in the Onboarding folder. **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
-
-5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
-6. Wait for a new vscode window to open inside the dev container as well as an RViz window to pop up with a little car and track in it. If these both happen, then you are good to go. If you don't see the RViz window, then you likely forgot to prep your xhost stuff from earlier (or something more sinister is going on). Nonetheless, if things are not working reach out to one of the co-leads for help
-
-If everything is working, you can move on to the actual tasks (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack).
-
-<!-- 6. Once in the container, run the following commands ***inside the container*** (press `ctrl/cmd + j` to open integrated terminal) to ensure the container is working properly:
-	- If on Windows using WSL, run the following command before the next ones: `echo 'export DISPLAY=host.docker.internal:0.0' >> ~/.bashrc`
-**Note:** you may need to run `sudo apt-get update` beforehand if the rviz2 installation fails
-
-You should see a window open and not run into any errors. If you get any errors, let us know. If no errors, Congrats on setting up your ROS2 environment 🎉 -->
-
 ### Software Learning
-
-If you don't have any experience with programming, git, or the ROS framework, listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
-
+If you don't have any experience with linux, programming, git, or the ROS framework, or just need a refresher listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
 
 #### Linux
-We use the Linux OS to interace with almost all of our software so we highly advise if you don't have experience using
-a CLI more specifically within Linux then here is a great resource.
+We use the Linux OS to interact with almost all of our software so we highly advise if you don't have experience using a terminal CLI more specifically within Linux then here is a great resource.
 
 - [Introduction to Linux](https://app.theconstructsim.com/courses/linux-for-robotics-40/)
 
 #### Git
-This is a great time to introduce git. You have a local instance of our repository on your computer, and so far you have probably been on the main branch. You will learn quickly to never be on the main branch, bad things happen often if your not careful. If you have never worked with git before, here are some resources to get you started:
+This is a great time to introduce git. If you have never worked with git before, here are some resources to get you started (the first link is an overview video, the other two are supplementary material if you are still confused):
 - [Introduction to Git](https://www.youtube.com/watch?v=tRZGeaHPoaw)
 - [official git documentation](https://git-scm.com/docs/gittutorial)
 - [a nice interactive tutorial for git branching](https://learngitbranching.js.org/)
-
-**NOTE:** all git commands should be run from a terminal **outside** of the devcontainer i.e. in another bash terminal instance (make sure the user in the terminal is your host computer user, not `autonomous`)
-
-You will want to create your own branch by running `git switch -c <your initials>/onboarding_lab1`. Run `git branch` to see that you now have the branch `main` and your freshly created branch. The highlighted one is the one your currently on. You can now work to your hearts desire, committing your work as you go with `git add <files to stage>` and `git commit -m "<message attached to commit>"`. When you are done the lab, you can push your branch to the remote repository on github and make a pull request! Get a co-lead to review it, and if all looks good, you are done the onboarding task! Welcome aboard :)
-
-**NOTE**: you should complete all of the tasks below while in the devcontainer
 
 #### Python
 Listed below is an introduction to object orientated programming, a concept we use a ton throughout our codebase.
@@ -157,21 +113,51 @@ We will start by learning the core concepts of ROS2:
 2. Complete the beginner turtle sim tutorial
    - https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Introducing-Turtlesim/Introducing-Turtlesim.html
 
-If you are struggling at all during this process, do not sweat it. Software stuff is confusing, especially when you are first starting out. I encourage you to try and seek out information on your own, as that is the single most important skill you can gain as a software engineer. Nonetheless, if you are hard stuck, feel free to reach out to the co-leads for help, we don't bite (well, Ryder might sometimes, so watch out).
-
-Let us know if you find any other helpful resources, we will add them to this list.
-
 Listed below are a few more resources that go into more detail regarding ROS if you feel you need extra
 - [ROS Basics](https://app.theconstructsim.com/courses/ros2-basics-in-5-days-python-118/)
 - [Python Robotics](https://app.theconstructsim.com/courses/python-3-for-robotics-58/)
 
-### Onboarding Task
+## Building the Software Container
+
+Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
+
+- Ensure you have Github setup under your UAlberta email (if you already have Github, you can just add your UAlberta address to your account)
+- Give your UAlberta email address to one of the autonomous leads and we will grant you access to the RC car repository
+  - Once you have access, you should be able to view this repository: https://github.com/UAlbertaFSAE/f1tenth
+
+Once you have access to the f1tenth repository, follow the next steps:
+
+1. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
+2. Make sure docker is installed and running in the background (either as docker desktop or start it through terminal commands, you can check its running by running `docker --version` in a terminal in your linux instance)
+3. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well)
+
+```
+git clone git@github.com:UAlbertaFSAE/f1tenth.git
+```
+
+4. Change into that directory with `cd f1tenth` and then run `code .` . This will open up a vscode instance in the Onboarding folder. **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
+5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
+6. Wait for a new vscode window to open inside the dev container (should say devcontainer in the bottom left corner of vscode).
+
+If everything is working, you can move on to the actual task (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
+
+<!-- 6. Once in the container, run the following commands ***inside the container*** (press `ctrl/cmd + j` to open integrated terminal) to ensure the container is working properly:
+	- If on Windows using WSL, run the following command before the next ones: `echo 'export DISPLAY=host.docker.internal:0.0' >> ~/.bashrc`
+**Note:** you may need to run `sudo apt-get update` beforehand if the rviz2 installation fails
+
+You should see a window open and not run into any errors. If you get any errors, let us know. If no errors, Congrats on setting up your ROS2 environment 🎉 -->
+
+## Onboarding Task
 
 Once done those tutorials, you will be tasked with building your own [ros2 package](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html) and writing nodes, publishers, and subscribers, following the requirements in [this f1tenth lab](https://github.com/f1tenth/f1tenth_lab1_template/tree/24f7320ebf1b9a325a2039d4208204da4454d1ab) (start from section 3 and onwards, and switch any foxy instances with humble as we use humble for our ros2 distribution).
 
-**NOTE:** Make sure you are on your own branch when doing this work, and do everything within the onboarding_ws/src folder!
+You will want to create your own branch by running `git switch -c <your initials>/onboarding_lab1`. Run `git branch` to see that you now have the branch `main` and your freshly created branch. The highlighted one is the one your currently on. You can now work to your hearts desire, committing your work as you go with `git add <files to stage>` and `git commit -m "<message attached to commit>"`.
+
+**NOTE:** do everything within the onboarding_ws/src folder!
 
 When you are done the lab, you can push your branch to the remote repository on github and make a pull request! Get a co-lead to review it, and if all looks good, you are done the onboarding task! Welcome aboard :)
+
+If you are struggling at all during this process, do not sweat it. Software stuff is confusing, especially when you are first starting out. I encourage you to try and seek out information on your own, as that is the single most important skill you can gain as a software engineer. Nonetheless, if you are hard stuck, feel free to reach out to the co-leads for help, we don't bite (well, Ryder might sometimes, so watch out).
 
 Here is a list of resources that may prove to be helpful during this process:
 
