@@ -146,7 +146,6 @@ You will want to create your own branch by running `git switch -c <your initials
 
 #### Python
 Listed below is an introduction to object orientated programming, a concept we use a ton throughout our codebase.
-which we use alot throughout our codebase
 
 [Introduction to OOP](https://www.youtube.com/watch?v=Ej_02ICOIgs)
 
