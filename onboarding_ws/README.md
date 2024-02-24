@@ -86,39 +86,6 @@ You will need to set up an SSH key to authenticate your computer with Github so 
 
 Log into github and click on your profile icon in the top right corner > click settings > click SSH and GPG keys > click add new SSH key. Add an informative title such as "Ubuntu VM" or "WSL" (just giving information on where the key was generated basically, if you ever end up with more keys in the future), and then paste the public key you copied into the necessary area. You should be all set up for cloning and pushing code :)
 
-## Building the Software Container
-
-Now that you hopefully have everything set up (and again, if we missed any important steps in this document let us know) it's time for some fun!
-
-Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
-
-- Ensure you have Github setup under your UAlberta email (if you already have Github, you can just add your UAlberta address to your account)
-- Give your UAlberta email address to one of the autonomous leads and we will grant you access to the RC car repository
-  - Once you have access, you should be able to view this repository: https://github.com/UAlbertaFSAE/f1tenth
-
-Once you have access to the f1tenth repository, follow the next steps:
-
-1. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
-2. Make sure docker is installed and running in the background (either as docker desktop start it through terminal commands, you can check by running `docker --version` in a terminal in your linux instance)
-3. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well)
-
-```
-git clone git@github.com:UAlbertaFSAE/f1tenth.git
-```
-
-4. Change into that directory with `cd f1tenth` and then run `code .` . This will open up a vscode instance in the Onboarding folder. **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
-
-5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
-6. Wait for a new vscode window to open inside the dev container as well as an RViz window to pop up with a little car and track in it. If these both happen, then you are good to go. If you don't see the RViz window, then you likely forgot to prep your xhost stuff from earlier (or something more sinister is going on). Nonetheless, if things are not working reach out to one of the co-leads for help
-
-If everything is working, you can move on to the actual tasks (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack).
-
-<!-- 6. Once in the container, run the following commands ***inside the container*** (press `ctrl/cmd + j` to open integrated terminal) to ensure the container is working properly:
-	- If on Windows using WSL, run the following command before the next ones: `echo 'export DISPLAY=host.docker.internal:0.0' >> ~/.bashrc`
-**Note:** you may need to run `sudo apt-get update` beforehand if the rviz2 installation fails
-
-You should see a window open and not run into any errors. If you get any errors, let us know. If no errors, Congrats on setting up your ROS2 environment 🎉 -->
-
 ### Software Learning
 
 If you don't have any experience with linux, programming, git, or the ROS framework, or just need a refresher listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
@@ -162,6 +129,39 @@ Let us know if you find any other helpful resources, we will add them to this li
 Listed below are a few more resources that go into more detail regarding ROS if you feel you need extra
 - [ROS Basics](https://app.theconstructsim.com/courses/ros2-basics-in-5-days-python-118/)
 - [Python Robotics](https://app.theconstructsim.com/courses/python-3-for-robotics-58/)
+
+## Building the Software Container
+
+Now that you hopefully have everything set up (and again, if we missed any important steps in this document let us know) it's time for some fun!
+
+Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
+
+- Ensure you have Github setup under your UAlberta email (if you already have Github, you can just add your UAlberta address to your account)
+- Give your UAlberta email address to one of the autonomous leads and we will grant you access to the RC car repository
+  - Once you have access, you should be able to view this repository: https://github.com/UAlbertaFSAE/f1tenth
+
+Once you have access to the f1tenth repository, follow the next steps:
+
+1. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
+2. Make sure docker is installed and running in the background (either as docker desktop start it through terminal commands, you can check by running `docker --version` in a terminal in your linux instance)
+3. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well)
+
+```
+git clone git@github.com:UAlbertaFSAE/f1tenth.git
+```
+
+4. Change into that directory with `cd f1tenth` and then run `code .` . This will open up a vscode instance in the Onboarding folder. **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
+
+5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
+6. Wait for a new vscode window to open inside the dev container as well as an RViz window to pop up with a little car and track in it. If these both happen, then you are good to go. If you don't see the RViz window, then you likely forgot to prep your xhost stuff from earlier (or something more sinister is going on). Nonetheless, if things are not working reach out to one of the co-leads for help
+
+If everything is working, you can move on to the actual tasks (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack).
+
+<!-- 6. Once in the container, run the following commands ***inside the container*** (press `ctrl/cmd + j` to open integrated terminal) to ensure the container is working properly:
+	- If on Windows using WSL, run the following command before the next ones: `echo 'export DISPLAY=host.docker.internal:0.0' >> ~/.bashrc`
+**Note:** you may need to run `sudo apt-get update` beforehand if the rviz2 installation fails
+
+You should see a window open and not run into any errors. If you get any errors, let us know. If no errors, Congrats on setting up your ROS2 environment 🎉 -->
 
 ### Onboarding Task
 
