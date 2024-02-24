@@ -86,11 +86,9 @@ You will need to set up an SSH key to authenticate your computer with Github so 
 
 Log into github and click on your profile icon in the top right corner > click settings > click SSH and GPG keys > click add new SSH key. Add an informative title such as "Ubuntu VM" or "WSL" (just giving information on where the key was generated basically, if you ever end up with more keys in the future), and then paste the public key you copied into the necessary area. You should be all set up for cloning and pushing code :)
 
-## Onboarding
+## Building the Software Container
 
 Now that you hopefully have everything set up (and again, if we missed any important steps in this document let us know) it's time for some fun!
-
-**NOTE**: This onboarding task is catered towards those with basic understanding of the Linux bash terminal and Python (or C++ if you so please). If you are unfamiliar with either, check out the free Linux for Robotics and Python3 for Robotics classes on [The Construct](https://www.theconstructsim.com/robotigniteacademy_learnros/ros-courses-library/) before beginning.
 
 Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
 
@@ -123,7 +121,7 @@ You should see a window open and not run into any errors. If you get any errors,
 
 ### Software Learning
 
-If you don't have any experience with programming, git, or the ROS framework, listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
+If you don't have any experience with linux, programming, git, or the ROS framework, or just need a refresher listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
 
 
 #### Linux
