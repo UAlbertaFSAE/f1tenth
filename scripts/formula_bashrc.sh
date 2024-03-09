@@ -32,7 +32,26 @@ rc_build() {
 		-Wall -Wextra -Wpedantic
 	)
 
+	# TODO: figure out how to unfold this in --packages-skip
+	local packages_to_skip=(
+		"zed_components",
+		"zed_ros2",
+		"zed_wrapper",
+		"zed_interfaces",
+		"rviz_plugin_zed_od",
+		"zed_topic_benchmark",
+		"zed_topic_benchmark_component",
+		"zed_topic_benchmark_interfaces",
+		"zed_display_rviz2"
+	)
+
 	cd $FORMULA_HOME/dev_ws && colcon build "${args[@]}" "$@"
+
+	# # dont want to build zed ros tools if not on jetson
+	# if [ "IS_JETSON" == "TRUE"]; then
+	# 	cd $FORMULA_HOME/dev_ws && colcon build "${args[@]}" "$@"
+	# else
+	# 	cd $FORMULA_HOME/dev_ws && colcon build --packages_skip "${args[@]}" "$@"
 }
 alias rc_all='rc_clean && rc_build && rc_source'
 
