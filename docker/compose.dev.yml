@@ -1,0 +1,33 @@
+services:
+  dev:
+    container_name: f1tenth_dev
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+      network: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - LIBGL_ALWAYS_INDIRECT=0
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=42
+      - IS_JETSON=FALSE
+    volumes:
+      - ..:/f1tenth:cached
+      - /dev:/dev
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    tty: true
+    stdin_open: true
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sim
+      network: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - LIBGL_ALWAYS_INDIRECT=0
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=42
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    tty: true
+    stdin_open: true
