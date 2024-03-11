@@ -22,6 +22,7 @@ services:
       - DISPLAY=${DISPLAY}
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
+      - IS_JETSON=TRUE
     volumes:
       - ..:/f1tenth:cached
       - /dev:/dev
