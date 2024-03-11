@@ -7,9 +7,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     ld = LaunchDescription()
-    config = os.path.join(
-        get_package_share_directory("pure_pursuit"), "config", "sim_config.yaml"
-    )
+    config = os.path.join(get_package_share_directory("pure_pursuit"), "config", "sim_config.yaml")
 
     pure_pursuit = Node(
         package="pure_pursuit",
