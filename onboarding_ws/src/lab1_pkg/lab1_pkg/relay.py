@@ -8,13 +8,24 @@ class MinimalSubscriber(Node):
     def __init__(self):
         super().__init__("minimal_subscriber")
         self.subscription = self.create_subscription(
-            String, "drive", self.listener_callback, 10
+            String, "/drive", self.listener_callback, 1
         )
-        # prevent unused variable warning
+
+        self.publisher_ = self.create_publisher(String, "/drive_relay", 1)
+
+    # self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
-        self.get_logger().info('I heard: "%s"' % msg.msg.drive.speed)
+        self.get_logger().info('I heard: "%s"' % msg.drive.steering_angle)
+        self.get_logger().info('I heard: "%s"' % msg.drive.speed)
+
+        param_v = msg.drive.speed * 3
+        param_d = msg.drive.steering_angle * 3
+
+        msg = AckermannDriveStamped()
+        msg.drive.steering_angle = param_v
+        msg.drive.speed = param_d
+        self.publisher_.publish(msg)
 
 
 def main(args=None):
