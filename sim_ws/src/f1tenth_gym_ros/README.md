@@ -69,11 +69,11 @@ If your system does not support nvidia-docker2, noVNC will have to be used to fo
 
 **Installing the simulation:**
 
-1. Clone this repo 
+1. Clone this repo
 2. Bringup the novnc container and the sim container with docker-compose:
 ```bash
 docker-compose up
-``` 
+```
 3. In a separate terminal, run the following, and you'll have the a bash session in the simulation container. `tmux` is available for convenience.
 ```bash
 docker exec -it f1tenth_gym_ros-sim-1 /bin/bash
@@ -157,4 +157,4 @@ Then, press `i` to move forward, `u` and `o` to move forward and turn, `,` to mo
 There are multiple ways to launch your own agent to control the vehicles.
 
 - The first one is creating a new package for your agent in the `/sim_ws` workspace inside the sim container. After launch the simulation, launch the agent node in another bash session while the sim is running.
-- The second one is to create a new ROS 2 container for you agent node. Then create your own package and nodes inside. Launch the sim container and the agent container both. With default networking configurations for `docker`, the behavior is to put The two containers on the same network, and they should be able to discover and talk to each other on different topics. If you're using noVNC, create a new service in `docker-compose.yml` for your agent node. You'll also have to put your container on the same network as the sim and novnc containers.
+- The second one is to create a new ROS 2 container for you agent node. Then create your own package and nodes inside. Launch the sim container and the agent container both. With default networking configurations for `docker`, the behavior is to put The two containers on the same network, and they should be able to discover and talk to each other on different topics. If you're using noVNC, create a new service in `docker-compose.dev.yml` for your agent node. You'll also have to put your container on the same network as the sim and novnc containers.
