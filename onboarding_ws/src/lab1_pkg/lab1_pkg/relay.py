@@ -8,9 +8,9 @@ class MinimalSubscriber(Node):
 
     def __init__(self):
         super().__init__("minimal_subscriber")
-        self.subscription = self.create_subscription(String, "drive", self.listener_callback, 10)
+        self.subscription = self.create_subscription(String, "/drive", self.listener_callback, 1)
 
-        self.publisher_ = self.create_publisher(String, "drive_relay", 10)
+        self.publisher_ = self.create_publisher(String, "/drive_relay", 1)
 
     # self.subscription  # prevent unused variable warning
 

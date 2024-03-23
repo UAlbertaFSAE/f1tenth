@@ -17,7 +17,13 @@ setup(
     description="TODO: Package description",
     license="Apache-2.0",
     tests_require=["pytest"],
+    # entry_points={
+    #     "console_scripts": ["talker = lab1_pkg.talker:main", "relay = lab1_pkg.relay:main"],
+    # },
     entry_points={
-        "console_scripts": ["talker = lab1_pkg.talker:main", "relay = lab1_pkg.relay:main"],
+        "console_scripts": [
+            "talker = lab1_pkg.talker:main",
+            "relay = lab1_pkg.relay:main",
+        ],
     },
 )
