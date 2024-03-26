@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
 
   auto node = std::make_shared<DetectionGenerator>();
-  node->read_csv("/f1tenth/dev_ws/src/navigation/detection_generator/data/cone_positions.csv");
+  node->read_csv("/f1tenth/dev_ws/src/perception/detection_generator/data/cone_positions.csv");
 
   rclcpp::spin(node);
   rclcpp::shutdown();
