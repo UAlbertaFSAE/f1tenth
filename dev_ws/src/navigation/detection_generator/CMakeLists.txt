@@ -6,25 +6,26 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(ament_cmake REQUIRED)
-
-# Find dependencies
 foreach(PACKAGE
   rclcpp
   ament_cmake
-  )
+  rc_interfaces
+)
   find_package(${PACKAGE} REQUIRED)
 endforeach()
 
-#include directories
+# include directories
 include_directories(include)
 
-#executables
+# executables
 add_executable(detection_generator src/detection_generator.cpp)
 
-ament_target_dependencies(detection_generator rclcpp)
+ament_target_dependencies(detection_generator
+    rclcpp
+    rc_interfaces
+)
 
-#install cpp exectuables
+# install cpp exectuables
 install(TARGETS
     detection_generator
     DESTINATION lib/${PROJECT_NAME}

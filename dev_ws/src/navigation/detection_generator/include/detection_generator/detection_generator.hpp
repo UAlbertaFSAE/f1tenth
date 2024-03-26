@@ -1,3 +1,5 @@
+#include <cstdio>
+#include "rc_interfaces/msg/cone.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 class DetectionGenerator : public rclcpp::Node {
@@ -5,5 +7,5 @@ class DetectionGenerator : public rclcpp::Node {
   DetectionGenerator();
 
  private:
-  int x;
+  std::vector<rc_interfaces::msg::Cone> cones;
 };
