@@ -74,7 +74,10 @@
     "cinttypes": "cpp",
     "typeindex": "cpp",
     "typeinfo": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "complex": "cpp",
+    "forward_list": "cpp",
+    "fstream": "cpp"
   },
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
