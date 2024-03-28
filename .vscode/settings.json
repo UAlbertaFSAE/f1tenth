@@ -1,7 +1,6 @@
 {
   "editor.formatOnSave": true,
   "files.trimTrailingWhitespace": true,
-  "files.insertFinalNewline": true,
   "editor.formatOnPaste": true,
   "files.trimFinalNewlines": true,
   "editor.tabSize": 4,

@@ -3,7 +3,7 @@
 DetectionGenerator::DetectionGenerator() : Node("detection_generator_node") {
   std::string csv_path =
       "/f1tenth/dev_ws/src/perception/detection_generator/data/cone_positions.csv";
-  this->declare_parameter("radius", 4.0);
+  this->declare_parameter("radius", 5.0);
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
 
   radius = this->get_parameter("radius").as_double();
@@ -59,39 +59,41 @@ double distance(float x1, float y1, float x2, float y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
+Eigen::Matrix3d quaternionToRotationMatrix(double x, double y, double z, double w) {
+  Eigen::Quaterniond q(w, x, y, z);
+  return q.toRotationMatrix();
+}
+
 void DetectionGenerator::publish_cones(const nav_msgs::msg::Odometry::ConstSharedPtr odom) {
   if (cones.size() == 0) {
     RCLCPP_INFO(this->get_logger(), "No cones to process");
     return;
   }
 
-  // todo: get these three values from odom
-  float direction = 0;  // should be in radians
-  float carX = 0;
-  float carY = 0;
+  float carX = odom->pose.pose.position.x;
+  float carY = odom->pose.pose.position.y;
+  Eigen::Matrix3d rotationMatrix =
+      quaternionToRotationMatrix(odom->pose.pose.orientation.x, odom->pose.pose.orientation.y,
+                                 odom->pose.pose.orientation.z, odom->pose.pose.orientation.w);
 
   for (const auto& cone : cones) {
     double dist = distance(carX, carY, cone.x, cone.y);
 
-    // calculate angle between current heading and vector pointing to cone
-    double angle = atan2(cone.y - carY, cone.x - carX);
-    double angleDiff = angle - direction;
+    // Calculate vector from current position to cone
+    Eigen::Vector3d coneVector(cone.x - carX, cone.y - carY, 0.0);
 
-    // normalize angle difference to be within [-pi, pi]
-    if (angleDiff > M_PI) {
-      angleDiff -= 2 * M_PI;
-    } else if (angleDiff < -M_PI) {
-      angleDiff += 2 * M_PI;
-    }
+    // Transform vector to car's coordinate frame using rotation matrix
+    Eigen::Vector3d transformedVector = rotationMatrix.transpose() * coneVector;
 
-    // check if the cone is within the radius and in front of the current position
-    if (dist <= radius && angleDiff >= -M_PI / 2 && angleDiff <= M_PI / 2) {
+    // Check if the cone is within the radius and in front of the current position
+    if (dist <= radius && transformedVector.x() >= 0) {
       // TODO: accumulate good cones into array and publish entire array at the end
       RCLCPP_INFO(this->get_logger(), "Publishing cone: x=%f, y=%f, color=%s", cone.x, cone.y,
                   cone.color.c_str());
       cone_publisher->publish(cone);
     }
   }
+  sleep(1);
 }
 
 int main(int argc, char** argv) {

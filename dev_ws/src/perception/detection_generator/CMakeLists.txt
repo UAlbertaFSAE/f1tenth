@@ -11,12 +11,16 @@ foreach(PACKAGE
   ament_cmake
   rc_interfaces
   nav_msgs
+  Eigen3
 )
   find_package(${PACKAGE} REQUIRED)
 endforeach()
 
 # include directories
 include_directories(include)
+include_directories(
+  ${EIGEN3_INCLUDE_DIRS}
+)
 
 # executables
 add_executable(detection_generator src/detection_generator.cpp)
