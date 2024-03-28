@@ -68,8 +68,8 @@ void DetectionGenerator::publish_cones(const nav_msgs::msg::Odometry::ConstShare
   float carX = odom->pose.pose.position.x;
   float carY = odom->pose.pose.position.y;
   Eigen::Matrix3d rotation_matrix =
-      Eigen::Quaterniond(odom->pose.pose.orientation.x, odom->pose.pose.orientation.y,
-                         odom->pose.pose.orientation.z, odom->pose.pose.orientation.w)
+      Eigen::Quaterniond(odom->pose.pose.orientation.w, odom->pose.pose.orientation.x,
+                         odom->pose.pose.orientation.y, odom->pose.pose.orientation.z)
           .toRotationMatrix();
 
   rc_interfaces::msg::Cones visible_cones;
