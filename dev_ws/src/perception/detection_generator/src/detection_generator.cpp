@@ -1,4 +1,4 @@
-#include "../include/detection_generator/detection_generator.hpp"
+#include "detection_generator/detection_generator.hpp"
 
 DetectionGenerator::DetectionGenerator() : Node("detection_generator_node") {}
 
