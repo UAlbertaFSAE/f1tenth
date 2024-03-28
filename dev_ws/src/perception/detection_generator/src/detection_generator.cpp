@@ -3,7 +3,7 @@
 DetectionGenerator::DetectionGenerator() : Node("detection_generator_node") {
   std::string csv_path =
       "/f1tenth/dev_ws/src/perception/detection_generator/data/cone_positions.csv";
-  this->declare_parameter("radius", 1.0);
+  this->declare_parameter("radius", 4.0);
 
   cones = read_csv(csv_path);
   cone_publisher = create_publisher<rc_interfaces::msg::Cone>("cone_data", rclcpp::QoS(10));
