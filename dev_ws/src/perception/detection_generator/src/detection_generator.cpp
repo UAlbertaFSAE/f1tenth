@@ -48,10 +48,42 @@ std::vector<rc_interfaces::msg::Cone> DetectionGenerator::read_csv(std::string p
   return cones;
 }
 
-void DetectionGenerator::publish_cones() {
+double distance(float x1, float y1, float x2, float y2) {
+  return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
+void DetectionGenerator::publish_cones(float radius) {
   if (cones.size() == 0) {
     RCLCPP_INFO(this->get_logger(), "No cones to process");
     return;
+  }
+
+  // todo: get these three values from odom
+  float direction = 0;  // should be in radians
+  float carX = 0;
+  float carY = 0;
+
+  for (const auto& cone : cones) {
+    double dist = distance(carX, carY, cone.x, cone.y);
+
+    // Calculate angle between current heading and vector pointing to cone
+    double angle = atan2(cone.y - carY, cone.x - carX);
+    double angleDiff = angle - direction;
+
+    // Normalize angle difference to be within [-pi, pi]
+    if (angleDiff > M_PI) {
+      angleDiff -= 2 * M_PI;
+    } else if (angleDiff < -M_PI) {
+      angleDiff += 2 * M_PI;
+    }
+
+    // Check if the cone is within the radius and in front of the current position
+    if (dist <= radius && angleDiff >= -M_PI / 2 && angleDiff <= M_PI / 2) {
+      // TODO: accumulate good cones into array and publish entire array at once at the end
+      RCLCPP_INFO(this->get_logger(), "Publishing cone: x=%f, y=%f, color=%s", cone.x, cone.y,
+                  cone.color.c_str());
+      cone_publisher->publish(cone);
+    }
   }
 }
 

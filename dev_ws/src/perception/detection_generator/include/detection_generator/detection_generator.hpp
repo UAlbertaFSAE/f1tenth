@@ -8,7 +8,7 @@ class DetectionGenerator : public rclcpp::Node {
  public:
   DetectionGenerator();
   std::vector<rc_interfaces::msg::Cone> read_csv(std::string path);
-  void publish_cones();
+  void publish_cones(float radius);
 
  private:
   std::vector<rc_interfaces::msg::Cone> cones;
