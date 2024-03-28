@@ -10,7 +10,7 @@ DetectionGenerator::DetectionGenerator() : Node("detection_generator_node") {
   std::string odom_topic = this->get_parameter("odom_topic").as_string();
 
   cones = read_csv(csv_path);
-  cone_publisher = create_publisher<rc_interfaces::msg::Cone>("cone_data", rclcpp::QoS(10));
+  cone_publisher = create_publisher<rc_interfaces::msg::Cones>("cone_data", rclcpp::QoS(10));
   odom_subscriber = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, rclcpp::QoS(10), std::bind(&DetectionGenerator::publish_cones, this, _1));
 }
@@ -59,11 +59,6 @@ double distance(float x1, float y1, float x2, float y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
-Eigen::Matrix3d quaternionToRotationMatrix(double x, double y, double z, double w) {
-  Eigen::Quaterniond q(w, x, y, z);
-  return q.toRotationMatrix();
-}
-
 void DetectionGenerator::publish_cones(const nav_msgs::msg::Odometry::ConstSharedPtr odom) {
   if (cones.size() == 0) {
     RCLCPP_INFO(this->get_logger(), "No cones to process");
@@ -72,28 +67,31 @@ void DetectionGenerator::publish_cones(const nav_msgs::msg::Odometry::ConstShare
 
   float carX = odom->pose.pose.position.x;
   float carY = odom->pose.pose.position.y;
-  Eigen::Matrix3d rotationMatrix =
-      quaternionToRotationMatrix(odom->pose.pose.orientation.x, odom->pose.pose.orientation.y,
-                                 odom->pose.pose.orientation.z, odom->pose.pose.orientation.w);
+  Eigen::Matrix3d rotation_matrix =
+      Eigen::Quaterniond(odom->pose.pose.orientation.x, odom->pose.pose.orientation.y,
+                         odom->pose.pose.orientation.z, odom->pose.pose.orientation.w)
+          .toRotationMatrix();
 
+  rc_interfaces::msg::Cones visible_cones;
   for (const auto& cone : cones) {
     double dist = distance(carX, carY, cone.x, cone.y);
 
-    // Calculate vector from current position to cone
-    Eigen::Vector3d coneVector(cone.x - carX, cone.y - carY, 0.0);
+    // calculate vector from current position to cone
+    Eigen::Vector3d cone_vector(cone.x - carX, cone.y - carY, 0.0);
 
-    // Transform vector to car's coordinate frame using rotation matrix
-    Eigen::Vector3d transformedVector = rotationMatrix.transpose() * coneVector;
+    // transform vector to car's coordinate frame using rotation matrix
+    Eigen::Vector3d transformed_vector = rotation_matrix.transpose() * cone_vector;
 
-    // Check if the cone is within the radius and in front of the current position
-    if (dist <= radius && transformedVector.x() >= 0) {
-      // TODO: accumulate good cones into array and publish entire array at the end
-      RCLCPP_INFO(this->get_logger(), "Publishing cone: x=%f, y=%f, color=%s", cone.x, cone.y,
+    // check if the cone is within the radius and in front of the current position
+    if (dist <= radius && transformed_vector.x() >= 0) {
+      RCLCPP_INFO(this->get_logger(), "Found cone: x=%f, y=%f, color=%s", cone.x, cone.y,
                   cone.color.c_str());
-      cone_publisher->publish(cone);
+      visible_cones.cones.push_back(cone);
     }
   }
-  sleep(1);
+
+  RCLCPP_INFO(this->get_logger(), "Publishing %ld visible cones", visible_cones.cones.size());
+  cone_publisher->publish(visible_cones);
 }
 
 int main(int argc, char** argv) {
