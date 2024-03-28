@@ -10,6 +10,7 @@ foreach(PACKAGE
   rclcpp
   ament_cmake
   rc_interfaces
+  nav_msgs
 )
   find_package(${PACKAGE} REQUIRED)
 endforeach()
@@ -23,6 +24,7 @@ add_executable(detection_generator src/detection_generator.cpp)
 ament_target_dependencies(detection_generator
     rclcpp
     rc_interfaces
+    nav_msgs
 )
 
 # install cpp exectuables

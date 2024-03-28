@@ -4,10 +4,15 @@ DetectionGenerator::DetectionGenerator() : Node("detection_generator_node") {
   std::string csv_path =
       "/f1tenth/dev_ws/src/perception/detection_generator/data/cone_positions.csv";
   this->declare_parameter("radius", 4.0);
+  this->declare_parameter("odom_topic", "/ego_racecar/odom");
+
+  radius = this->get_parameter("radius").as_double();
+  std::string odom_topic = this->get_parameter("odom_topic").as_string();
 
   cones = read_csv(csv_path);
   cone_publisher = create_publisher<rc_interfaces::msg::Cone>("cone_data", rclcpp::QoS(10));
-  radius = this->get_parameter("radius").as_double();
+  odom_subscriber = this->create_subscription<nav_msgs::msg::Odometry>(
+      odom_topic, rclcpp::QoS(10), std::bind(&DetectionGenerator::publish_cones, this, _1));
 }
 
 std::vector<rc_interfaces::msg::Cone> DetectionGenerator::read_csv(std::string path) {
@@ -54,7 +59,7 @@ double distance(float x1, float y1, float x2, float y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
-void DetectionGenerator::publish_cones() {
+void DetectionGenerator::publish_cones(const nav_msgs::msg::Odometry::ConstSharedPtr odom) {
   if (cones.size() == 0) {
     RCLCPP_INFO(this->get_logger(), "No cones to process");
     return;
