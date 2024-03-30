@@ -75,6 +75,9 @@ void DetectionGenerator::publish_cones(const nav_msgs::msg::Odometry::ConstShare
   rc_interfaces::msg::Cones visible_cones;
   for (const auto& cone : cones) {
     double dist = distance(carX, carY, cone.x, cone.y);
+    if (dist > radius) {
+      continue;
+    }
 
     // calculate vector from current position to cone
     Eigen::Vector3d cone_vector(cone.x - carX, cone.y - carY, 0.0);
