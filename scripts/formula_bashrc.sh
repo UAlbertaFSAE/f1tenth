@@ -53,6 +53,7 @@ rc_build() {
 	fi
 }
 alias rc_all='rc_clean && rc_build && rc_source'
+alias launch_zed_wrapper='ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i ros_params_override_path:=src/perception/wrapper_params_override.yaml'
 
 pre-commit install
 
