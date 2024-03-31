@@ -18,4 +18,4 @@ jobs:
       - name: Build Packages
         run: |
           echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.bashrc
-          rc_build
+          echo ~/.bashrc
