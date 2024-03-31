@@ -29,9 +29,9 @@ jobs:
 
     - name: Install Ubuntu Packages
       run: |
-        apt update && apt install -q -y --no-install-recommends $(cat docker/deps/packages.txt)
-        rm -rf /var/lib/apt/lists/*
-        apt-get clean
+        sudo apt update && apt install -q -y --no-install-recommends $(cat docker/deps/packages.txt)
+        sudo rm -rf /var/lib/apt/lists/*
+        sudo apt-get clean
 
     - name: Source ROS 2 setup file
       run: source /opt/ros/humble/setup.bash
