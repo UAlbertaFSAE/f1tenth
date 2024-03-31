@@ -8,7 +8,6 @@ on:
 
 jobs:
   test:
-    shell: bash
     runs-on: ubuntu-22.04
     container:
       image: jackpar/f1tenth
@@ -17,6 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build Packages
+        shell: bash
         run: |
           source /opt/ros/humble/setup.bash
 # export AMENT_PREFIX_PATH=""
