@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    shell: bash
     runs-on: ubuntu-22.04
     container:
       image: jackpar/f1tenth
