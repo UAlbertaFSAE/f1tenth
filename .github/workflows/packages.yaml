@@ -19,4 +19,4 @@ jobs:
         shell: bash
         run: |
           echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> ~/.bashrc
-          rc_build
+          cat ~/.bashrc
