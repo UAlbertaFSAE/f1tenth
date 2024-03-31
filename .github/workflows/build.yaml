@@ -25,7 +25,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          ls .
+          ls ./docker
           docker buildx build --push --platform linux/amd64,linux/arm64 -t formula/base ./docker/Dockerfile.dev
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
