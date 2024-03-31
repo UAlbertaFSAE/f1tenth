@@ -17,5 +17,5 @@ jobs:
         uses: actions/checkout@v2
       - name: Build Packages
         run: |
-          echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.bashrc
-          echo ~/.bashrc
+          echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> ~/.bashrc
+          cat ~/.bashrc
