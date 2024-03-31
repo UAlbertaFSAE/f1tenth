@@ -57,4 +57,3 @@ alias rc_all='rc_clean && rc_build && rc_source'
 pre-commit install
 
 source /opt/ros/humble/setup.bash
-# source /f1tenth/dev_ws/install/local_setup.bash
