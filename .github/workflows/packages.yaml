@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-22.04
     container:
       image: jackpar/f1tenth
-      options: --user autonomous
+      options: --user root
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build Packages
-        run: cd dev_ws && colcon build --symlink-install
+        run: |
+          echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.bashrc
+          rc_build
