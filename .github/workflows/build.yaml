@@ -29,12 +29,11 @@ jobs:
 
     - name: Install Ubuntu Packages
       run: |
-        sudo apt update && apt install -q -y --no-install-recommends $(cat docker/deps/packages.txt)
-        sudo rm -rf /var/lib/apt/lists/*
-        sudo apt-get clean
+        sudo apt update
+        sudo apt install -q -y --no-install-recommends $(cat docker/deps/packages.txt)
 
     - name: Source ROS 2 setup file
       run: source /opt/ros/humble/setup.bash
 
     - name: Build ROS 2 packages
-      run: cd dev_ws && colcon build
+      run: cd dev_ws && colcon build --symlink-install
