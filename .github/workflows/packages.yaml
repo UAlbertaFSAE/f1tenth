@@ -21,5 +21,3 @@ jobs:
           echo -e "\nsource ./scripts/github_action_runner.sh" >> ~/.bashrc
           source ~/.bashrc
           rc_build
-# source /opt/ros/humble/setup.bash
-# cd dev_ws && colcon build --symlink-install --packages-skip '^zed_.*$' rviz_plugin_zed_od

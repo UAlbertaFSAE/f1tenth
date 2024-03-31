@@ -1,10 +1,8 @@
 services:
   dev:
     container_name: f1tenth_dev
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.dev
-      network: host
+    image:  jackpar/f1tenth
+    network_mode: "host"
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
