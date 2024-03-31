@@ -7,33 +7,55 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      steps:
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: Set up ROS
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install ROS2
-      run: |
-        sudo apt update && sudo apt install -y curl gnupg2 lsb-release
-        curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-        sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
-        sudo apt update
-        sudo apt install -y ros-humble-desktop
-        sudo apt install -y python3-colcon-common-extensions
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-    - name: Install Ubuntu Packages
-      run: |
-        sudo apt update
-        sudo apt install -q -y --no-install-recommends $(cat docker/deps/packages.txt)
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Source ROS 2 setup file
-      run: source /opt/ros/humble/setup.bash
+      - name: Build and push Docker image
+        run: |
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t formula/base .
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  # build:
+  #   runs-on: ubuntu-latest
 
-    - name: Build ROS 2 packages
-      run: cd dev_ws && colcon build --symlink-install
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v2
+
+  #   - name: Set up ROS
+  #     uses: actions/setup-python@v2
+  #     with:
+  #       python-version: '3.x'
+  #   - name: Install ROS2
+  #     run: |
+  #       sudo apt update && sudo apt install -y curl gnupg2 lsb-release
+  #       curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+  #       sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
+  #       sudo apt update
+  #       sudo apt install -y ros-humble-desktop
+  #       sudo apt install -y python3-colcon-common-extensions
+
+  #   - name: Install Ubuntu Packages
+  #     run: |
+  #       sudo apt update
+  #       sudo apt install -q -y --no-install-recommends $(cat docker/deps/packages.txt)
+
+  #   - name: Source ROS 2 setup file
+  #     run: source /opt/ros/humble/setup.bash
+
+  #   - name: Build ROS 2 packages
+  #     run: cd dev_ws && colcon build --symlink-install
