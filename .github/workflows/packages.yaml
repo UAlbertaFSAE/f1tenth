@@ -19,5 +19,7 @@ jobs:
         shell: bash
         run: |
           echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> ~/.bashrc
-          source /opt/ros/humble/setup.bash
-          cd dev_ws && colcon build --symlink-install --packages-skip '^zed_.*$' rviz_plugin_zed_od
+          source ~/.bashrc
+          rc_build
+# source /opt/ros/humble/setup.bash
+# cd dev_ws && colcon build --symlink-install --packages-skip '^zed_.*$' rviz_plugin_zed_od
