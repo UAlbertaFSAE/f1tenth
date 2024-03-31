@@ -1,9 +1,16 @@
-# name: ROS 2 Package Build
+name: ROS 2 Package Build
 
-# on:
-#   push:
-#     branches: [ "main" ]
-#   pull_request:
-#     branches: [ "main" ]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-# jobs:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: jackpar/f1tenth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
