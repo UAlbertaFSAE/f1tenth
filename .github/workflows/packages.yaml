@@ -16,4 +16,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build Packages
-        run: cd dev_ws && colcon build -Wall -Wextra -Wpedantic --symlink-install
+        run: cd dev_ws && colcon build --symlink-install
