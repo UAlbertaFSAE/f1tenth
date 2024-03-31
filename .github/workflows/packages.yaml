@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     container:
       image: jackpar/f1tenth
-      options: --user root
+      options: --user autonomous
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
