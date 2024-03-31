@@ -27,10 +27,5 @@ rc_build() {
 		"zed_display_rviz2"
 	)
 
-	# dont want to build zed ros tools if not on jetson
-	if [ "$IS_JETSON" == "TRUE" ]; then
-		cd $FORMULA_HOME/dev_ws && colcon build "${args[@]}" "$@"
-	else
-		cd $FORMULA_HOME/dev_ws && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
-	fi
+	cd ./dev_ws && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
 }
