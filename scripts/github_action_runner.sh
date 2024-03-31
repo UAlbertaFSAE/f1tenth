@@ -29,3 +29,5 @@ rc_build() {
 
 	cd ./dev_ws && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
 }
+
+source /opt/ros/humble/setup.bash
