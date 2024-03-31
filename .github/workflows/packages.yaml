@@ -17,4 +17,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Build Packages
         run: |
+          export AMENT_PREFIX_PATH=""
+          export CMAKE_PREFIX_PATH=""
           cd dev_ws && colcon build --symlink-install
