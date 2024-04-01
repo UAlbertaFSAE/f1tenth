@@ -18,6 +18,6 @@ jobs:
       - name: Build Packages
         shell: bash
         run: |
-          echo -e "\nsource ./scripts/github_action_runner.sh" >> ~/.bashrc
+          echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
           source ~/.bashrc
           rc_build
