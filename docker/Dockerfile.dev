@@ -24,7 +24,7 @@ RUN apt update && apt install -q -y --no-install-recommends \
     $(cat deps/packages.txt) \
     && rm -rf /var/lib/apt/lists/* && apt-get clean
 
-# install python packages TODO: figure out why these aren't showing up in pip freeze
+# install python packages
 COPY docker/deps/requirements.txt deps/requirements.txt
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
