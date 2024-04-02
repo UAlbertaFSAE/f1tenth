@@ -31,6 +31,7 @@ RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
 
 # setup bashrc
 RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.bashrc
+RUN echo "temp"
 
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]
