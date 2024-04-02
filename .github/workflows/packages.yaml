@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     container:
-      image: jackpar/f1tenth
+      image: ualbertaformula/f1tenth
       options: --user root
     steps:
       - name: Checkout code
