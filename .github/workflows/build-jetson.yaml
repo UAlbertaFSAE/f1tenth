@@ -1,9 +1,9 @@
-name: Build and push sim dockerfile to Docker Hub
+name: Build and push dockerfile to Docker Hub(jetson)
 
 on:
   push:
     paths:
-      - 'docker/Dockerfile.sim' # only run when sim dockerfile changes
+      - 'docker/**' # only run when docker related files change
 
 jobs:
   docker:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64 -t ualbertaformula/f1tenth-sim -f ./docker/Dockerfile.sim .
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t ualbertaformula/f1tenth-jetson -f ./docker/Dockerfile.jetson .
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

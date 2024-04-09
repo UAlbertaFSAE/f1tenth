@@ -33,6 +33,4 @@ COPY ./sim_ws/setup.bash /sim_ws/setup.bash
 WORKDIR /sim_ws
 RUN chmod +x setup.bash
 
-RUN echo "temp"
-
 ENTRYPOINT ["/bin/bash", "setup.bash"]
