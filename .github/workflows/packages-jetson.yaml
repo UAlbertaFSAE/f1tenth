@@ -1,4 +1,4 @@
-name: ROS 2 Package Build
+name: Build ROS2 Packages(jetson)
 
 on:
   push:
@@ -7,10 +7,10 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-jetson:
     runs-on: ubuntu-22.04
     container:
-      image: ualbertaformula/f1tenth
+      image: ualbertaformula/f1tenth-jetson
       options: --user root
     steps:
       - name: Checkout code

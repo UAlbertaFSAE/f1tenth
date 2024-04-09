@@ -32,5 +32,7 @@ RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
 # setup bashrc
 RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.bashrc
 
+RUN git config --global --add safe.directory /f1tenth
+
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]

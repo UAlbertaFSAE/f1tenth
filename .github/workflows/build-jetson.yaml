@@ -3,10 +3,14 @@ name: Build and push dockerfile to Docker Hub(jetson)
 on:
   push:
     paths:
-      - 'docker/**' # only run when docker related files change
+      - 'docker/Dockerfile.dev'
+      - 'docker/deps/packages.txt'
+      - 'docker/deps/packages-jetson.txt'
+      - 'docker/deps/requirements.txt'
+      - 'docker/deps/requirements-jetson.txt'
 
 jobs:
-  docker:
+  docker-jetson:
     runs-on: ubuntu-22.04
 
     steps:

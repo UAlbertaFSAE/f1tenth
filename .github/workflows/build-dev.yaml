@@ -3,10 +3,12 @@ name: Build and push dockerfile to Docker Hub(dev)
 on:
   push:
     paths:
-      - 'docker/**' # only run when docker related files change
+      - 'docker/Dockerfile.dev'
+      - 'docker/deps/packages.txt'
+      - 'docker/deps/requirements.txt'
 
 jobs:
-  docker:
+  docker-dev:
     runs-on: ubuntu-22.04
 
     steps:
