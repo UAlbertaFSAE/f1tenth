@@ -10,7 +10,7 @@ jobs:
   build-jetson:
     runs-on: ubuntu-22.04
     container:
-      image: ualbertaformula/f1tenth-jetson
+      image: ualbertaformula/f1tenth-jetson:arm64
       options: --user root
     steps:
       - uses: actions/checkout@v2
