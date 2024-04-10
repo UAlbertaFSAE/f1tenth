@@ -13,13 +13,11 @@ jobs:
       image: ualbertaformula/f1tenth-jetson
       options: --user root
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build Packages
-        shell: bash
-        uses: pguyot/arm-runner-action@v2
+      - uses: actions/checkout@v2
+      - uses: pguyot/arm-runner-action@v2
         with:
           commands: |
+            bash
             echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
             source ~/.bashrc
             rc_build
