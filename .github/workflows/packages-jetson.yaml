@@ -17,7 +17,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Build Packages
         shell: bash
-        run: |
-          echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
-          source ~/.bashrc
-          rc_build
+        uses: pguyot/arm-runner-action@v2
+        with:
+          commands: |
+            echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
+            source ~/.bashrc
+            rc_build
