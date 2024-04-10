@@ -6,6 +6,10 @@
   "initializeCommand":
       "docker pull ualbertaformula/f1tenth:latest && docker pull ualbertaformula/f1tenth-sim:latest",
   "shutdownAction": "stopCompose",
+  "features": {
+    "git": "os-provided",
+    "sshd": "latest"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
