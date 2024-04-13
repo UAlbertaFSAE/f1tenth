@@ -32,17 +32,14 @@ std::vector<rc_interfaces::msg::Cone> DetectionGenerator::read_csv(std::string p
       if (!word.empty()) {
         if (j == 0) {
           cone.x = std::stod(word);
-          RCLCPP_INFO(this->get_logger(), "X: %f", cone.x);
         }
 
         if (j == 1) {
           cone.y = std::stod(word);
-          RCLCPP_INFO(this->get_logger(), "Y: %f", cone.y);
         }
 
         if (j == 2) {
           cone.color = word;
-          RCLCPP_INFO(this->get_logger(), "Color: %s", cone.color.c_str());
         }
       }
 
