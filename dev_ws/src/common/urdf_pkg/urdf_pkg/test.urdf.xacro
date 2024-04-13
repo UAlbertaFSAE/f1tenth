@@ -3,4 +3,5 @@
 <link name = "rc/base_link">
 <visual>
     <geometry>
-    <box size = 2>
+        <box size>
+    <geometry>
