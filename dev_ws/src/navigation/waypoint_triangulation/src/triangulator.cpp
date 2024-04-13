@@ -17,7 +17,7 @@ void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr co
   for (int i = 0; i < cones->cones.size(); i++) {
     rc_interfaces::msg::Cone cone = cones->cones[i];
     RCLCPP_INFO(this->get_logger(), "Triangulator got cone: X: %f, Y: %f, Color: %s", cone.x,
-                cone.y, cone.color);
+                cone.y, cone.color.c_str());
   }
 }
 
