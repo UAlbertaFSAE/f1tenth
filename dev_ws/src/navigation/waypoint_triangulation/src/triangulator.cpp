@@ -9,9 +9,35 @@ Triangulator::Triangulator() : Node("triangulator") {
 }
 
 void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones) {
-  for (int i = 0; i < cones->cones.size(); i++) {
-    std::cout << "X: " << cones->cones[i].x << " Y: " << cones->cones[i].y << std::endl;
+  if (!has_new_cones(cones)) {
+    RCLCPP_INFO(this->get_logger(), "No new cones to process");
+    return;
   }
+
+  for (int i = 0; i < cones->cones.size(); i++) {
+    rc_interfaces::msg::Cone cone = cones->cones[i];
+    RCLCPP_INFO(this->get_logger(), "Triangulator got cone: X: %f, Y: %f, Color: %s", cone.x,
+                cone.y, cone.color);
+  }
+}
+
+bool Triangulator::is_same_cone(const rc_interfaces::msg::Cone coneA,
+                                const rc_interfaces::msg::Cone coneB) {
+  return (coneA.x == coneB.x) && (coneA.y == coneB.y) && (coneA.color == coneB.color);
+}
+
+bool Triangulator::has_new_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones) {
+  if (cones->cones.size() != last_cones->cones.size()) {
+    return false;
+  }
+
+  for (int i = 0; i < cones->cones.size(); i++) {
+    if (!is_same_cone(cones->cones[i], last_cones->cones[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 int main(int argc, char** argv) {
