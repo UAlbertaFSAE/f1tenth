@@ -16,10 +16,8 @@ services:
     tty: true
     stdin_open: true
   sim:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.sim
-      network: host
+    image:  ualbertaformula/f1tenth-sim
+    network_mode: "host"
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0

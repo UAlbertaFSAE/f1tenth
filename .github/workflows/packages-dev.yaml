@@ -1,4 +1,4 @@
-name: ROS 2 Package Build
+name: Build ROS2 Packages(dev)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-dev:
     runs-on: ubuntu-22.04
     container:
       image: ualbertaformula/f1tenth
