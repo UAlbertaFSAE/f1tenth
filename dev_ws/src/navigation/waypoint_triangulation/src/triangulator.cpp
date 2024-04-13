@@ -28,16 +28,16 @@ bool Triangulator::is_same_cone(const rc_interfaces::msg::Cone coneA,
 
 bool Triangulator::has_new_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones) {
   if (cones->cones.size() != last_cones->cones.size()) {
-    return false;
+    return true;
   }
 
   for (int i = 0; i < cones->cones.size(); i++) {
     if (!is_same_cone(cones->cones[i], last_cones->cones[i])) {
-      return false;
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 int main(int argc, char** argv) {
