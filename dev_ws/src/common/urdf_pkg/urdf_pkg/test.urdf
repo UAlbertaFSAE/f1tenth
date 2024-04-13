@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<robot name = "rc_car">
+<link name = "rc/base_link">
+<visual>
+    <geometry>
+    <box size = 2>
