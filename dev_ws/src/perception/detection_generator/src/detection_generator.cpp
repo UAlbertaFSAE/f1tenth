@@ -83,7 +83,7 @@ void DetectionGenerator::publish_cones(const nav_msgs::msg::Odometry::ConstShare
     Eigen::Vector3d transformed_vector = rotation_matrix.transpose() * cone_vector;
 
     // check if the cone is within the radius and in front of the current position
-    if (dist <= radius && transformed_vector.x() >= 0) {
+    if (transformed_vector.x() >= 0) {
       RCLCPP_INFO(this->get_logger(), "Found cone: x=%f, y=%f, color=%s", cone.x, cone.y,
                   cone.color.c_str());
       visible_cones.cones.push_back(cone);

@@ -1,6 +1,6 @@
 #include "triangulator.hpp"
 
-Triangulator::Triangulator() : Node("triangulator") {
+Triangulator::Triangulator() : Node("triangulator node") {
   this->declare_parameter("cones_topic", "/cone_data");
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
 
