@@ -29,8 +29,8 @@ RUN source /opt/ros/humble/setup.bash && \
     rosdep install -i --from-path src --rosdistro humble -y && \
     colcon build
 
-COPY ./scripts/simulator_setup.bash /sim_ws/setup.bash
+COPY ./scripts/simulator_setup.bash /sim_ws/simulator_setup.bash
 WORKDIR /sim_ws
-RUN chmod +x setup.bash
+RUN chmod +x simulator_setup.bash
 
-ENTRYPOINT ["/bin/bash", "setup.bash"]
+ENTRYPOINT ["/bin/bash", "simulator_setup.bash"]
