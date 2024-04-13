@@ -38,15 +38,14 @@ install(TARGETS
 )
 
 
-# not sure what this stuff is
 target_include_directories(detection_generator PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(detection_generator PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
 install(TARGETS detection_generator
-  DESTINATION lib/${PROJECT_NAME})
-
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 
 ament_package()
