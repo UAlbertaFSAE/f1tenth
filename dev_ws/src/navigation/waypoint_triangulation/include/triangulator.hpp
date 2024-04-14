@@ -7,9 +7,10 @@ using std::placeholders::_1;
 class Triangulator : public rclcpp::Node {
  public:
   Triangulator();
+  ~Triangulator();
 
  private:
-  const rc_interfaces::msg::Cones::ConstSharedPtr last_cones;
+  const rc_interfaces::msg::Cones* last_cones;
   rclcpp::Subscription<rc_interfaces::msg::Cones>::SharedPtr cone_subscriber;
 
   bool is_same_cone(const rc_interfaces::msg::Cone coneA, const rc_interfaces::msg::Cone coneB);

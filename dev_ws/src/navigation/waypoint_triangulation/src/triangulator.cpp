@@ -1,12 +1,16 @@
 #include "triangulator.hpp"
 
-Triangulator::Triangulator() : Node("triangulator node") {
+Triangulator::Triangulator() : Node("triangulator_node") {
   this->declare_parameter("cones_topic", "/cone_data");
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
 
   cone_subscriber = this->create_subscription<rc_interfaces::msg::Cones>(
       cone_topic, rclcpp::QoS(10), std::bind(&Triangulator::read_cones, this, _1));
+
+  last_cones = new rc_interfaces::msg::Cones();
 }
+
+Triangulator::~Triangulator() { delete last_cones; }
 
 void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones) {
   if (!has_new_cones(cones)) {
@@ -14,7 +18,7 @@ void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr co
     return;
   }
 
-  for (int i = 0; i < cones->cones.size(); i++) {
+  for (size_t i = 0; i < cones->cones.size(); i++) {
     rc_interfaces::msg::Cone cone = cones->cones[i];
     RCLCPP_INFO(this->get_logger(), "Triangulator got cone: X: %f, Y: %f, Color: %s", cone.x,
                 cone.y, cone.color.c_str());
@@ -31,7 +35,7 @@ bool Triangulator::has_new_cones(const rc_interfaces::msg::Cones::ConstSharedPtr
     return true;
   }
 
-  for (int i = 0; i < cones->cones.size(); i++) {
+  for (size_t i = 0; i < cones->cones.size(); i++) {
     if (!is_same_cone(cones->cones[i], last_cones->cones[i])) {
       return true;
     }
