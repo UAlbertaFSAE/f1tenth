@@ -2,7 +2,6 @@ services:
   dev:
     container_name: f1tenth_dev
     image:  ualbertaformula/f1tenth
-    network_mode: "host"
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
@@ -15,9 +14,11 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
     stdin_open: true
+    networks:
+      - my_network
+
   sim:
     image:  ualbertaformula/f1tenth-sim
-    network_mode: "host"
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
@@ -27,3 +28,9 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
     stdin_open: true
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
