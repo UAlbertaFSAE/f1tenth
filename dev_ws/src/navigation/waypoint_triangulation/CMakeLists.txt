@@ -10,6 +10,7 @@ foreach(PACKAGE
   rclcpp
   ament_cmake
   rc_interfaces
+  nav_msgs
 )
   find_package(${PACKAGE} REQUIRED)
 endforeach()
@@ -20,6 +21,7 @@ add_executable(triangulator src/triangulator.cpp)
 ament_target_dependencies(triangulator
     rc_interfaces
     rclcpp
+    nav_msgs
 )
 
 install(TARGETS
