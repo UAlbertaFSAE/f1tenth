@@ -20,8 +20,7 @@ foreach(PACKAGE
   ackermann_msgs
   sensor_msgs
   std_msgs
-  depthimage_to_laserscan
-  teleop_twist_keyboard)
+  depthimage_to_laserscan)
 
   find_package(${PACKAGE} REQUIRED)
 

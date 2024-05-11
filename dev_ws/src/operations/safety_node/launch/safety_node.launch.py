@@ -21,11 +21,6 @@ def generate_launch_description():
                 ],
             ),
             Node(
-                package="teleop_twist_keyboard",
-                executable="teleop_twist_keyboard",
-                name="kb_teleop",
-            ),
-            Node(
                 package="safety_node",
                 executable="safety_node",
                 name="safety_node",
