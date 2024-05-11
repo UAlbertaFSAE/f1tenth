@@ -3,7 +3,7 @@
 Triangulator::Triangulator() : Node("triangulator_node") {
   this->declare_parameter("cones_topic", "/detection_generator/cone_data");
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
-  this->declare_parameter("waypoint_topic", "/waypoints");
+  this->declare_parameter("waypoint_topic", "waypoints");
 
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
   std::string odom_topic = this->get_parameter("odom_topic").as_string();
@@ -60,6 +60,7 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
 
   // publish waypoint at midpoint
   geometry_msgs::msg::Point mp = midpoint(left, right);
+  RCLCPP_INFO(this->get_logger(), "Publishing Midpoint: X: %f, Y: %f", mp.x, mp.y);
   waypoint_publisher->publish(mp);
 
   // continue finding next closest left and rights based on previous angle
