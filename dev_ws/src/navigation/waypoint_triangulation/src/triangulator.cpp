@@ -31,11 +31,11 @@ void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr co
 
 bool Triangulator::is_same_cone(const rc_interfaces::msg::Cone &coneA,
                                 const rc_interfaces::msg::Cone &coneB) {
-  return (coneA.x == coneB.x) && (coneA.y == coneB.y) && (coneA.color == coneB.color);
+  return (coneA.x == coneB.x) && (coneA.y == coneB.y);
 }
 
 bool Triangulator::has_new_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones) {
-  if (last_cones->cones.size() == 0) {
+  if (last_cones->cones.size() != cones->cones.size()) {
     return true;
   }
 
