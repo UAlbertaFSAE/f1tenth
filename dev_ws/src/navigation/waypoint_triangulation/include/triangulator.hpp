@@ -30,6 +30,7 @@ class Triangulator : public rclcpp::Node {
   rc_interfaces::msg::Cones* last_cones;
   rclcpp::Subscription<rc_interfaces::msg::Cones>::SharedPtr cone_subscriber;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber;
+  rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr waypoint_publisher;
 
   // call backs
   void read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones);
@@ -41,5 +42,6 @@ class Triangulator : public rclcpp::Node {
   LR split(rc_interfaces::msg::Cones* cones);
   rc_interfaces::msg::Cone closest_cone(std::vector<rc_interfaces::msg::Cone>& cones,
                                         const geometry_msgs::msg::Point& position);
-  //   rc_interfaces::msg::Cone next_cone();
+  geometry_msgs::msg::Point midpoint(const rc_interfaces::msg::Cone& coneA,
+                                     const rc_interfaces::msg::Cone& coneB);
 };

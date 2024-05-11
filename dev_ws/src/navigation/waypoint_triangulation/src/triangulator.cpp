@@ -3,14 +3,19 @@
 Triangulator::Triangulator() : Node("triangulator_node") {
   this->declare_parameter("cones_topic", "/detection_generator/cone_data");
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
+  this->declare_parameter("waypoint_topic", "/waypoints");
+
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
   std::string odom_topic = this->get_parameter("odom_topic").as_string();
+  std::string waypoint_topic = this->get_parameter("waypoint_topic").as_string();
 
   cone_subscriber = this->create_subscription<rc_interfaces::msg::Cones>(
       cone_topic, rclcpp::QoS(10), std::bind(&Triangulator::read_cones, this, _1));
 
   odom_subscriber = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, rclcpp::QoS(10), std::bind(&Triangulator::odom_callback, this, _1));
+
+  waypoint_publisher = create_publisher<geometry_msgs::msg::Point>(waypoint_topic, rclcpp::QoS(10));
 
   last_cones = new rc_interfaces::msg::Cones();
 
@@ -53,7 +58,9 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
   RCLCPP_INFO(this->get_logger(), "Closest right cone: X: %f, Y: %f, Color: %s", right.x, right.y,
               right.color.c_str());
 
-  // publish waypoint in mid point
+  // publish waypoint at midpoint
+  geometry_msgs::msg::Point mp = midpoint(left, right);
+  waypoint_publisher->publish(mp);
 
   // continue finding next closest left and rights based on previous angle
 }
@@ -111,6 +118,16 @@ rc_interfaces::msg::Cone Triangulator::closest_cone(std::vector<rc_interfaces::m
   }
 
   return closest;
+}
+
+geometry_msgs::msg::Point Triangulator::midpoint(const rc_interfaces::msg::Cone &coneA,
+                                                 const rc_interfaces::msg::Cone &coneB) {
+  geometry_msgs::msg::Point point;
+  point.x = (coneA.x + coneB.x) / 2;
+  point.y = (coneA.y + coneB.y) / 2;
+  point.z = 0;
+
+  return point;
 }
 
 double Triangulator::distance(float x1, float y1, float x2, float y2) {
