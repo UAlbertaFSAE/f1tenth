@@ -19,7 +19,9 @@ foreach(PACKAGE
   nav_msgs
   ackermann_msgs
   sensor_msgs
-  std_msgs)
+  std_msgs
+  depthimage_to_laserscan
+  teleop_twist_keyboard)
 
   find_package(${PACKAGE} REQUIRED)
 

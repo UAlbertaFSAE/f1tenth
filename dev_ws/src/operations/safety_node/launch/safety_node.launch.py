@@ -1,6 +1,5 @@
-from launch_ros.actions import Node
-
 from launch import LaunchDescription
+from launch_ros.actions import Node
 
 
 # TODO: get range_min and max from zed2i yaml in perception zed_wrapper config folder
@@ -15,7 +14,16 @@ def generate_launch_description():
                     ("/depth", "/zed/zed_node/depth/depth_registered"),
                     ("/depth_camera_info", "zed/zed_node/depth/camera_info"),
                 ],
-                parameters=[{"range_min": 0.2}, {"range_max": 20.0}, {"scan_height": 3}],
+                parameters=[
+                    {"range_min": 0.2},
+                    {"range_max": 20.0},
+                    {"scan_height": 3},
+                ],
+            ),
+            Node(
+                package="teleop_twist_keyboard",
+                executable="teleop_twist_keyboard",
+                name="kb_teleop",
             ),
             Node(
                 package="safety_node",
