@@ -28,6 +28,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter(
       "waypoints_path", "/f1tenth/dev_ws/src/navigation/waypoint_generator/src/waypoints_odom.csv");
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
+  this->declare_parameter("waypoint_topic", "/waypoint_triangulation/waypoints");
   this->declare_parameter("car_refFrame", "ego_racecar/base_link");
   this->declare_parameter("drive_topic", "/drive");
   this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
@@ -43,6 +44,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   // Default Values
   waypoints_path = this->get_parameter("waypoints_path").as_string();
   odom_topic = this->get_parameter("odom_topic").as_string();
+  waypoint_topic = this->get_parameter("waypoint_topic").as_string();
   car_refFrame = this->get_parameter("car_refFrame").as_string();
   drive_topic = this->get_parameter("drive_topic").as_string();
   rviz_current_waypoint_topic = this->get_parameter("rviz_current_waypoint_topic").as_string();
@@ -57,6 +59,10 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
 
   subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
+
+  waypoint_subscriber = this->create_subscription<geometry_msgs::msg::Point>(
+      odom_topic, rclcpp::QoS(10), std::bind(&PurePursuit::waypoint_callback, this, _1));
+
   timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
 
   publisher_drive =
@@ -71,7 +77,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
 
   RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched");
 
-  load_waypoints();
+  // load_waypoints();
 }
 
 double PurePursuit::to_radians(double degrees) {
@@ -336,6 +342,12 @@ void PurePursuit::publish_message(double steering_angle) {
       velocity_percentage);
 
   publisher_drive->publish(drive_msgObj);
+}
+
+void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint) {
+  waypoints.X.push_back(waypoint->x);
+  waypoints.Y.push_back(waypoint->y);
+  waypoints.V.push_back(1);
 }
 
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
