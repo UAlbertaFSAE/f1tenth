@@ -61,7 +61,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
       odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
 
   waypoint_subscriber = this->create_subscription<geometry_msgs::msg::Point>(
-      odom_topic, rclcpp::QoS(10), std::bind(&PurePursuit::waypoint_callback, this, _1));
+      waypoint_topic, rclcpp::QoS(10), std::bind(&PurePursuit::waypoint_callback, this, _1));
 
   timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
 
@@ -76,6 +76,8 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched");
+
+  num_waypoints = 0;
 
   // load_waypoints();
 }
@@ -345,12 +347,27 @@ void PurePursuit::publish_message(double steering_angle) {
 }
 
 void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint) {
+  // don't push the same point on multiple times
+  if (num_waypoints > 0) {
+    double last_x = waypoints.X[waypoints.X.size() - 1];
+    double last_y = waypoints.Y[waypoints.Y.size() - 1];
+
+    if (waypoint->x == last_x && waypoint->y == last_y) {
+      return;
+    }
+  }
+
   waypoints.X.push_back(waypoint->x);
   waypoints.Y.push_back(waypoint->y);
   waypoints.V.push_back(1);
+  num_waypoints++;
 }
 
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
+  if (num_waypoints == 0) {
+    return;
+  }
+
   x_car_world = odom_submsgObj->pose.pose.position.x;
   y_car_world = odom_submsgObj->pose.pose.position.y;
   // interpolate between different way-points

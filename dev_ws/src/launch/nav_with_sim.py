@@ -16,7 +16,12 @@ def generate_launch_description():
                 namespace="waypoint_triangulation",
                 executable="triangulator",
                 name="triangulator",
-            )
-            # TODO: add pure pursuit
+            ),
+            Node(
+                package="pure_pursuit",
+                namespace="pure_pursuit",
+                executable="pure_pursuit",
+                name="pursuit",
+            ),
         ]
     )
