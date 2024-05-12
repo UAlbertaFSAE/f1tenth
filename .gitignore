@@ -44,7 +44,6 @@ build/*.obj
 .DS_Store
 
 # images (for now)
-*.png
 *.jpg
 *.svg
 *.jpeg

@@ -25,9 +25,8 @@
 
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   // initialise parameters
-  this->declare_parameter(
-      "waypoints_path", "/f1tenth/dev_ws/src/navigation/waypoint_generator/src/waypoints_odom.csv");
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
+  this->declare_parameter("waypoint_topic", "/waypoint_triangulation/waypoints");
   this->declare_parameter("car_refFrame", "ego_racecar/base_link");
   this->declare_parameter("drive_topic", "/drive");
   this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
@@ -41,8 +40,8 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("velocity_percentage", 0.6);
 
   // Default Values
-  waypoints_path = this->get_parameter("waypoints_path").as_string();
   odom_topic = this->get_parameter("odom_topic").as_string();
+  waypoint_topic = this->get_parameter("waypoint_topic").as_string();
   car_refFrame = this->get_parameter("car_refFrame").as_string();
   drive_topic = this->get_parameter("drive_topic").as_string();
   rviz_current_waypoint_topic = this->get_parameter("rviz_current_waypoint_topic").as_string();
@@ -57,6 +56,10 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
 
   subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
+
+  waypoint_subscriber = this->create_subscription<geometry_msgs::msg::Point>(
+      waypoint_topic, rclcpp::QoS(10), std::bind(&PurePursuit::waypoint_callback, this, _1));
+
   timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
 
   publisher_drive =
@@ -71,7 +74,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
 
   RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched");
 
-  load_waypoints();
+  num_waypoints = 0;
 }
 
 double PurePursuit::to_radians(double degrees) {
@@ -87,53 +90,6 @@ double PurePursuit::to_degrees(double radians) {
 double PurePursuit::p2pdist(double &x1, double &x2, double &y1, double &y2) {
   double dist = sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
   return dist;
-}
-
-void PurePursuit::load_waypoints() {
-  csvFile_waypoints.open(waypoints_path, std::ios::in);
-
-  if (!csvFile_waypoints.is_open()) {
-    RCLCPP_ERROR(this->get_logger(), "Cannot Open CSV File: %s", waypoints_path.c_str());
-    return;
-  } else {
-    RCLCPP_INFO(this->get_logger(), "CSV File Opened");
-  }
-
-  // std::vector<std::string> row;
-  std::string line, word, temp;
-
-  while (!csvFile_waypoints.eof()) {
-    std::getline(csvFile_waypoints, line, '\n');
-    std::stringstream s(line);
-
-    int j = 0;
-    while (getline(s, word, ',')) {
-      if (!word.empty()) {
-        if (j == 0) {
-          waypoints.X.push_back(std::stod(word));
-        } else if (j == 1) {
-          waypoints.Y.push_back(std::stod(word));
-        } else if (j == 2) {
-          waypoints.V.push_back(std::stod(word));
-        }
-      }
-      j++;
-    }
-  }
-
-  csvFile_waypoints.close();
-  num_waypoints = waypoints.X.size();
-  RCLCPP_INFO(this->get_logger(), "Finished loading %d waypoints from %s", num_waypoints,
-              waypoints_path.c_str());
-
-  double average_dist_between_waypoints = 0.0;
-  for (int i = 0; i < num_waypoints - 1; i++) {
-    average_dist_between_waypoints +=
-        p2pdist(waypoints.X[i], waypoints.X[i + 1], waypoints.Y[i], waypoints.Y[i + 1]);
-  }
-  average_dist_between_waypoints /= num_waypoints;
-  RCLCPP_INFO(this->get_logger(), "Average distance between waypoints: %f",
-              average_dist_between_waypoints);
 }
 
 void PurePursuit::visualize_lookahead_point(Eigen::Vector3d &point) {
@@ -338,7 +294,28 @@ void PurePursuit::publish_message(double steering_angle) {
   publisher_drive->publish(drive_msgObj);
 }
 
+void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint) {
+  // don't push the same point on multiple times
+  if (num_waypoints > 0) {
+    double last_x = waypoints.X[waypoints.X.size() - 1];
+    double last_y = waypoints.Y[waypoints.Y.size() - 1];
+
+    if (waypoint->x == last_x && waypoint->y == last_y) {
+      return;
+    }
+  }
+
+  waypoints.X.push_back(waypoint->x);
+  waypoints.Y.push_back(waypoint->y);
+  waypoints.V.push_back(1);
+  num_waypoints++;
+}
+
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
+  if (num_waypoints == 0) {
+    return;
+  }
+
   x_car_world = odom_submsgObj->pose.pose.position.x;
   y_car_world = odom_submsgObj->pose.pose.position.y;
   // interpolate between different way-points
