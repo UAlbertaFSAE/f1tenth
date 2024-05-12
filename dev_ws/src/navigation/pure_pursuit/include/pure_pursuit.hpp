@@ -62,7 +62,7 @@ class PurePursuit : public rclcpp::Node {
   std::string global_refFrame;
   std::string rviz_current_waypoint_topic;
   std::string rviz_lookahead_waypoint_topic;
-  std::string waypoints_path;
+
   double K_p;
   double min_lookahead;
   double max_lookahead;
@@ -102,8 +102,6 @@ class PurePursuit : public rclcpp::Node {
   double to_radians(double degrees);
   double to_degrees(double radians);
   double p2pdist(double &x1, double &x2, double &y1, double &y2);
-
-  void load_waypoints();
 
   void visualize_lookahead_point(Eigen::Vector3d &point);
   void visualize_current_point(Eigen::Vector3d &point);

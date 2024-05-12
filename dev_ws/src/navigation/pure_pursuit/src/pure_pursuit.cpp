@@ -25,8 +25,6 @@
 
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   // initialise parameters
-  this->declare_parameter(
-      "waypoints_path", "/f1tenth/dev_ws/src/navigation/waypoint_generator/src/waypoints_odom.csv");
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
   this->declare_parameter("waypoint_topic", "/waypoint_triangulation/waypoints");
   this->declare_parameter("car_refFrame", "ego_racecar/base_link");
@@ -42,7 +40,6 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("velocity_percentage", 0.6);
 
   // Default Values
-  waypoints_path = this->get_parameter("waypoints_path").as_string();
   odom_topic = this->get_parameter("odom_topic").as_string();
   waypoint_topic = this->get_parameter("waypoint_topic").as_string();
   car_refFrame = this->get_parameter("car_refFrame").as_string();
@@ -78,8 +75,6 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched");
 
   num_waypoints = 0;
-
-  // load_waypoints();
 }
 
 double PurePursuit::to_radians(double degrees) {
@@ -95,53 +90,6 @@ double PurePursuit::to_degrees(double radians) {
 double PurePursuit::p2pdist(double &x1, double &x2, double &y1, double &y2) {
   double dist = sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
   return dist;
-}
-
-void PurePursuit::load_waypoints() {
-  csvFile_waypoints.open(waypoints_path, std::ios::in);
-
-  if (!csvFile_waypoints.is_open()) {
-    RCLCPP_ERROR(this->get_logger(), "Cannot Open CSV File: %s", waypoints_path.c_str());
-    return;
-  } else {
-    RCLCPP_INFO(this->get_logger(), "CSV File Opened");
-  }
-
-  // std::vector<std::string> row;
-  std::string line, word, temp;
-
-  while (!csvFile_waypoints.eof()) {
-    std::getline(csvFile_waypoints, line, '\n');
-    std::stringstream s(line);
-
-    int j = 0;
-    while (getline(s, word, ',')) {
-      if (!word.empty()) {
-        if (j == 0) {
-          waypoints.X.push_back(std::stod(word));
-        } else if (j == 1) {
-          waypoints.Y.push_back(std::stod(word));
-        } else if (j == 2) {
-          waypoints.V.push_back(std::stod(word));
-        }
-      }
-      j++;
-    }
-  }
-
-  csvFile_waypoints.close();
-  num_waypoints = waypoints.X.size();
-  RCLCPP_INFO(this->get_logger(), "Finished loading %d waypoints from %s", num_waypoints,
-              waypoints_path.c_str());
-
-  double average_dist_between_waypoints = 0.0;
-  for (int i = 0; i < num_waypoints - 1; i++) {
-    average_dist_between_waypoints +=
-        p2pdist(waypoints.X[i], waypoints.X[i + 1], waypoints.Y[i], waypoints.Y[i + 1]);
-  }
-  average_dist_between_waypoints /= num_waypoints;
-  RCLCPP_INFO(this->get_logger(), "Average distance between waypoints: %f",
-              average_dist_between_waypoints);
 }
 
 void PurePursuit::visualize_lookahead_point(Eigen::Vector3d &point) {
