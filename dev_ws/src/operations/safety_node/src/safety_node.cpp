@@ -16,11 +16,7 @@ class Safety : public rclcpp::Node {
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "scan", 10, std::bind(&Safety::scan_callback, this, _1));
     odom_subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
-        "cmd_vel", 10, std::bind(&Safety::odom_callback, this, _1));
-    // odom_subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    //     "ego_racecar/odom", 10, std::bind(&Safety::odom_callback, this, _1));
-    // odom_subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    //     "zed/zed_node/odom", 10, std::bind(&Safety::odom_callback, this, _1));
+        "ego_racecar/odom", 10, std::bind(&Safety::odom_callback, this, _1));
   }
 
  private:
@@ -37,6 +33,7 @@ class Safety : public rclcpp::Node {
 
   void scan_callback(const sensor_msgs::msg::LaserScan::ConstSharedPtr scan_msg) {
     /// calculate TTC
+    RCLCPP_INFO(this->get_logger(), "current laserscan 0: '%f'", scan_msg->ranges[0]);
     bool emergency_breaking = false;
     for (std::size_t i = 0; i < scan_msg->ranges.size(); i++) {
       double r = scan_msg->ranges[i];
