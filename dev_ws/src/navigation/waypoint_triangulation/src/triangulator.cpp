@@ -64,7 +64,7 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
 
   publish_midpoint(left, right);
 
-  const int interp_count = 5;
+  constexpr int interp_count = 5;
 
   // interpolate cones between last left/right and current left/right
   auto l = interpolate_points(last_left, left, interp_count);
