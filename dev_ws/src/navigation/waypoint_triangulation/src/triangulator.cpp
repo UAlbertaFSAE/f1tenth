@@ -67,12 +67,12 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
   publish_midpoint(left, right);
 
   // interpolate cones between last left/right and current left/right
-  auto l = interpolate_points(last_left, left, interp_count);
-  auto r = interpolate_points(last_right, right, interp_count);
+  std::vector<rc_interfaces::msg::Cone> l = interpolate_points(last_left, left, interp_count);
+  std::vector<rc_interfaces::msg::Cone> r = interpolate_points(last_right, right, interp_count);
 
   for (int i = 0; i < interp_count; i++) {
-    auto lc = l[i];
-    auto rc = r[i];
+    rc_interfaces::msg::Cone lc = l[i];
+    rc_interfaces::msg::Cone rc = r[i];
 
     publish_midpoint(lc, rc);
   }
