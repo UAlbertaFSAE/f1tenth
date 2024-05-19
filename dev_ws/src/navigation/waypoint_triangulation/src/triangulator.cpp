@@ -18,6 +18,10 @@ Triangulator::Triangulator() : Node("triangulator_node") {
   waypoint_publisher = create_publisher<geometry_msgs::msg::Point>(waypoint_topic, rclcpp::QoS(10));
 
   last_cones = new rc_interfaces::msg::Cones();
+  last_left.x = 0;
+  last_left.y = 0;
+  last_right.x = 0;
+  last_right.y = 0;
 
   RCLCPP_INFO(this->get_logger(), "Starting up triangulator");
 }
@@ -58,12 +62,47 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
   RCLCPP_INFO(this->get_logger(), "Closest right cone: X: %f, Y: %f, Color: %s", right.x, right.y,
               right.color.c_str());
 
+  publish_midpoint(left, right);
+
+  const int interp_count = 5;
+
+  // interpolate cones between last left/right and current left/right
+  auto l = interpolate_points(last_left, left, interp_count);
+  auto r = interpolate_points(last_right, right, interp_count);
+
+  for (int i = 0; i < interp_count; i++) {
+    auto lc = l[i];
+    auto rc = r[i];
+
+    publish_midpoint(lc, rc);
+  }
+}
+
+std::vector<rc_interfaces::msg::Cone> Triangulator::interpolate_points(
+    rc_interfaces::msg::Cone coneA, rc_interfaces::msg::Cone coneB, int count) {
+  std::vector<rc_interfaces::msg::Cone> points(count);
+
+  // Calculate the increments in x and y directions
+  double deltaX = (coneB.x - coneA.x) / (count + 1);
+  double deltaY = (coneB.y - coneA.y) / (count + 1);
+
+  // Generate the interpolated points
+  for (int i = 0; i < count; ++i) {
+    rc_interfaces::msg::Cone point;
+    point.x = coneA.x + i * deltaX;
+    point.y = coneA.y + i * deltaY;
+
+    points[i] = point;
+  }
+
+  return points;
+}
+
+void Triangulator::publish_midpoint(rc_interfaces::msg::Cone left, rc_interfaces::msg::Cone right) {
   // publish waypoint at midpoint
   geometry_msgs::msg::Point mp = midpoint(left, right);
   RCLCPP_INFO(this->get_logger(), "Publishing Midpoint: X: %f, Y: %f", mp.x, mp.y);
   waypoint_publisher->publish(mp);
-
-  // continue finding next closest left and rights based on previous angle
 }
 
 bool Triangulator::is_same_cone(const rc_interfaces::msg::Cone &coneA,
