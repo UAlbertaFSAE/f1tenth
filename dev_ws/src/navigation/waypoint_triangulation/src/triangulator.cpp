@@ -4,6 +4,7 @@ Triangulator::Triangulator() : Node("triangulator_node") {
   this->declare_parameter("cones_topic", "/detection_generator/cone_data");
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
   this->declare_parameter("waypoint_topic", "waypoints");
+  this->declare_parameter("interpolation_count", 5);
 
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
   std::string odom_topic = this->get_parameter("odom_topic").as_string();
@@ -17,6 +18,7 @@ Triangulator::Triangulator() : Node("triangulator_node") {
 
   waypoint_publisher = create_publisher<geometry_msgs::msg::Point>(waypoint_topic, rclcpp::QoS(10));
 
+  interp_count = this->get_parameter("interpolation_count").as_int();
   last_cones = new rc_interfaces::msg::Cones();
   last_left.x = 0;
   last_left.y = 0;
@@ -63,8 +65,6 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
               right.color.c_str());
 
   publish_midpoint(left, right);
-
-  constexpr int interp_count = 5;
 
   // interpolate cones between last left/right and current left/right
   auto l = interpolate_points(last_left, left, interp_count);

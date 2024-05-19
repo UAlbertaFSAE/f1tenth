@@ -30,6 +30,7 @@ class Triangulator : public rclcpp::Node {
   rc_interfaces::msg::Cones* last_cones;
   rc_interfaces::msg::Cone last_left;
   rc_interfaces::msg::Cone last_right;
+  int interp_count;
 
   rclcpp::Subscription<rc_interfaces::msg::Cones>::SharedPtr cone_subscriber;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber;
