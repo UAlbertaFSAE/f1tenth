@@ -64,8 +64,11 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
   RCLCPP_INFO(this->get_logger(), "Closest right cone: X: %f, Y: %f, Color: %s", right.x, right.y,
               right.color.c_str());
 
-  publish_midpoint(left, right);
-
+  // has not set a last left/right
+  if (is_same_cone(last_left, last_right)) {
+    publish_midpoint(left, right);
+    return;
+  }
   // interpolate cones between last left/right and current left/right
   std::vector<rc_interfaces::msg::Cone> l = interpolate_points(last_left, left, interp_count);
   std::vector<rc_interfaces::msg::Cone> r = interpolate_points(last_right, right, interp_count);
@@ -76,6 +79,8 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
 
     publish_midpoint(lc, rc);
   }
+
+  publish_midpoint(left, right);
 }
 
 std::vector<rc_interfaces::msg::Cone> Triangulator::interpolate_points(
@@ -99,7 +104,6 @@ std::vector<rc_interfaces::msg::Cone> Triangulator::interpolate_points(
 }
 
 void Triangulator::publish_midpoint(rc_interfaces::msg::Cone left, rc_interfaces::msg::Cone right) {
-  // publish waypoint at midpoint
   geometry_msgs::msg::Point mp = midpoint(left, right);
   RCLCPP_INFO(this->get_logger(), "Publishing Midpoint: X: %f, Y: %f", mp.x, mp.y);
   waypoint_publisher->publish(mp);
