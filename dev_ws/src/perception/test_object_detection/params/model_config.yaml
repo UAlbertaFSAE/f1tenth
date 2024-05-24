@@ -1,0 +1,9 @@
+trt_models:
+  na: ""
+
+pt_models:
+  yolov8s_best: "/f1tenth/dev_ws/src/perception/test_object_detection/models/first_yolov8s.pt"
+
+inference_params:
+  conf: 0.50
+  iou: 0.70
