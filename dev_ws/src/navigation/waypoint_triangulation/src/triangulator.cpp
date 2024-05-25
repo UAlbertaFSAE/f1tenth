@@ -20,10 +20,10 @@ Triangulator::Triangulator() : Node("triangulator_node") {
 
   interp_count = this->get_parameter("interpolation_count").as_int();
   last_cones = new rc_interfaces::msg::Cones();
-  last_left.x = 0;
-  last_left.y = 0;
-  last_right.x = 0;
-  last_right.y = 0;
+  last_left.x = -1;
+  last_left.y = -1;
+  last_right.x = -1;
+  last_right.y = -1;
 
   RCLCPP_INFO(this->get_logger(), "Starting up triangulator");
 }
@@ -69,6 +69,11 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
     publish_midpoint(left, right);
     last_left = left;
     last_right = right;
+    return;
+  }
+
+  // no points to interpolate, car still needs to move further to find new cones
+  if (is_same_cone(last_left, left) && is_same_cone(last_right, right)) {
     return;
   }
 
