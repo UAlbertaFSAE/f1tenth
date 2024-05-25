@@ -65,8 +65,10 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
               right.color.c_str());
 
   // has not set a last left/right
-  if (is_same_cone(last_left, left) && is_same_cone(last_right, right)) {
+  if (is_same_cone(last_left, last_right)) {
     publish_midpoint(left, right);
+    last_left = left;
+    last_right = right;
     return;
   }
 
