@@ -65,10 +65,11 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
               right.color.c_str());
 
   // has not set a last left/right
-  if (is_same_cone(last_left, last_right)) {
+  if (is_same_cone(last_left, left) && is_same_cone(last_right, right)) {
     publish_midpoint(left, right);
     return;
   }
+
   // interpolate cones between last left/right and current left/right
   std::vector<rc_interfaces::msg::Cone> l = interpolate_points(last_left, left, interp_count);
   std::vector<rc_interfaces::msg::Cone> r = interpolate_points(last_right, right, interp_count);
@@ -81,6 +82,8 @@ void Triangulator::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr o
   }
 
   publish_midpoint(left, right);
+  last_left = left;
+  last_right = right;
 }
 
 std::vector<rc_interfaces::msg::Cone> Triangulator::interpolate_points(
