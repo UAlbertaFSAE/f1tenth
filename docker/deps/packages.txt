@@ -16,3 +16,4 @@ ros-humble-ackermann-msgs
 ros-humble-teleop-twist-keyboard
 ros-humble-diagnostic-updater
 ros-humble-rmw-cyclonedds-cpp
+ros-humble-xacro

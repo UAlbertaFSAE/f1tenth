@@ -1,1 +1,5 @@
 ros-humble-depthimage-to-laserscan
+ros-humble-nmea-msgs
+ros-humble-geographic-msgs
+ros-humble-robot-localization
+ros-humble-cv-bridge

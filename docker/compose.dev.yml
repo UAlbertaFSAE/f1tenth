@@ -9,7 +9,6 @@ services:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - CYCLONEDDS_URI=file:///f1tenth/cyclonedds_config.xml
       - IS_JETSON=FALSE
     volumes:
       - ..:/f1tenth:cached
@@ -26,9 +25,7 @@ services:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - CYCLONEDDS_URI=file:///cyclonedds_config.xml
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ${PWD}/cyclonedds_config.xml:/cyclonedds_config.xml
     tty: true
     stdin_open: true

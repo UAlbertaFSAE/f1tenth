@@ -34,6 +34,7 @@ rc_build() {
 
 	# important: do not add commas between any new packages added here
 	local packages_to_skip=(
+		"safety_node"
 		"zed_components"
 		"zed_ros2"
 		"zed_wrapper"
