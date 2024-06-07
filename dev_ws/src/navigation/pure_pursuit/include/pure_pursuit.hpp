@@ -56,12 +56,13 @@ class PurePursuit : public rclcpp::Node {
   double y_car_world;
 
   std::string odom_topic;
+  std::string waypoint_topic;
   std::string car_refFrame;
   std::string drive_topic;
   std::string global_refFrame;
   std::string rviz_current_waypoint_topic;
   std::string rviz_lookahead_waypoint_topic;
-  std::string waypoints_path;
+
   double K_p;
   double min_lookahead;
   double max_lookahead;
@@ -85,6 +86,7 @@ class PurePursuit : public rclcpp::Node {
 
   // declare subscriber sharedpointer obj
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_odom;
+  rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr waypoint_subscriber;
 
   // declare publisher sharedpointer obj
   rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr publisher_drive;
@@ -100,8 +102,6 @@ class PurePursuit : public rclcpp::Node {
   double to_radians(double degrees);
   double to_degrees(double radians);
   double p2pdist(double &x1, double &x2, double &y1, double &y2);
-
-  void load_waypoints();
 
   void visualize_lookahead_point(Eigen::Vector3d &point);
   void visualize_current_point(Eigen::Vector3d &point);
@@ -119,6 +119,7 @@ class PurePursuit : public rclcpp::Node {
   void publish_message(double steering_angle);
 
   void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj);
+  void waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint);
 
   void timer_callback();
 };
