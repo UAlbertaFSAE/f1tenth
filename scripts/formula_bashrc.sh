@@ -55,9 +55,9 @@ rc_build() {
 
 	# dont want to build zed ros tools if not on jetson
 	if [ "$IS_JETSON" == "TRUE" ]; then
-		cd $FORMULA_HOME/dev_ws && colcon build "${args[@]}" "$@"
+		cd $FORMULA_HOME && colcon build "${args[@]}" "$@"
 	else
-		cd $FORMULA_HOME/dev_ws && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
+		cd $FORMULA_HOME && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
 	fi
 }
 alias rc_all='rc_clean && rc_build && rc_source'
