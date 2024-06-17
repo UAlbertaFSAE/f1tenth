@@ -2,6 +2,12 @@ FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
 
+COPY src/perception src/perception
+
+# install zed ros repositories
+RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-wrapper.git --recurse-submodules
+RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-examples.git
+
 # install apt packages
 COPY docker/deps/packages.txt deps/packages.txt
 COPY docker/deps/packages-jetson.txt deps/packages-jetson.txt
@@ -25,10 +31,6 @@ RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-re
     rm -rf /usr/local/zed/resources/* \
     rm -rf ZED_SDK_Linux.run && \
     rm -rf /var/lib/apt/lists/* && apt-get clean
-
-# install zed ros repositories
-RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-wrapper.git --recurse-submodules
-RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-examples.git
 
 # setup bashrc
 RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /root/.bashrc
