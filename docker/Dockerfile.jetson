@@ -2,12 +2,6 @@ FROM ros:humble
 
 SHELL ["/bin/bash", "-c"]
 
-COPY src/perception src/perception
-
-# install zed ros repositories
-RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-wrapper.git --recurse-submodules
-RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-examples.git
-
 # install apt packages
 COPY docker/deps/packages.txt deps/packages.txt
 COPY docker/deps/packages-jetson.txt deps/packages-jetson.txt

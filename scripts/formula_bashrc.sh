@@ -31,7 +31,34 @@ rc_build() {
 		--cmake-args "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" "-DCMAKE_EXPORT_COMPILE_COMMANDS=On"
 		-Wall -Wextra -Wpedantic
 	)
-	cd $FORMULA_HOME && colcon build "${args[@]}" "$@"
+
+	# important: do not add commas between any new packages added here
+	local packages_to_skip=(
+		"zed_components"
+		"zed_ros2"
+		"zed_wrapper"
+		"zed_interfaces"
+		"rviz_plugin_zed_od"
+		"zed_topic_benchmark"
+		"zed_topic_benchmark_component"
+		"zed_topic_benchmark_interfaces"
+		"zed_display_rviz2"
+		"zed_tutorial_video"
+		"zed_robot_integration"
+		"zed_rgb_convert"
+		"zed_tutorial_pos_tracking"
+		"zed_multi_camera"
+		"zed_tutorial_depth"
+		"zed_depth_to_laserscan"
+		"zed_aruco_localization"
+	)
+
+	# dont want to build zed ros tools if not on jetson
+	if [ "$IS_JETSON" == "TRUE" ]; then
+		cd $FORMULA_HOME/dev_ws && colcon build "${args[@]}" "$@"
+	else
+		cd $FORMULA_HOME/dev_ws && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
+	fi
 }
 alias rc_all='rc_clean && rc_build && rc_source'
 
