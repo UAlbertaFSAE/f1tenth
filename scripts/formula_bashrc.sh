@@ -14,11 +14,11 @@ export AMENT_PREFIX_PATH=""
 export CMAKE_PREFIX_PATH=""
 
 rc_clean() {
-	cd $FORMULA_HOME/dev_ws && rm -rf build install log
+	cd $FORMULA_HOME && rm -rf build install log
 }
 
 rc_source() {
-	source $FORMULA_HOME/dev_ws/install/setup.bash
+	source $FORMULA_HOME/install/setup.bash
 }
 
 export CMAKE_BUILD_TYPE=RelWithDebInfo
@@ -47,9 +47,9 @@ rc_build() {
 
 	# dont want to build zed ros tools if not on jetson
 	if [ "$IS_JETSON" == "TRUE" ]; then
-		cd $FORMULA_HOME/dev_ws && colcon build "${args[@]}" "$@"
+		cd $FORMULA_HOME && colcon build "${args[@]}" "$@"
 	else
-		cd $FORMULA_HOME/dev_ws && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
+		cd $FORMULA_HOME && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
 	fi
 }
 alias rc_all='rc_clean && rc_build && rc_source'
