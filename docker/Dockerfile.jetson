@@ -27,8 +27,8 @@ RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-re
     rm -rf /var/lib/apt/lists/* && apt-get clean
 
 # install zed ros repositories
-RUN cd /f1tenth/src/perception && git clone https://github.com/stereolabs/zed-ros2-wrapper.git --recurse-submodules
-RUN cd /f1tenth/src/perception && git clone https://github.com/stereolabs/zed-ros2-examples.git
+RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-wrapper.git --recurse-submodules
+RUN cd src/perception && git clone https://github.com/stereolabs/zed-ros2-examples.git
 
 # setup bashrc
 RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /root/.bashrc
