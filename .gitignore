@@ -47,3 +47,7 @@ build/*.obj
 *.jpg
 *.svg
 *.jpeg
+*.png
+
+# python cache
+__pycache__

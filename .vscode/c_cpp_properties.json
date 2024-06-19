@@ -14,7 +14,7 @@
         "/opt/ros/humble/include/**",
         "/opt/ros/humble/install/include/**",
         "/usr/local/cuda/include/**",
-        "/f1tenth/dev_ws/install/**",
+        "/f1tenth/install/**",
         "/f1tenth/dev_ws/src/**",
         "/usr/local/zed/include"
       ],
@@ -22,7 +22,7 @@
       "compilerPath": "/usr/bin/clang",
       "cStandard": "c11",
       "cppStandard": "c++17",
-      "compileCommands": "${workspaceFolder}/dev_ws/build/compile_commands.json"
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json"
     }
   ],
   "version": 4
