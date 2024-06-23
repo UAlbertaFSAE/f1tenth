@@ -3,6 +3,9 @@ version: "3.8"
 services:
   jetson:
     container_name: f1tenth_jetson
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.jetson
     image:  ualbertaformula/f1tenth-jetson
     network_mode: host
     privileged: true
