@@ -1,0 +1,10 @@
+FROM f1tenth/focal-l4t-foxy:f1tenth-stack
+
+# for installing cyclonedds in the container
+RUN apt update && apt install -q -y --no-install-recommends \
+    ros-foxy-rmw-cyclonedds-cpp
+
+# NOTE: in the future we will need to somehow overwrite config files with the
+# newly tuned odom values and the overwritten joystick mappings
+
+ENTRYPOINT [ "/bin/bash" ]

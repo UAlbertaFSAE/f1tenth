@@ -34,6 +34,7 @@ rc_build() {
 
 	# important: do not add commas between any new packages added here
 	local packages_to_skip=(
+		"safety_node"
 		"zed_components"
 		"zed_ros2"
 		"zed_wrapper"
@@ -61,5 +62,6 @@ rc_build() {
 	fi
 }
 alias rc_all='rc_clean && rc_build && rc_source'
+alias launch_zed_wrapper='ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i ros_params_override_path:=src/perception/config/wrapper_params_override.yaml'
 
 source /opt/ros/humble/setup.bash
