@@ -6,15 +6,11 @@ This document will help you with contributing issues, bug fixes, and new feature
 
 ## Issues
 
-Issues on GitHub are the process by which you can report bugs or request new features. If these are new to you, check out this [overview](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues). We have a few main types of issues:
-1. bug
+Issues on GitHub are the process by which you can report bugs or request new features. If these are new to you, check out this [overview](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues). We have two main types of issues:
+1. bug fix
     - anything that is broken
-2. feature
-    - some new functionality that didn't exist before
-3. performance
-    - optimization type things, like increasing speed of processing or accuracy of something
-4. documentation
-    - improvements or additions to any of the documentation, like contributing guidelines and onboarding
+2. feature request
+    - some new functionality that didn't exist before, or things like optimizations, refactors, and documentation changes
 
 They are listed in order of priority, but of course there are always outstanding circumstances. We have templates for each type of issue that will ensure all the necessary information is included for work to begin on it.
 
@@ -90,7 +86,7 @@ snake_case:
 - XML files
 - YAML files
 - folders of any kind
-- Markdown (**Note**: should be all caps)
+- Markdown
 
 CameCase:
 - CMake files
