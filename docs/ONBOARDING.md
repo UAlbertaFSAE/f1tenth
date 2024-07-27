@@ -25,7 +25,7 @@ Everything you need to know about the competition is in the [formula student han
 
 We recommend you have the following:
 
-- A computer with at least 8Gb of ram (16Gb preferred), and 50-100Gb of free storage
+- A computer with at least 16Gb of ram, and 50-100Gb of free storage
   - Using Linux natively or through a dual boot is preferred, but our system should work (albeit with slight hiccups) on Linux, Windows, and Mac, as long as you follow the following instructions carefully and ensure you have everything set up correctly
   - **NOTE**: Mac support is iffy due to arm vs. x86 conflicts in docker containers. You can try, but having either a native linux system or a windows system with WSL2 is the best option (even if you have to remote desktop in)
 
