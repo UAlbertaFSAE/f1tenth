@@ -12,7 +12,7 @@ Issues on GitHub are the process by which you can report bugs or request new fea
 2. feature request
     - some new functionality that didn't exist before, or things like optimizations, refactors, and documentation changes
 
-They are listed in order of priority, but of course there are always outstanding circumstances. We have templates for each type of issue that will ensure all the necessary information is included for work to begin on it.
+We have templates for each type of issue that will ensure all the necessary information is included for work to begin on it.
 
 We use [github projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects) to organize and prioritize issues, so this may be a good place to check out what issues are most pressing.
 
@@ -26,7 +26,7 @@ pull requests should be reviewed by a lead or a member who is well acquanted wit
 
 Before submitting a pull request, please make sure that you have followed the [code style](#code-style) guidelines below. Ensure that any changes come with relevant updates to the documentation in the docstrings and Markdown files. Also, make sure that changes to the code have been tested, as we want to keep the `main` branch in a working state at all times.
 
-Before getting started, first make sure you have latest code from the main branch by running the following command:
+Before getting started, first make sure you have latest code from the `main` branch by running the following command:
 ```bash
 git pull origin main
 ```
