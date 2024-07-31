@@ -1,10 +1,9 @@
 {
   "editor.formatOnSave": true,
-  "files.trimTrailingWhitespace": true,
   "editor.formatOnPaste": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
-  "editor.tabSize": 4,
-  "terminal.integrated.defaultProfile.linux": "bash",
   "files.associations": {
     ".inputrc": "shellscript",
     "iostream": "cpp",
@@ -78,17 +77,12 @@
     "forward_list": "cpp",
     "fstream": "cpp"
   },
+  "terminal.integrated.defaultProfile.linux": "bash",
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.detectIndentation": false,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    }
+    "editor.tabSize": 4
   },
-  "black-formatter.args": [
-    "--line-length=100",
-    "--target-version=py310"
-  ],
   "python.languageServer": "Pylance",
   "python.autoComplete.extraPaths": [
     "/opt/ros/humble/lib/python3.10/site-packages",
@@ -98,9 +92,19 @@
     "/opt/ros/humble/lib/python3.10/site-packages",
     "/opt/ros/humble/local/lib/python3.10/dist-packages",
   ],
+  "black-formatter.args": [
+    "--line-length=100",
+    "--target-version=py310"
+  ],
+  "isort.args": [
+    "--profile",
+    "black"
+  ],
+  "isort.check": true,
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools",
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2
   },
   "C_Cpp.default.cStandard": "c11",
   "C_Cpp.default.cppStandard": "c++17",

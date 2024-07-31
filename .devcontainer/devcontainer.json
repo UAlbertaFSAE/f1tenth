@@ -18,10 +18,11 @@
         "eamodio.gitlens",
         "ms-python.python",
         "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.isort",
+        "ms-python.mypy-type-checker",
         "ms-python.vscode-pylance",
         "xaver.clang-format",
-        "ms-python.isort",
-        "matangover.mypy",
         "ms-iot.vscode-ros"
       ]
     }
