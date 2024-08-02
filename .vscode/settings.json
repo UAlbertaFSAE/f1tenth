@@ -77,6 +77,12 @@
     "forward_list": "cpp",
     "fstream": "cpp"
   },
+  "files.exclude": {
+    "usr/include/ignition/**": true
+  },
+  "search.exclude": {
+    "usr/include/ignition/**": true
+  },
   "terminal.integrated.defaultProfile.linux": "bash",
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
@@ -113,12 +119,7 @@
   "C_Cpp.files.exclude": {
     "/usr/include/ignition/**": true
   },
-  "files.exclude": {
-    "usr/include/ignition/**": true
-  },
-  "search.exclude": {
-    "usr/include/ignition/**": true
-  },
+  "C_Cpp.codeAnalysis.clangTidy.enabled": true,
   "[dockerfile]": {
     "editor.detectIndentation": false,
   },
@@ -127,5 +128,5 @@
   },
   "ros.distro": "humble",
   "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
-  "mypy.configFile": "mypy.ini"
+  "mypy.configFile": "mypy.ini",
 }
