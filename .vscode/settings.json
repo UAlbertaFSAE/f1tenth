@@ -99,8 +99,11 @@
     "/opt/ros/humble/local/lib/python3.10/dist-packages",
   ],
   "black-formatter.args": [
-    "--line-length=100",
+    "--line-length=79",
     "--target-version=py310"
+  ],
+  "flake8.path": [
+    "/usr/local/bin/flake8"
   ],
   "isort.args": [
     "--profile",
@@ -109,6 +112,9 @@
   "isort.check": true,
   "mypy-type-checker.args": [
     "--config-file=mypy.ini"
+  ],
+  "mypy-type-checker.path": [
+    "/usr/local/bin/mypy"
   ],
   "mypy-type-checker.ignorePatterns": [
     "${workspaceFolder}/src/navigation/pure_pursuit/**",
@@ -120,7 +126,7 @@
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools",
     "editor.detectIndentation": false,
-    // "editor.tabSize": 2
+    "editor.tabSize": 2
   },
   "C_Cpp.default.cStandard": "c11",
   "C_Cpp.default.cppStandard": "c++17",
@@ -132,9 +138,9 @@
   "C_Cpp.codeAnalysis.runAutomatically": true,
   "C_Cpp.codeAnalysis.clangTidy.enabled": true,
   "C_Cpp.codeAnalysis.clangTidy.path": "/usr/bin/clang-tidy",
-  "C_Cpp.codeAnalysis.clangTidy.args": [
-    "--fix",
-  ],
+  // "C_Cpp.codeAnalysis.exclude": {
+  //   "src/navigation/pure_pursuit": true,
+  // },
   "[dockerfile]": {
     "editor.detectIndentation": false,
   },
