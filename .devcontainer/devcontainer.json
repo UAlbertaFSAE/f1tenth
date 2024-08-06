@@ -3,8 +3,7 @@
   "service": "dev",
   "dockerComposeFile": "../docker/compose.dev.yml",
   "workspaceFolder": "/f1tenth",
-  "initializeCommand":
-      "docker pull ualbertaformula/f1tenth:latest && docker pull ualbertaformula/f1tenth-sim:latest",
+  "initializeCommand": "docker pull ualbertaformula/f1tenth:latest && docker pull ualbertaformula/f1tenth-sim:latest",
   "shutdownAction": "stopCompose",
   "features": {
     "git": "os-provided",
@@ -20,10 +19,10 @@
         "ms-python.black-formatter",
         "ms-python.flake8",
         "ms-python.isort",
-        "ms-python.mypy-type-checker",
+        "ms-python.mypy-type-checker@prerelease",
         "ms-python.vscode-pylance",
-        "xaver.clang-format",
-        "ms-iot.vscode-ros"
+        "ms-iot.vscode-ros",
+        "njpwerner.autodocstring"
       ]
     }
   }

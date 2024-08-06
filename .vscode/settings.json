@@ -87,7 +87,7 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.detectIndentation": false,
-    "editor.tabSize": 4
+    "editor.tabSize": 4,
   },
   "python.languageServer": "Pylance",
   "python.autoComplete.extraPaths": [
@@ -107,10 +107,20 @@
     "black"
   ],
   "isort.check": true,
+  "mypy-type-checker.args": [
+    "--config-file=mypy.ini"
+  ],
+  "mypy-type-checker.ignorePatterns": [
+    "${workspaceFolder}/src/navigation/pure_pursuit/**",
+    "${workspaceFolder}/src/navigation/particle_filter/**"
+  ],
+  "autoDocstring.docstringFormat": "google",
+  "autoDocstring.generateDocstringOnEnter": true,
+  "autoDocstring.guessTypes": true,
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools",
     "editor.detectIndentation": false,
-    "editor.tabSize": 2
+    // "editor.tabSize": 2
   },
   "C_Cpp.default.cStandard": "c11",
   "C_Cpp.default.cppStandard": "c++17",
@@ -119,7 +129,12 @@
   "C_Cpp.files.exclude": {
     "/usr/include/ignition/**": true
   },
+  "C_Cpp.codeAnalysis.runAutomatically": true,
   "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+  "C_Cpp.codeAnalysis.clangTidy.path": "/usr/bin/clang-tidy",
+  "C_Cpp.codeAnalysis.clangTidy.args": [
+    "--fix",
+  ],
   "[dockerfile]": {
     "editor.detectIndentation": false,
   },
@@ -128,5 +143,4 @@
   },
   "ros.distro": "humble",
   "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
-  "mypy.configFile": "mypy.ini",
 }

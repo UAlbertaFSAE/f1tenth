@@ -1,6 +1,7 @@
 {
     "configurations": [
         {
+            "name": "ROS",
             "browse": {
                 "databaseFilename": "${default}",
                 "limitSymbolsToIncludedHeaders": false
@@ -10,15 +11,14 @@
                 "/usr/include/aarch64-linux-gnu/c++/11/",
                 "/usr/include/x86_64-linux-gnu/c++/11/",
                 "/usr/include/c++/11/",
-                "/usr/include/clang/10/include/",
+                "/usr/include/clang/14/include/",
                 "/opt/ros/humble/include/**",
                 "/opt/ros/humble/install/include/**",
                 "/usr/local/cuda/include/**",
                 "/f1tenth/install/**",
-                "/f1tenth/dev_ws/src/**",
+                "/f1tenth/src/**",
                 "/usr/local/zed/include"
             ],
-            "name": "ROS",
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++17",

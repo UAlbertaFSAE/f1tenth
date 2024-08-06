@@ -1,3 +1,8 @@
 [flake8]
-ignore = Q000, I100, I201, D100, W503, E501, I101
 max-line-length = 100
+max-doc-length = 100
+
+# any code not written by us, or any extraneous cases
+exclude =
+    src/navigation/pure_pursuit/**,
+    src/navigation/particle_filter/**
