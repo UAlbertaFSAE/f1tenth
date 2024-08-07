@@ -14,7 +14,7 @@ Issues on GitHub are the process by which you can report bugs or request new fea
 
 We have templates for each type of issue that will ensure all the necessary information is included for work to begin on it.
 
-We use [github projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects) to organize and prioritize issues, so this may be a good place to check out what issues are most pressing.
+We use [github projects](https://github.com/orgs/UAlbertaFSAE/projects) to organize and prioritize issues, so this may be a good place to check out what issues are most pressing.
 
 If you want to work on an issue, please assign yourself to it so others can know who is working on an issue. You can leave updates on an issue to let others know your progress, and so that others can help if needed. If you are no longer working on an issue, please unassign yourself and leave a comment explaining why you are no longer working on it (it is fine if you don't have the time or get in over your head!).
 
@@ -88,7 +88,7 @@ snake_case:
 - folders of any kind
 - Markdown
 
-CameCase:
+CamelCase:
 - CMake files
 - ROS Msg files
 - ROS Action files
