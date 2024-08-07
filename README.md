@@ -1,5 +1,3 @@
 # Ualberta F1Tenth
 
-Welcome to our RC car repository. If you are just starting out, check out the Onboarding [README file](https://github.com/UAlbertaFSAE/f1tenth/tree/main/docs/ONBOARDING.md) in there for more information to get started
-
-To get started with contributing to the repo, please look [here](https://github.com/UAlbertaFSAE/f1tenth/blob/main/docs/CONTRIBUTING.md)
+Welcome to our autonomous remote control car repository. We are developing an autonomy stack for an [RC car](https://f1tenth.org/build.html) as a testing ground for algorithms and design decisions that may be included in our future Autonomous Electric vehicle. If you are just starting out, check out the [Contributing Guidelines](docs/CONTRIBUTING.md) document for more information on how to proceed with helping us develop our system!! Make sure to check out the resources section of the guideline if you are new to ROS or a new UAlberta formula team member as there is information about onboarding and learning resources.
