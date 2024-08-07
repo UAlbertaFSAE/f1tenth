@@ -25,7 +25,7 @@ Everything you need to know about the competition is in the [formula student han
 
 We recommend you have the following:
 
-- A computer with at least 8Gb of ram (16Gb preferred), and 50-100Gb of free storage
+- A computer with at least 16GB of ram and 50-100Gb of free storage
   - Using Linux natively or through a dual boot is preferred, but our system should work (albeit with slight hiccups) on Linux, Windows, and Mac, as long as you follow the following instructions carefully and ensure you have everything set up correctly
   - **NOTE**: Mac support is iffy due to arm vs. x86 conflicts in docker containers. You can try, but having either a native linux system or a windows system with WSL2 is the best option (even if you have to remote desktop in)
 
@@ -120,40 +120,24 @@ Listed below are a few more resources that go into more detail regarding ROS if 
 ## Building the Software Container
 
 Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
-
-- Ensure you have Github setup under your UAlberta email (if you already have Github, you can just add your UAlberta address to your account)
-- Give your UAlberta email address to one of the autonomous leads and we will grant you access to the RC car repository
-  - Once you have access, you should be able to view this repository: https://github.com/UAlbertaFSAE/f1tenth
-
-Once you have access to the f1tenth repository, follow the next steps:
-
-1. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
+1. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well) with `git clone git@github.com:UAlbertaFSAE/f1tenth.git` and then change into it with `cd f1tenth`
 2. Make sure docker is installed and running in the background (either as docker desktop or start it through terminal commands, you can check its running by running `docker --version` in a terminal in your linux instance)
-3. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well)
-
-```
-git clone git@github.com:UAlbertaFSAE/f1tenth.git
-```
-
-4. Change into that directory with `cd f1tenth` and then run `code .` . This will open up a vscode instance in the Onboarding folder. **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
+3. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
+4. run `code .` to open up vscode inside the f1tenth directory (to ensure you are in the right directory beforehand, run `pwd` and you should see /f1tenth at the end of the output). **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
 5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
-6. Wait for a new vscode window to open inside the dev container (should say devcontainer in the bottom left corner of vscode).
+6. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
 
-If everything is working, you can move on to the actual task (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
+If everything is working, you can move on to the actual onboarding task (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
 
-<!-- 6. Once in the container, run the following commands ***inside the container*** (press `ctrl/cmd + j` to open integrated terminal) to ensure the container is working properly:
-	- If on Windows using WSL, run the following command before the next ones: `echo 'export DISPLAY=host.docker.internal:0.0' >> ~/.bashrc`
-**Note:** you may need to run `sudo apt-get update` beforehand if the rviz2 installation fails
-
-You should see a window open and not run into any errors. If you get any errors, let us know. If no errors, Congrats on setting up your ROS2 environment 🎉 -->
+**NOTE:** if you are on windows using WSL, you will need to run the following command when in the container: `export DISPLAY=host.docker.internal:0.0`. This ensures GUI's can be used properly from within the container.
 
 ## Onboarding Task
 
 Once done those tutorials, you will be tasked with building your own [ros2 package](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html) and writing nodes, publishers, and subscribers, following the requirements in [this f1tenth lab](https://github.com/f1tenth/f1tenth_lab1_template/tree/24f7320ebf1b9a325a2039d4208204da4454d1ab) (start from section 3 and onwards, and switch any foxy instances with humble as we use humble for our ros2 distribution).
 
-You will want to create your own branch by running `git switch -c <your initials>/onboarding_lab1`. Run `git branch` to see that you now have the branch `main` and your freshly created branch. The highlighted one is the one your currently on. You can now work to your hearts desire, committing your work as you go with `git add <files to stage>` and `git commit -m "<message attached to commit>"`.
+You will want to create your own branch by running `git switch -c <your initials>/onboarding_lab1` (make sure you are in the f1tenth directory or a child of it when running this). Run `git branch` to see that you now have the branch `main` and your freshly created branch. The highlighted one is the one your currently on. You can now work to your hearts desire, committing your work as you go with `git add <files to stage>` and `git commit -m "<message attached to commit>"`.
 
-**NOTE:** do everything within the onboarding_ws/src folder!
+**NOTE:** create your package from within the `src/` folder.
 
 When you are done the lab, you can push your branch to the remote repository on github and make a pull request! Get a co-lead to review it, and if all looks good, you are done the onboarding task! Welcome aboard :)
 
@@ -167,6 +151,4 @@ Here is a list of resources that may prove to be helpful during this process:
 
 Some notes on our project management workflow:
 - For keeping track of all our high level projects and tasks we use Github's Project board
-- The project board (Projects) can be found by going to the f1tenth repository and then it is listed as one of the
-  navigation items
-- This is where you will go to see what tasks are assigned for you to complete
+  - this is where you will see all the tasks that need to be completed
