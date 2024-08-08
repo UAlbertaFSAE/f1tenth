@@ -1,9 +1,7 @@
-clang
-clang-format
-clang-tidy
-clang-tools
-clangd
-
+wget
+lsb-release
+software-properties-common
+gnupg
 vim
 tmux
 python3-pip

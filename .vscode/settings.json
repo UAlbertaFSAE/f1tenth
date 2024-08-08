@@ -124,24 +124,19 @@
   "autoDocstring.generateDocstringOnEnter": true,
   "autoDocstring.guessTypes": true,
   "[cpp]": {
-    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
     "editor.detectIndentation": false,
     "editor.tabSize": 2
   },
   "C_Cpp.default.cStandard": "c11",
   "C_Cpp.default.cppStandard": "c++17",
-  "C_Cpp.default.compilerPath": "/usr/bin/clang",
   "C_Cpp.loggingLevel": "Debug",
-  "C_Cpp.intelliSenseEngine": "default",
   "C_Cpp.files.exclude": {
     "/usr/include/ignition/**": true
   },
-  "C_Cpp.codeAnalysis.runAutomatically": true,
-  "C_Cpp.codeAnalysis.clangTidy.enabled": true,
-  "C_Cpp.codeAnalysis.clangTidy.path": "/usr/bin/clang-tidy",
-  // "C_Cpp.codeAnalysis.exclude": {
-  //   "src/navigation/pure_pursuit": true,
-  // },
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "clangd.path": "/usr/bin/clangd-18",
+  "clangd.enableCodeCompletion": true,
   "[dockerfile]": {
     "editor.detectIndentation": false,
   },

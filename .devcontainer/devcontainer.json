@@ -13,6 +13,7 @@
     "vscode": {
       "extensions": [
         "ms-vscode.cpptools",
+        "llvm-vs-code-extensions.vscode-clangd",
         "twxs.cmake",
         "eamodio.gitlens",
         "ms-python.python",

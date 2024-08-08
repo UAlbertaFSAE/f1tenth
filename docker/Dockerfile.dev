@@ -24,6 +24,15 @@ RUN apt update && apt install -q -y --no-install-recommends \
     $(cat deps/packages.txt) \
     && rm -rf /var/lib/apt/lists/* && apt-get clean
 
+# install clang tooling (version 18)
+RUN wget https://apt.llvm.org/llvm.sh \
+    && chmod +x llvm.sh \
+    && ./llvm.sh 18 \
+    && apt update && apt install -y \
+    clang-tools-18 \
+    clang-tidy-18 \
+    clang-format-18
+
 # install python packages
 COPY docker/deps/requirements.txt deps/requirements.txt
 RUN python3 -m pip install --upgrade pip
