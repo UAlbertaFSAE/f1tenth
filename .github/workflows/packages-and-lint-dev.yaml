@@ -1,0 +1,55 @@
+name: Build ROS2 Packages and Lint Repo
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-and-lint-cpp:
+    runs-on: ubuntu-22.04
+    container:
+      image: ualbertaformula/f1tenth
+      options: --user root
+    permissions:
+      metadata: read
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build Packages
+        run: |
+          echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
+          source ~/.bashrc
+          rc_build
+      # NOTE: don't want to waste action minutes and rebuild everything for
+      # compilation database in a separate job, so doing linting and build in same job
+      - name: cpp-linter/cpp-linter-action@v2
+        id: linter
+        if: ${{ success() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: 'file'  # use .clang-format file
+          tidy-checks: '' # use .clang-tidy config file.
+          database: './build/'
+          thread-comments: 'update'
+          no-lgtm: false
+          version: '/usr/bin/' # use clang tools from docker container
+      # right now this doesn't really do anything, but if we add more steps in the
+      # future this will ensure they don't run since the cpp-linter action always
+      # passes regardless of checks failed
+      - name: Fail fast?!
+        if: steps.linter.outputs.checks-failed > 0
+        run: exit 1
+  # lint-python:
+  #   runs-on: ubuntu-22.04
+  #   container:
+  #     image: ualbertaformula/f1tenth
+  #     options: --user root

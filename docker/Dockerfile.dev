@@ -43,5 +43,7 @@ RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.
 
 RUN git config --global --add safe.directory /f1tenth
 
+ENV IS_JETSON=FALSE
+
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]

@@ -42,5 +42,7 @@ RUN git config --global --add safe.directory /f1tenth
 RUN git config --global user.email "formula@ualberta.ca"
 RUN git config --global user.name "formula"
 
+ENV IS_JETSON=TRUE
+
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]
