@@ -20,10 +20,6 @@ jobs:
     container:
       image: ualbertaformula/f1tenth
       options: --user root
-    permissions:
-      metadata: read
-      contents: write
-      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
