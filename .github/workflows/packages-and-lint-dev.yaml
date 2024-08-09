@@ -3,15 +3,19 @@ name: Build ROS2 Packages and Lint Repo
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  build-and-lint-cpp:
+  build-dev: # TODO: change this name once u figure out how to change status checks in github
     runs-on: ubuntu-22.04
     container:
       image: ualbertaformula/f1tenth
@@ -30,7 +34,8 @@ jobs:
           rc_build
       # NOTE: don't want to waste action minutes and rebuild everything for
       # compilation database in a separate job, so doing linting and build in same job
-      - name: cpp-linter/cpp-linter-action@v2
+      - name: lint cpp code using clang-tidy and clang-format
+        uses: cpp-linter/cpp-linter-action@v2
         id: linter
         if: ${{ success() }}
         env:
