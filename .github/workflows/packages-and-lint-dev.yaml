@@ -61,12 +61,13 @@ jobs:
           fetch-depth: 0
 
       - name: Lint python code and check formatting
-        uses: super-linter/super-linter@v6.8.0
+        uses: super-linter/super-linter/slim@v6.8.0
         env:
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # FILTER_REGEX_EXCLUDE:
           FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
+          LINTER_RULES_PATH: .
           VALIDATE_PYTHON_BLACK: true
           VALIDATE_PYTHON_MYPY: true
           VALIDATE_PYTHON_ISORT: true
