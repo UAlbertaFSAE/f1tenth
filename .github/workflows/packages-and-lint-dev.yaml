@@ -42,7 +42,7 @@ jobs:
           database: './build/'
           thread-comments: 'update'
           no-lgtm: false
-          version: '18' # TODO: figure out how to get this to use the tools in the docker container
+          version: '/lib/llvm-18/bin/'
       # right now this doesn't really do anything, but if we add more steps in the
       # future this will ensure they don't run since the cpp-linter action always
       # passes regardless of checks failed
