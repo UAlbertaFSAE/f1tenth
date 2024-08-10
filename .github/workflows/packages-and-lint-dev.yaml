@@ -42,11 +42,9 @@ jobs:
           database: './build/'
           thread-comments: 'update'
           no-lgtm: false
-          version: '/lib/llvm-18/bin/'
-      # right now this doesn't really do anything, but if we add more steps in the
-      # future this will ensure they don't run since the cpp-linter action always
-      # passes regardless of checks failed
-      - name: Fail fast?!
+          version: '18'
+      # we need this fail check since cpp-linter always succeeds even if checks fail
+      - name: Check fail
         if: steps.linter.outputs.checks-failed > 0
         run: exit 1
   # lint-python:
