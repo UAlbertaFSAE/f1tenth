@@ -61,7 +61,7 @@ jobs:
           fetch-depth: 0
 
       - name: Lint python code and check formatting
-        uses: super-linter/super-linter
+        uses: super-linter/super-linter@v6.8.0
         env:
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
