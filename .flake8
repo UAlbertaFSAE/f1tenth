@@ -4,6 +4,9 @@ max-doc-length = 72
 
 require-plugins = pep8-naming
 
+# for black compatibility
+extend-ignore = E203,E701
+
 # any code not written by us, or any extraneous cases
 exclude =
     src/navigation/pure_pursuit/**,

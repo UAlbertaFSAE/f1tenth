@@ -99,19 +99,19 @@
     "/opt/ros/humble/local/lib/python3.10/dist-packages",
   ],
   "black-formatter.args": [
-    "--line-length=79",
-    "--target-version=py310"
+    "--config",
+    "pyproject.toml"
   ],
   "flake8.path": [
     "/usr/local/bin/flake8"
   ],
-  "isort.args": [
-    "--profile",
-    "black"
-  ],
   "isort.check": true,
+  "isort.args": [
+    "--settings-path",
+    "pyproject.toml"
+  ],
   "mypy-type-checker.args": [
-    "--config-file=mypy.ini"
+    "--config-file=pyproject.toml"
   ],
   "mypy-type-checker.path": [
     "/usr/local/bin/mypy"
