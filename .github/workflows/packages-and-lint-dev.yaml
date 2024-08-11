@@ -65,7 +65,7 @@ jobs:
         env:
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ENABLE_GITHUB_ACTIONS_STEP_SUMMARY
+          ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
           # FILTER_REGEX_EXCLUDE:
           FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
           LINTER_RULES_PATH: .
