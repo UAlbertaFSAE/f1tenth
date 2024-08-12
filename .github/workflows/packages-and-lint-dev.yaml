@@ -66,27 +66,9 @@ jobs:
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
-          # FILTER_REGEX_EXCLUDE:
           FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
           LINTER_RULES_PATH: .
-          VALIDATE_PYTHON_BLACK: true
           VALIDATE_PYTHON_MYPY: true
-          VALIDATE_PYTHON_ISORT: true
-          VALIDATE_PYTHON_FLAKE8: true
-          PYTHON_BLACK_CONFIG_FILE: pyproject.toml
+          VALIDATE_PYTHON_RUFF: true
           PYTHON_MYPY_CONFIG_FILE: pyproject.toml
-          PYTHON_ISORT_CONFIG_FILE: pyproject.toml
-          PYTHON_FLAKE8_CONFIG_FILE: .flake8
-      # - name: lint python code with mypy/flake8 and check formatting with black/isort
-      #   uses: ricardochaves/python-lint@v1.4.0
-      #   with:
-      #     use-pylint: false
-      #     use-pycodestyle: false
-      #     use-flake8: true
-      #     use-black: true
-      #     use-mypy: true
-      #     use-isort: true
-      #     extra-flake8-options: "--config=.flake8"
-      #     extra-black-options: "--line-length=79 --target-version=py310"
-      #     extra-mypy-options: "--config-file mypy.ini"
-      #     extra-isort-options: "--profile black"
+          PYTHON_RUFF_CONFIG_FILE: pyproject.toml

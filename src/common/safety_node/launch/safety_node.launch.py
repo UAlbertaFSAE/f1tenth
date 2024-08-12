@@ -1,15 +1,16 @@
 import os
+import sys
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
-import sys
+import argparse
 
 # TODO: get range_min and max from zed2i yaml in perception zed_wrapper config folder
 def generate_launch_description():
     return LaunchDescription(
         [
-    Node(
+            Node(
                 package="depthimage_to_laserscan",
                 executable="depthimage_to_laserscan_node",
                 name="depthimage_to_laserscan",

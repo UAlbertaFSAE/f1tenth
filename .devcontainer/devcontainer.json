@@ -17,11 +17,8 @@
         "twxs.cmake",
         "eamodio.gitlens",
         "ms-python.python",
-        "ms-python.black-formatter",
-        "ms-python.flake8",
-        "ms-python.isort",
+        "charliermarsh.ruff",
         "ms-python.mypy-type-checker@prerelease",
-        "ms-python.vscode-pylance",
         "ms-iot.vscode-ros",
         "njpwerner.autodocstring"
       ]

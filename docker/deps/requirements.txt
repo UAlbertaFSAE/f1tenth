@@ -1,4 +1,3 @@
 transforms3d
-flake8
-pep8-naming
+ruff
 mypy

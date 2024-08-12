@@ -85,8 +85,11 @@
   },
   "terminal.integrated.defaultProfile.linux": "bash",
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
     "editor.tabSize": 4,
   },
   "python.languageServer": "Pylance",
@@ -98,18 +101,12 @@
     "/opt/ros/humble/lib/python3.10/site-packages",
     "/opt/ros/humble/local/lib/python3.10/dist-packages",
   ],
-  "black-formatter.args": [
-    "--config",
-    "pyproject.toml"
+  "ruff.configuration": "./pyproject.toml",
+  "ruff.exclude": [
+    "src/navigation/pure_pursuit/**",
+    "src/navigation/particle_filter/**",
   ],
-  "flake8.path": [
-    "/usr/local/bin/flake8"
-  ],
-  "isort.check": true,
-  "isort.args": [
-    "--settings-path",
-    "pyproject.toml"
-  ],
+  "ruff.logLevel": "debug",
   "mypy-type-checker.args": [
     "--config-file=pyproject.toml"
   ],

@@ -1,16 +1,13 @@
 #include <cstdio>
-#include <string>
 #include <iostream>
+#include <string>
 
-void foo_bar(int test1, std::string test2) {
-  std::cout << test1 << " " << test2 << std::endl;
-}
+void fooBar(int test1, std::string& test2) { std::cout << test1 << " " << test2 << '\n'; }
 
-int main(int argc, char ** argv)
-{
-  (void) argc;
-  (void) argv;
+int main(int argc, char** argv) {
+  (void)argc;
+  (void)argv;
 
-  printf("hello world mypkg package\n");
+  std::cout << "hello world mypkg package\n";
   return 0;
 }
