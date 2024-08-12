@@ -102,10 +102,6 @@
     "/opt/ros/humble/local/lib/python3.10/dist-packages",
   ],
   "ruff.configuration": "./pyproject.toml",
-  "ruff.exclude": [
-    "src/navigation/pure_pursuit/**",
-    "src/navigation/particle_filter/**",
-  ],
   "ruff.logLevel": "debug",
   "mypy-type-checker.args": [
     "--config-file=pyproject.toml"
@@ -113,6 +109,8 @@
   "mypy-type-checker.path": [
     "/usr/local/bin/mypy"
   ],
+  // NOTE: the mypy extension runs on single files, so you need this for excludes
+  // to work when developing in vscode
   "mypy-type-checker.ignorePatterns": [
     "${workspaceFolder}/src/navigation/pure_pursuit/**",
     "${workspaceFolder}/src/navigation/particle_filter/**"
