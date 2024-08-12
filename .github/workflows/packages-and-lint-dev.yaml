@@ -55,39 +55,40 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        # with:
-        #   # super-linter needs the full git history to get the
-        #   # list of files that changed across commits
-        #   fetch-depth: 0
+        with:
+          # super-linter needs the full git history to get the
+          # list of files that changed across commits
+          fetch-depth: 0
       # - name: type check python with mypy
       #   uses: jpetrucciani/mypy-check@master
       #   with:
       #     path: './src'
       #     mypy_flags: '--config-file pyproject.toml'
       #     python_version: '3.10'
-      - name: lint python with ruff
-        uses: chartboost/ruff-action@v1
-        with:
-          src: './src'
-          args: 'check --config ./pyproject.toml'
-          changed-files: 'true'
-      - name: check python formatting with ruff
-        uses: chartboost/ruff-action@v1
-        with:
-          src: './src'
-          args: 'format --check --config ./pyproject.toml'
-          changed-files: 'true'
+      # - name: lint python with ruff
+      #   uses: chartboost/ruff-action@v1
+      #   with:
+      #     src: './src'
+      #     args: 'check --config ./pyproject.toml'
+      #     changed-files: 'true'
+      # - name: check python formatting with ruff
+      #   uses: chartboost/ruff-action@v1
+      #   with:
+      #     src: './src'
+      #     args: 'format --check --config ./pyproject.toml'
+      #     changed-files: 'true'
 
 
-      # - name: Lint python code and check formatting
-      #   uses: super-linter/super-linter/slim@v6.8.0
-      #   env:
-      #     # To report GitHub Actions status checks
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
-      #     # FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
-      #     LINTER_RULES_PATH: .
-      #     VALIDATE_PYTHON_MYPY: true
-      #     VALIDATE_PYTHON_RUFF: true
-      #     PYTHON_MYPY_CONFIG_FILE: pyproject.toml
-      #     PYTHON_RUFF_CONFIG_FILE: pyproject.toml
+      - name: Lint python code and check formatting
+        uses: super-linter/super-linter/slim@v6.8.0
+        env:
+          # To report GitHub Actions status checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
+          FILTER_REGEX_EXCLUDE: .*src/navigation/** # just testing this for now
+          FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
+          LINTER_RULES_PATH: .
+          VALIDATE_PYTHON_MYPY: true
+          VALIDATE_PYTHON_RUFF: true
+          PYTHON_MYPY_CONFIG_FILE: pyproject.toml
+          PYTHON_RUFF_CONFIG_FILE: pyproject.toml
