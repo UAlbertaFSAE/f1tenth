@@ -53,6 +53,7 @@ jobs:
       image: ualbertaformula/f1tenth
       options: --user root
     strategy:
+      fail-fast: false
       matrix:
         linter: [ruff, mypy]
     steps:
@@ -66,7 +67,7 @@ jobs:
         uses: advanced-security/python-lint-code-scanning-action@v1
         with:
           linter: ${{ matrix.linter }}
-          python-version: 3.10
+          python-version: '3.10'
 
 
       # - name: Lint python code and check formatting
