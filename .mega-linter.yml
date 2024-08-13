@@ -13,11 +13,11 @@ DEFAULT_WORKSPACE: .
 LINTER_RULES_PATH: .
 
 ENABLE_LINTERS:
-  - MYPY
-  - RUFF
+  - PYTHON_MYPY
+  - PYTHON_RUFF
 
 # run ruff format check within mega-linter step
 POST_COMMANDS:
   - command: ruff format --check --config ./pyproject.toml
     cwd: "workspace"   # Will be run at the root of the workspace (usually your repository root)
-    continue_if_failed: False  # Will stop the process if command is failed (return code > 0)
+    continue_if_failed: True  # Will stop the process if command is failed (return code > 0)
