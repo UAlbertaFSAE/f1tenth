@@ -48,8 +48,8 @@ convention = "google"
 python_version = "3.10"
 
 exclude = [
-    'pure_pursuit',
-    'particle_filter',
+    "^.*src/navigation/pure_pursuit(/.*)?",
+    "^.*src/navigation/particle_filter(/.*)?",
 ]
 
 warn_no_return = true
