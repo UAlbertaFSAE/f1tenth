@@ -64,7 +64,7 @@ jobs:
           # list of files that changed across commits
           fetch-depth: 0
 
-      # MegaLinter
+      # MegaLinter step
       - name: MegaLinter for python linting and format checks
         id: ml
         # python flavor
@@ -73,15 +73,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISABLE: COPYPASTE,SPELL
 
-      # # Upload MegaLinter artifacts
-      # - name: Archive production artifacts
-      #   if: success() || failure()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: MegaLinter reports
-      #     path: |
-      #       megalinter-reports
-      #       mega-linter.log
+      # Upload MegaLinter artifacts
+      - name: Archive production artifacts
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MegaLinter reports
+          path: |
+            megalinter-reports
+            mega-linter.log
       # - name: Lint python code and check formatting
       #   uses: super-linter/super-linter/slim@v6.8.0
       #   env:
