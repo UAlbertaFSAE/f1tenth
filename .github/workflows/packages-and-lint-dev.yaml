@@ -76,4 +76,5 @@ jobs:
       # run ruff format check for python (megalinter post command seems to be
       # erroring so I am running this as a separate step)
       - name: ruff python format check
+        if: success() || failure()
         run: ruff format --check --config ./pyproject.toml ./src

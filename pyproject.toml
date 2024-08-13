@@ -39,6 +39,8 @@ ignore = [
   "D300",
   # missing docstring in '__init__'
   "D107",
+  # missing docstring in public module
+  "D100",
 ]
 
 [tool.ruff.lint.pydocstyle]

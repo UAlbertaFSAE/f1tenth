@@ -1,13 +1,14 @@
-import os
-import sys
-
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
-import argparse
 
 # TODO: get range_min and max from zed2i yaml in perception zed_wrapper config folder
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
+    """Generates the launch description for launching the safety node.
+
+    Returns:
+        LaunchDescription: Launch description object containing a few nodes
+    """
     return LaunchDescription(
         [
             Node(
