@@ -65,10 +65,15 @@ jobs:
           fetch-depth: 0
 
       # MegaLinter step
-      - name: MegaLinter for python linting and format checks
+      - name: MegaLinter for python linting
         id: ml
         # python flavor
         uses: oxsecurity/megalinter/flavors/python@v7.13.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISABLE: COPYPASTE,SPELL
+
+      # run ruff format check for python (megalinter post command seems to be
+      # erroring so I am running this as a separate step)
+      - name: ruff python format check
+        run: ruff format --check --config ./pyproject.toml ./src

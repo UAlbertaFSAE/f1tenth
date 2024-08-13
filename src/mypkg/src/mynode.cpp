@@ -2,9 +2,7 @@
 #include <iostream>
 #include <string>
 
-void foo_bar(int test1, std::string& test2) {
-  std::cout << test1 << " " << test2 << '\n';
-}
+void fooBar(int test1, std::string& test2) { std::cout << test1 << " " << test2 << '\n'; }
 
 int main(int argc, char** argv) {
   (void)argc;
