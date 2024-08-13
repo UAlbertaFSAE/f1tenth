@@ -19,8 +19,8 @@
         "ms-python.python",
         "charliermarsh.ruff",
         "ms-python.mypy-type-checker@prerelease",
-        "ms-iot.vscode-ros",
-        "njpwerner.autodocstring"
+        "njpwerner.autodocstring",
+        "ms-iot.vscode-ros"
       ]
     }
   }

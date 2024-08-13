@@ -52,6 +52,7 @@ build/*.obj
 # python cache
 __pycache__
 .mypy_cache
+.ruff_cache
 
 # clangd cache
 .cache/

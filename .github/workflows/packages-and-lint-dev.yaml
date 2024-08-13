@@ -72,26 +72,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISABLE: COPYPASTE,SPELL
-
-      # Upload MegaLinter artifacts
-      - name: Archive production artifacts
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: MegaLinter reports
-          path: |
-            megalinter-reports
-            mega-linter.log
-      # - name: Lint python code and check formatting
-      #   uses: super-linter/super-linter/slim@v6.8.0
-      #   env:
-      #     # To report GitHub Actions status checks
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
-      #     FILTER_REGEX_EXCLUDE: .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
-      #     FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
-      #     LINTER_RULES_PATH: .
-      #     VALIDATE_PYTHON_MYPY: true
-      #     VALIDATE_PYTHON_RUFF: true
-      #     PYTHON_MYPY_CONFIG_FILE: pyproject.toml
-      #     PYTHON_RUFF_CONFIG_FILE: pyproject.toml
