@@ -23,11 +23,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Build Packages
         run: |
           echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
           source ~/.bashrc
           rc_build
+
       # NOTE: don't want to waste action minutes and rebuild everything for
       # compilation database in a separate job, so doing linting and build in same job
       - name: lint cpp code using clang-tidy and clang-format
@@ -43,10 +45,12 @@ jobs:
           thread-comments: 'update'
           no-lgtm: false
           version: '18'
+
       # we need this fail check since cpp-linter always succeeds even if checks fail
       - name: Check fail
         if: steps.linter.outputs.checks-failed > 0
         run: exit 1
+
   lint-python:
     runs-on: ubuntu-22.04
     container:
@@ -59,22 +63,35 @@ jobs:
           # super-linter needs the full git history to get the
           # list of files that changed across commits
           fetch-depth: 0
-      # - name: check python formatting with ruff
-      #   uses: chartboost/ruff-action@v1
-      #   with:
-      #     src: './src'
-      #     args: 'format --check --config ./pyproject.toml'
-      #     changed-files: 'true'
-      - name: Lint python code and check formatting
-        uses: super-linter/super-linter/slim@v6.8.0
+
+      # MegaLinter
+      - name: MegaLinter for python linting and format checks
+        id: ml
+        # python flavor
+        uses: oxsecurity/megalinter/flavors/python@v7.13.0
         env:
-          # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
-          FILTER_REGEX_EXCLUDE: .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
-          FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
-          LINTER_RULES_PATH: .
-          VALIDATE_PYTHON_MYPY: true
-          VALIDATE_PYTHON_RUFF: true
-          PYTHON_MYPY_CONFIG_FILE: pyproject.toml
-          PYTHON_RUFF_CONFIG_FILE: pyproject.toml
+          DISABLE: COPYPASTE,SPELL
+
+      # # Upload MegaLinter artifacts
+      # - name: Archive production artifacts
+      #   if: success() || failure()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: MegaLinter reports
+      #     path: |
+      #       megalinter-reports
+      #       mega-linter.log
+      # - name: Lint python code and check formatting
+      #   uses: super-linter/super-linter/slim@v6.8.0
+      #   env:
+      #     # To report GitHub Actions status checks
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
+      #     FILTER_REGEX_EXCLUDE: .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
+      #     FILTER_REGEX_INCLUDE: .*src/.* # only analyze source files
+      #     LINTER_RULES_PATH: .
+      #     VALIDATE_PYTHON_MYPY: true
+      #     VALIDATE_PYTHON_RUFF: true
+      #     PYTHON_MYPY_CONFIG_FILE: pyproject.toml
+      #     PYTHON_RUFF_CONFIG_FILE: pyproject.toml

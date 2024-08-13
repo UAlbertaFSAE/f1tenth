@@ -1,0 +1,23 @@
+# analyze any source files except for packages we did not write ourselves
+FILTER_REGEX_INCLUDE: .*src/.*
+# FILTER_REGEX_EXCLUDE: .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
+EXCLUDED_DIRECTORIES: [
+  "pure_pursuit",
+  "particle_filter"
+]
+
+# don't really want to re-validate files that we already checked
+VALIDATE_ALL_CODEBASE: false
+
+DEFAULT_WORKSPACE: .
+LINTER_RULES_PATH: .
+
+ENABLE_LINTERS:
+  - MYPY
+  - RUFF
+
+# run ruff format check within mega-linter step
+POST_COMMANDS:
+  - command: ruff format --check --config ./pyproject.toml
+    cwd: "workspace"   # Will be run at the root of the workspace (usually your repository root)
+    continue_if_failed: False  # Will stop the process if command is failed (return code > 0)
