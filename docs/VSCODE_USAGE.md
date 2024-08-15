@@ -21,6 +21,15 @@ We have linters and code formatters set up in vscode so that you will get annota
 
 To see what an error/warning is and what tool is throwing it, just hover the annotation squiggle in vscode, or go to the problems pane in the terminal window. This should show you what checks are causing the error, and potential fixes. Sometimes fixes can be applied automatically by pressing `quick fix`, if a fix is available.
 
+Here is a list with the documentation for each of our linters/formatters and github workflow actions:
+- [clangd language server](https://clangd.llvm.org/)
+- [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)
+- [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
+- [ruff](https://docs.astral.sh/ruff/)
+- [mypy](https://mypy.readthedocs.io/en/stable/index.html)
+- [cpp-linter action](https://cpp-linter.github.io/cpp-linter-action/)
+- [mega-linter action](https://megalinter.io/7.13.0/)
+
 ##### C++
 We use `clang-tidy` for linting and `clang-format` for code formatting. Since the clangd language server requires build commands for processing your c++ files, you need to run the following for clang-tidy linting to work on your c++ package:
 ```bash
@@ -41,7 +50,7 @@ These tools will enforce the pep8 style guidelines and ensure we have safe pytho
 Again, if you ever need to skip some linter check, use `# noqa` at the end of the line. If you need to skip linting on whole packages (say you ported someone's open source ROS package), you can add exclude paths in the `ruff.exclude` and `mypy-type-checker.ignorePatterns` settings in the `.vscode/settings.json` file to stop errors showing in vscode. Add them into the `FILTER_REGEX_EXCLUDE` regex string in the `.mega-linter.yml` file to ignore them in the CI linting check.
 - you can also add them to the exclude section for each tool in the `pyproject.toml` file if you want, for completeness sake
 
-here is the [mypy](https://mypy.readthedocs.io/en/stable/index.html) and [ruff](https://docs.astral.sh/ruff/) documentation if you want to learn more. The mypy vscode extension is [here](https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker) and the ruff vscode extension is [here](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)
+The mypy vscode extension is [here](https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker) and the ruff vscode extension is [here](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) if you would like to learn more.
 
 ### ROS extension
 TODO
