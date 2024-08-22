@@ -22,7 +22,7 @@ You should create a new git branch to develop your changes on. If you are addres
 
 To create a new branch run the following command while **on the main branch**:
 ```bash
-git switch -b <branch-name>
+git switch -c <branch-name>
 ```
 
 ## Pull Requests
