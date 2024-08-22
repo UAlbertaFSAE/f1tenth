@@ -23,6 +23,9 @@ services:
 
   sim:
     image:  ualbertaformula/f1tenth-sim
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sim
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
