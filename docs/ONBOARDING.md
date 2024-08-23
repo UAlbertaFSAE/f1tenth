@@ -86,36 +86,37 @@ You will need to set up an SSH key to authenticate your computer with Github so 
 
 Log into github and click on your profile icon in the top right corner > click settings > click SSH and GPG keys > click add new SSH key. Add an informative title such as "Ubuntu VM" or "WSL" (just giving information on where the key was generated basically, if you ever end up with more keys in the future), and then paste the public key you copied into the necessary area. You should be all set up for cloning and pushing code :)
 
-### Software Learning
+## Software Learning
 If you don't have any experience with linux, programming, git, or the ROS framework, or just need a refresher listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
 
-#### Linux
+### Linux
 We use the Linux OS to interact with almost all of our software so we highly advise if you don't have experience using a terminal CLI more specifically within Linux then here is a great resource.
 
-- [Introduction to Linux](https://app.theconstructsim.com/courses/linux-for-robotics-40/)
+- [linux command line for beginners](https://ubuntu.com/tutorials/command-line-for-beginners#1-overview)
 
-#### Git
+### Git
 This is a great time to introduce git. If you have never worked with git before, here are some resources to get you started (the first link is an overview video, the other two are supplementary material if you are still confused):
 - [Introduction to Git](https://www.youtube.com/watch?v=tRZGeaHPoaw)
 - [official git documentation](https://git-scm.com/docs/gittutorial)
 - [a nice interactive tutorial for git branching](https://learngitbranching.js.org/)
 
-#### Python
-Listed below is an introduction to object orientated programming, a concept we use a ton throughout our codebase.
+### Python
+Listed below is an introduction to object orientated programming, a concept we use a ton throughout our codebase:
+- [Introduction to OOP](https://www.youtube.com/watch?v=Ej_02ICOIgs)
 
-[Introduction to OOP](https://www.youtube.com/watch?v=Ej_02ICOIgs)
+### Docker
+Even though you will likely not have to touch any of the docker configuration during development, it is still good to have a high level understanding of how it works so you understand how our stack is set up better:
+- [docker tutorial](https://docker-curriculum.com/)
+- [docker docs](https://docs.docker.com/)
 
-#### ROS
-We will start by learning the core concepts of ROS2:
+### ROS
+Understanding the core principles and design patters of ROS will help immensely when developing code for our system:
+- [ROS2 concepts and design patterns](https://osrf.github.io/ros2multirobotbook/ros2_design_patterns.html)
 
-1. Review ROS Basic Concepts (focus on nodes, interfaces, topics, parameters, and launch for now)
-   - https://docs.ros.org/en/humble/Concepts/Basic.html
-2. Complete the beginner turtle sim tutorial
-   - https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Introducing-Turtlesim/Introducing-Turtlesim.html
+and understanding the command line tools will make your life much easier:
+- [ROS2 command line interface](https://osrf.github.io/ros2multirobotbook/ros2_cli.html)
 
-Listed below are a few more resources that go into more detail regarding ROS if you feel you need extra
-- [ROS Basics](https://app.theconstructsim.com/courses/ros2-basics-in-5-days-python-118/)
-- [Python Robotics](https://app.theconstructsim.com/courses/python-3-for-robotics-58/)
+If you still feel like you need more introduction, [the construct sim](https://app.theconstruct.ai/courses/) has some free courses that may be of some use.
 
 ## Building the Software Container
 

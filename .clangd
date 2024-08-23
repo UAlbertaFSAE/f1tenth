@@ -1,0 +1,10 @@
+CompileFlags:
+    CompilationDatabase: build/
+
+Index:
+  StandardLibrary: Yes
+
+Diagnostics:
+  UnusedIncludes: None
+  ClangTidy:
+    FastCheckFilter: Loose

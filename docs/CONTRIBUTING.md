@@ -14,9 +14,16 @@ Issues on GitHub are the process by which you can report bugs or request new fea
 
 We have templates for each type of issue that will ensure all the necessary information is included for work to begin on it.
 
-We use [github projects](https://github.com/orgs/UAlbertaFSAE/projects) to organize and prioritize issues, so this may be a good place to check out what issues are most pressing.
+We use [github projects](https://github.com/orgs/UAlbertaFSAE/projects) to organize and prioritize issues, so this may be a good place to check out what issues are most pressing. If you want to work on an issue, please assign yourself to it so others can know who is working on an issue. You can leave updates on an issue to let others know your progress, and so that others can help if needed. If you are no longer working on an issue, please unassign yourself and leave a comment explaining why you are no longer working on it (it is fine if you don't have the time or get in over your head!).
 
-If you want to work on an issue, please assign yourself to it so others can know who is working on an issue. You can leave updates on an issue to let others know your progress, and so that others can help if needed. If you are no longer working on an issue, please unassign yourself and leave a comment explaining why you are no longer working on it (it is fine if you don't have the time or get in over your head!).
+You should create a new git branch to develop your changes on. If you are addressing a specific issue, your branch name should be `<issue number>-<name>/<modified>`. If you are not addressing a specific issue (though generally an issue *should* be made first), your branch name should be `<name>/<modified>`.
+- `<name>` is your first initial and last name with no space between
+- `<modified>` should be a brief 1-2 word description of what you are modifying such as `object-detector-node`, `plugin.xml`, or `docs`.
+
+To create a new branch run the following command while **on the main branch**:
+```bash
+git switch -c <branch-name>
+```
 
 ## Pull Requests
 
@@ -26,17 +33,7 @@ pull requests should be reviewed by a lead or a member who is well acquanted wit
 
 Before submitting a pull request, please make sure that you have followed the [code style](#code-style) guidelines below. Ensure that any changes come with relevant updates to the documentation in the docstrings and Markdown files. Also, make sure that changes to the code have been tested, as we want to keep the `main` branch in a working state at all times.
 
-Before getting started, first make sure you have latest code from the `main` branch by running the following command:
-```bash
-git pull origin main
-```
-
-Once you have done that you can create a new branch for your changes. If you are addressing a specific issue, your branch name should be `<issue number>-<name>/<modified>`. If you are not addressing a specific issue (generally an issue should be made about what needs to be changed before changes should happen), your branch name should be `<name>/<modified>`. `<name>` is your first initial and last name with no space between, and `<modified>` should be a brief 1-2 word description of what you are modifying such as `object-detector-node`, `plugin.xml`, or `docs`. To create a new branch run the following command while **on the main branch**:
-```bash
-git switch -b <branch-name>
-```
-
-Once you have created your branch you can make your changes in this branch. Changes should be mostly if not all complete before making a pull request, and if not complete make sure to attach a message as to why. Ensure that your commit messages and the title for merge request are descriptive of the changes you have made. Don't overthink your commit messages, they will be deleted when the branch is merged into the main branch. An example of a good commit message would be, `Add MPC controller to control package`.
+Changes should be mostly if not all complete before making a pull request, but if not put \[WIP\] at the start of the title and mark the PR as a draft. Ensure that your commit messages and the title for merge request are descriptive of the changes you have made. Don't overthink your commit messages, they will be deleted when the branch is merged into the main branch. An example of a good commit message would be: `Add MPC controller to control package`.
 
 When ready to make the pull request, ensure that you merge the main branch into your branch with
 ```bash
@@ -44,12 +41,13 @@ git fetch origin && git merge main
 ```
 This will ensure whatever changes to the main branch that have occurred while you worked on your own branch can be combined into your changes.
 
-You can push your changes to the remote repository. This will create a new branch on the remote repository with the same name as your local branch. You can then create a pull request on GitHub to merge your branch into the main branch. To push your branch to GitHub run the following command:
+You can push your changes to the remote repository with:
 ```bash
 git push --set-upstream origin <branch-name>
 ```
+This will create a new branch on the remote repository with the same name as your local branch. You can then create a pull request on GitHub to merge your branch into the main branch.
 
-Make sure to follow the pull request template when creating a pull request. If you are addressing a specific issue, please make sure that issue is linked in the pull request. Add a reviewer to your pull request, once it has been reviewed and approved, check one last time to make sure your branch has the most up to date main (as changes might have occurred while you were addressing feedback on the pull request), and then you can merge your code
+Make sure to follow the pull request template when creating a pull request, and add a reviewer to it. If you are addressing a specific issue, please make sure that issue is linked in the pull request. Once it has been reviewed and approved, check one last time to make sure your branch has the most up to date main (as changes might have occurred while you were addressing feedback on the pull request), and then you can merge your code
 - it is your job to click the merge button, we wouldn't want to rob you of that satisfaction ;) (but also it is your responsibility to ensure everything works before pressing that button)
 
 ## Documentation
@@ -65,8 +63,8 @@ where YYYY indicates year.
 
 ## Code style
 
-**IMPORTANT**: We try to follow the [ROS2 code style](https://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Code-Style-Language-Versions.html) to ensure consistency and best practices. Within this they follow [Google C++ style](https://google.github.io/styleguide/cppguide.html#The__define_Guard) and [Python PEP8 style](https://peps.python.org/pep-0008/) for C++ and Python files respectively. It may be useful to have these handy while you are coding! Of course there will be times where deviation from this guide may be required, and that's okay. Just try your best to follow it! We will *hopefully* have linters and auto formatting set up soon to make your life easier while coding.
-- the philosophy is to have fast commits and pushes to allow eyes on code, so formatting and linting won't be enforced until pull requests are made, at which point linter tests must be passed in order to merge code.
+**IMPORTANT**: We try to follow the [ROS2 code style](https://docs.ros.org/en/humble/The-ROS2-Project/Contributing/Code-Style-Language-Versions.html) to ensure consistency and best practices. Within this they follow [Google C++ style](https://google.github.io/styleguide/cppguide.html) and [Python PEP8 style](https://peps.python.org/pep-0008/) for C++ and Python files respectively. It may be useful to have these handy while you are coding! Of course there will be times where deviation from this guide may be required, and that's okay. Just try your best to follow it!
+- We have set up linters and code formatters in vscode to ease this process, so just ensure you have no linter errors and format your files on save and you should be good to go. See our [linter docs](VSCODE_USAGE.md) for more info on how to use the linting/formatting tools effectively, amongst other things.
 
 For all programming languages we use, please follow these common guidelines on top of the ROS guidelines:
 - Have descriptive (ideally short) variable, function, and class names.
@@ -77,7 +75,7 @@ For all programming languages we use, please follow these common guidelines on t
     - see bottom of [documentation](#documentation) notes above
 - Try to follow the advice of the linter.
 
-**NOTE:** Try to include as much [type-hinting](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html) as possible when writing python code, as we will also be trying to incorporate mypy static analysis at some point.
+**NOTE:** Try to include as much [type-hinting](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html) as possible when writing python code, as we have mypy static analysis enabled to ensure safe python code.
 
 ### File/Folder names:
 snake_case:
@@ -114,4 +112,5 @@ For new members to the UAlberta Formula Student Racing Autonomous Subteam, or co
 - [mypy python type-hints cheat sheet](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html)
 - [github docs](https://docs.github.com/en)
 - [git docs](https://git-scm.com/doc)
+- [docker docs](https://docs.docker.com/)
 - [f1tenth autonomous RC car resources](https://f1tenth.org/index.html)
