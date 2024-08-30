@@ -128,10 +128,10 @@ Now assuming you are feeling confident enough with the basics of monkeying aroun
 5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
 6. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
 
-If everything is working, you can move on to the actual onboarding task (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
+**NOTE:** if you are on windows using WSL, you will need to run the following command when in the dev container: `export DISPLAY=host.docker.internal:0.0`. This ensures GUI's can be used properly from within the container. You must also do this in the simulator container if you want the simulator GUI (RViz) to open. You can do this by following the instructions in the [sim docs](SIMULATOR.md).
+- this is just a temporary fix, we hope to have it automated in the future
 
-**NOTE:** if you are on windows using WSL, you will need to run the following command when in the container: `export DISPLAY=host.docker.internal:0.0`. This ensures GUI's can be used properly from within the container.
-- you may also need to look at the [simulator](SIMULATOR.md) docs if you are using windows WSL to see how to get the simulator container GUI working
+If everything is working, you can move on to the actual onboarding task (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
 
 ## Onboarding Task
 
