@@ -23,11 +23,12 @@ Everything you need to know about the competition is in the [formula student han
 
 ##### System Requirements
 
-We recommend you have the following:
+We recommend you have the following specs on a computer:
 
-- A computer with at least 16GB of ram and 50-100Gb of free storage
-  - Using Linux natively or through a dual boot is preferred, but our system should work (albeit with slight hiccups) on Linux, Windows, and Mac, as long as you follow the following instructions carefully and ensure you have everything set up correctly
-  - **NOTE**: Mac support is iffy due to arm vs. x86 conflicts in docker containers. You can try, but having either a native linux system or a windows system with WSL2 is the best option (even if you have to remote desktop in)
+- 16Gb of ram
+- 25-50Gb of free storage
+
+**Note:** Using Linux natively or through a dual boot is preferred, but our system should work (albeit with slight hiccups) on Linux, Windows, and Mac, as long as you follow the following instructions carefully and ensure you have everything set up correctly
 
 ## Software Setup
 
@@ -87,40 +88,53 @@ You will need to set up an SSH key to authenticate your computer with Github so 
 Log into github and click on your profile icon in the top right corner > click settings > click SSH and GPG keys > click add new SSH key. Add an informative title such as "Ubuntu VM" or "WSL" (just giving information on where the key was generated basically, if you ever end up with more keys in the future), and then paste the public key you copied into the necessary area. You should be all set up for cloning and pushing code :)
 
 ## Software Learning
-If you don't have any experience with linux, programming, git, or the ROS framework, or just need a refresher listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use.
+
+If you don't have any experience with linux, programming, git, or the ROS framework, or just need a refresher listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use. We **highly** recommend you be familiar with each of these tools, as it will make onboarding and future development a lot less daunting. Don't feel bad if you need to spend a long time getting familiar with these things, it'll save you (and the leads) much grief in the future.
 
 ### Linux
+
 We use the Linux OS to interact with almost all of our software so we highly advise if you don't have experience using a terminal CLI more specifically within Linux then here is a great resource.
 
 - [linux command line for beginners](https://ubuntu.com/tutorials/command-line-for-beginners#1-overview)
 
 ### Git
+
 This is a great time to introduce git. If you have never worked with git before, here are some resources to get you started (the first link is an overview video, the other two are supplementary material if you are still confused):
+
 - [Introduction to Git](https://www.youtube.com/watch?v=tRZGeaHPoaw)
 - [official git documentation](https://git-scm.com/docs/gittutorial)
 - [a nice interactive tutorial for git branching](https://learngitbranching.js.org/)
 
 ### Python
-Listed below is an introduction to object orientated programming, a concept we use a ton throughout our codebase:
+
+Listed below is an introduction to python, and in intro to object orientated programming in python, a concept we use a lot throughout our codebase:
+
+- [Introduction to Python](https://www.codecademy.com/learn/learn-python-3)
 - [Introduction to OOP](https://www.youtube.com/watch?v=Ej_02ICOIgs)
 
-### Docker
-Even though you will likely not have to touch any of the docker configuration during development, it is still good to have a high level understanding of how it works so you understand how our stack is set up better:
-- [docker tutorial](https://docker-curriculum.com/)
-- [docker docs](https://docs.docker.com/)
-
 ### ROS
+
 Understanding the core principles and design patters of ROS will help immensely when developing code for our system:
+
 - [ROS2 concepts and design patterns](https://osrf.github.io/ros2multirobotbook/ros2_design_patterns.html)
 
 and understanding the command line tools will make your life much easier:
+
 - [ROS2 command line interface](https://osrf.github.io/ros2multirobotbook/ros2_cli.html)
 
 If you still feel like you need more introduction, [the construct sim](https://app.theconstruct.ai/courses/) has some free courses that may be of some use.
 
+### Docker
+
+Even though you will likely not have to touch any of the docker configuration during development, it is still good to have a high level understanding of how it works so you understand how our stack is set up better:
+
+- [docker tutorial](https://docker-curriculum.com/)
+- [docker docs](https://docs.docker.com/)
+
 ## Building the Software Container
 
 Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
+
 1. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well) with `git clone git@github.com:UAlbertaFSAE/f1tenth.git` and then change into it with `cd f1tenth`
 2. Make sure docker is installed and running in the background (either as docker desktop or start it through terminal commands, you can check its running by running `docker --version` in a terminal in your linux instance)
 3. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
@@ -129,21 +143,92 @@ Now assuming you are feeling confident enough with the basics of monkeying aroun
 6. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
 
 **NOTE:** if you are on windows using WSL, you will need to run the following command when in the dev container: `export DISPLAY=host.docker.internal:0.0`. This ensures GUI's can be used properly from within the container. You must also do this in the simulator container if you want the simulator GUI (RViz) to open. You can do this by following the instructions in the [sim docs](SIMULATOR.md).
+
 - this is just a temporary fix, we hope to have it automated in the future
 
 If everything is working, you can move on to the actual onboarding task (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
 
 ## Onboarding Task
 
-Once done those tutorials, you will be tasked with building your own [ros2 package](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html) and writing nodes, publishers, and subscribers, following the requirements in [this f1tenth lab](https://github.com/f1tenth/f1tenth_lab1_template/tree/24f7320ebf1b9a325a2039d4208204da4454d1ab) (start from section 3 and onwards, and switch any foxy instances with humble as we use humble for our ros2 distribution).
+Once done those tutorials, you will be tasked with building your own [ros2 package](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html) and writing nodes, publishers, and subscribers. The goal is for you to get more comfortable with the ROS2 framework, as well as to build the skill of finding information and troubleshooting on your own. Lead's will be here to help, but try your best to find what you need online first (there are tons of resources out there that can help you complete this task, you just gotta channel your inner Sherlocke Holmes)
 
-You will want to create your own branch by running `git switch -c <your initials>/onboarding_lab1` (make sure you are in the f1tenth directory or a child of it when running this). Run `git branch` to see that you now have the branch `main` and your freshly created branch. The highlighted one is the one your currently on. You can now work to your hearts desire, committing your work as you go with `git add <files to stage>` and `git commit -m "<message attached to commit>"`.
+You will want to create your own branch (following the branch naming convention in the [contributing guidelines](CONTRIBUTING.md), with \<modified\> being "onboarding". Make sure you are in the `f1tenth/` directory or a child of it when running this. Run `git branch` to see that you now have the branch `main` and your freshly created branch. The highlighted one is the one your currently on. You can now work to your hearts desire, committing your work as you go with `git add <files to stage>` and `git commit -m "<message attached to commit>"`.
 
-**NOTE:** create your package from within the `src/` folder.
+### The Task
 
-When you are done the lab, you can push your branch to the remote repository on github and make a pull request! Get a co-lead to review it, and if all looks good, you are done the onboarding task! Welcome aboard :)
+You're going to learn ROS2 basics by creating your own ROS2 package and building some publisher and subscriber nodes to communicate information, along with a launch file to spin up your nodes.
 
-If you are struggling at all during this process, do not sweat it. Software stuff is confusing, especially when you are first starting out. I encourage you to try and seek out information on your own, as that is the single most important skill you can gain as a software engineer. Nonetheless, if you are hard stuck, feel free to reach out to the co-leads for help, we don't bite (well, Ryder might sometimes, so watch out).
+#### Step 1: Create your package
+
+Create a package name `onboarding` in the `src/` folder.
+
+**requirements:**
+
+- the package supports either `C++` or `Python`
+- the package needs to have the `ackermann_msgs` dependency
+- Your package folder should be neat. You shouldn't have multiple `src` folders or unnecessary `install` or `build` folders.
+
+The goal is to have a working ROS2 package that can contain code for building a part of a robotic application. You will get experience with specifying dependencies for your package, which is code written by someone else (or maybe even you) that your code will require to run properly.
+
+#### Step 2: Create a publisher node
+
+Create a node for publishing [odometry data](https://en.wikipedia.org/wiki/Odometry), which you will later subscribe to and manipulate. You will write this node in whatever language you specified your package to be in.
+
+**requirements:**
+
+- your publisher listens to two ROS parameters `v` and `d`.
+- your publisher publishes an `AckermannDriveStamped` message with the `speed` field equal to the `v` parameter and `steering_angle` field equal to the `d` parameter, and to a topic named `drive`.
+- your node publishes data as fast as possible.
+
+You can test your node by building your package with `colcon build --packages-select onboarding` (and then source the newly built code using `source install/setup.bash`)and running your node with `ros2 run onboarding <your-node-name>`. Try updating the parameters `v` and `d` through the command line and echoing the `drive` topic (using `ros2 topic echo /drive` in another terminal) to see changes.
+
+The goal is to get you familiar with the conventions for writing ROS2 nodes and how to implement a publisher, which is used A LOT in robotics projects.
+
+#### Step 3: Create a publisher/subscriber node
+
+Create a node for subscribing to the odometry data that you now have a node publishing, manipulating that data, and publishing this new data. You will create this node in the same language you wrote your previous one in.
+
+**requirements:**
+
+- your subscriber node subscribes to the `drive` topic
+- in the subscriber callback, take the speed and steering angle from the incoming message and multiply both by 3, then publish these new values via another `AckermannDriveStamped` message to a topic named `drive_manipulated`
+
+You can test your node by spinning up the publisher you wrote previously, and then spinning up this new node and echoing the topics `drive` and `drive_manipulated`. If you did it right, `drive_manipulated` should have the speed and steering angles 3 times as large as `drive`.
+
+- Make sure to build your package and re-source the ROS2 overlay again before testing!
+
+The goal of this step is to get you experience writing a ROS2 node that has more than one component to it, which in this case is publishing **and** subscribing. This is another very common paradigm, where you have a node that is obtaining some data, manipulating it, and then sending it elsewhere.
+
+#### Step 4: build a launch file to spin up your nodes
+
+launch files are a tool for spinning up parts of the system that require each other, all at once. An example would be the safety node, which requires a few other nodes to be running with it for it to work.
+
+**requirements:**
+
+- create a launch file in a directory called `launch` just inside your package directory
+- spin up your publisher and your publisher/subscriber nodes inside this launch file
+- set default values for the `v` and `d` parameters in your launch file as well
+
+If you did it right, you should be able to build your package again and launch your nodes using `ros2 launch onboarding <launch_file>`. In another terminal, use the following commands (one at a time) to see if everything is working as expected
+
+```
+ros2 node list
+ros2 node info <publisher node>
+ros2 node info <publisher/subscriber node>
+ros2 topic list
+ros2 topic info drive
+ros2 topic echo drive
+ros2 topic info drive_manipulated
+ros2 topic echo drive_manipulated
+```
+
+The goal is to get you used to writing launch files, as these are used everywhere to spin up specific parts of a robotic system, as well as for setting configuration details that nodes may need to run properly.
+
+#### Step 5: Submitting your onboarding task
+
+When you are done the onboarding task, you can push your branch to the remote repository on github and make a pull request! Get a co-lead to review it, and if all looks good, you are done the onboarding task! Welcome aboard :)
+
+### Resources
 
 Here is a list of resources that may prove to be helpful during this process:
 
@@ -151,6 +236,4 @@ Here is a list of resources that may prove to be helpful during this process:
 
 ## Github (Project Management)
 
-Some notes on our project management workflow:
-- For keeping track of all our high level projects and tasks we use Github's Project board
-  - this is where you will see all the tasks that need to be completed
+Now that you've completed onboarding, you can head to our [project board](https://github.com/orgs/UAlbertaFSAE/projects/1) to see what tasks need to be worked on. There are various views you can play around with to see ToDo's per sub-component, as well as to see the workload of other team members and your own workload. Feel free to assign yourself to a task you are interested in (if a task with someone already assigned interests you, reach out to that person to see if you can collaborate on it).
