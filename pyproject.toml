@@ -1,0 +1,70 @@
+[tool.ruff]
+target-version = "py310"
+extend-exclude = [
+  "src/navigation/pure_pursuit/**",
+  "src/navigation/particle_filter/**",
+]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # pydocstyle
+    "D",
+    # pep8-naming
+    "N",
+]
+ignore = [
+  # line-too-long since built-in formatter only does best effort
+  "E501",
+  # indentation-with-invalid-multiple
+  "E111",
+  # indentation-with-invalid-multiple-comment
+  "E114",
+  # over-indented
+  "E117",
+  # indent-with-spaces
+  "D206",
+  # triple-single-quotes
+  "D300",
+  # missing docstring in public module
+  "D100",
+  # missing docstring in public package ('__init__' file at root of a python package)
+  "D104",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.10"
+
+exclude = [
+    "^.*src/navigation/pure_pursuit(/.*)?",
+    "^.*src/navigation/particle_filter(/.*)?",
+]
+
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+disallow_untyped_defs = true
+disallow_untyped_decorators = true
+
+strict_equality = true
+strict_concatenate = true
+
+ignore_missing_imports = true

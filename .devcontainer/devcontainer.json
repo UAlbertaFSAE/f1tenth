@@ -3,19 +3,23 @@
   "service": "dev",
   "dockerComposeFile": "../docker/compose.dev.yml",
   "workspaceFolder": "/f1tenth",
+  "initializeCommand": "docker pull ualbertaformula/f1tenth:latest && docker pull ualbertaformula/f1tenth-sim:latest",
   "shutdownAction": "stopCompose",
+  "features": {
+    "git": "os-provided",
+    "sshd": "latest"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-vscode.cpptools",
+        "llvm-vs-code-extensions.vscode-clangd",
         "twxs.cmake",
         "eamodio.gitlens",
         "ms-python.python",
-        "ms-python.black-formatter",
-        "ms-python.vscode-pylance",
-        "xaver.clang-format",
-        "ms-python.isort",
-        "matangover.mypy",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker@prerelease",
+        "njpwerner.autodocstring",
         "ms-iot.vscode-ros"
       ]
     }

@@ -4,12 +4,13 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
-      network: host
+    image:  ualbertaformula/f1tenth
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - IS_JETSON=FALSE
     volumes:
       - ..:/f1tenth:cached
@@ -17,17 +18,27 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
     stdin_open: true
+    networks:
+      - my_network
+
   sim:
+    image:  ualbertaformula/f1tenth-sim
     build:
       context: ..
       dockerfile: docker/Dockerfile.sim
-      network: host
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
     stdin_open: true
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge

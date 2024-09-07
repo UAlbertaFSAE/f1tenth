@@ -6,7 +6,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.jetson
-      network: host
+    image:  ualbertaformula/f1tenth-jetson
     network_mode: host
     privileged: true
     runtime: nvidia
@@ -18,27 +18,34 @@ services:
               count: 1
               capabilities: [gpu]
     environment:
-      - SSH_AUTH_SOCK=/ssh-agent
       - DISPLAY=${DISPLAY}
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///f1tenth/cyclonedds_config.xml
       - IS_JETSON=TRUE
     volumes:
       - ..:/f1tenth:cached
       - /dev:/dev
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - $SSH_AUTH_SOCK:/ssh-agent
       - /usr/local/cuda:/usr/local/cuda
     tty: true
     stdin_open: true
   hardware:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.hardware
     privileged: true
     network_mode: host
     environment:
       - DISPLAY=${DISPLAY}
+      - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///cyclonedds_config.xml
     volumes:
       - /tmp/.X11-unix/:/tmp/.X11-unix
       - /dev:/dev
-    image: f1tenth/focal-l4t-foxy:f1tenth-stack
+      - ${PWD}/cyclonedds_config.xml:/cyclonedds_config.xml
+    # image: f1tenth/focal-l4t-foxy:f1tenth-stack
     stdin_open: true
     tty: true

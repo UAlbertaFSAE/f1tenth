@@ -44,7 +44,15 @@ build/*.obj
 .DS_Store
 
 # images (for now)
-*.png
 *.jpg
 *.svg
 *.jpeg
+*.png
+
+# python cache
+__pycache__
+.mypy_cache
+.ruff_cache
+
+# clangd cache
+.cache/
