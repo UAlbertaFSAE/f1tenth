@@ -165,6 +165,7 @@ Create a package name `onboarding` in the `src/` folder.
 **requirements:**
 
 - the package supports either `C++` or `Python`
+    - if using `C++`, target `C++17` in your CMakeLists.txt file
 - the package needs to have the `ackermann_msgs` dependency
 - Your package folder should be neat. You shouldn't have multiple `src` folders or unnecessary `install` or `build` folders.
 
