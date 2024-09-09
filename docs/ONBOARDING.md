@@ -167,7 +167,6 @@ Create a package name `onboarding` in the `src/` folder.
 - the package supports either `C++` or `Python`
     - if using `C++`, target `C++17` in your CMakeLists.txt file
 - the package needs to have `ackermann_msgs` and `rclcpp` (or `rclpy` if using python) as dependencies
-- Your package folder should be neat. You shouldn't have multiple `src` folders or unnecessary `install` or `build` folders.
 
 The goal is to have a working ROS2 package that can contain code for building a part of a robotic application. You will get experience with specifying dependencies for your package, which is code written by someone else (or maybe even you) that your code will require to run properly.
 
@@ -186,7 +185,7 @@ Create a node called `odom_publisher` for publishing [odometry data](https://en.
 
 If you want to go above and beyond, try setting floating point ranges on the two parameters `v` and `d`.
 
-You can test your node by building your package with `colcon build --packages-select onboarding` (and then source the newly built code using `source install/setup.bash`)and running your node with `ros2 run onboarding odom_publisher`. Try updating the parameters `v` and `d` through the command line (find how in ROS2 Humble documentation) and echoing the `drive` topic to see changes.
+You can test your node by building your package with `colcon build --packages-select onboarding` (and then source the newly built code using `source install/setup.bash`)and running your node with `ros2 run onboarding odom_publisher`. Try updating the parameters `v` and `d` through the command line (find how in ROS2 Humble documentation) and echoing the `drive` topic to see changes. Try running `ros2 topic hz /drive` in a separate terminal to see if your data is being published near the 1KHz requirement.
 
 The goal is to get you familiar with the conventions for writing ROS2 nodes and how to implement a publisher, which is used A LOT in robotics projects.
 
