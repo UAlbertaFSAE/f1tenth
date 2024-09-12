@@ -185,7 +185,7 @@ Create a node called `odom_publisher` for publishing [odometry data](https://en.
 
 If you want to go above and beyond, try setting floating point ranges on the two parameters `v` and `d`.
 
-You can test your node by building your package with `colcon build --packages-select onboarding` (and then source the newly built code using `source install/setup.bash`)and running your node with `ros2 run onboarding odom_publisher`. Try updating the parameters `v` and `d` through the command line (find how in ROS2 Humble documentation) and echoing the `drive` topic to see changes. Try running `ros2 topic hz /drive` in a separate terminal to see if your data is being published near the 1KHz requirement.
+You can test your node by building your package with `colcon build --packages-select onboarding --symlink-install` (and then source the newly built code using `source install/setup.bash`) and running your node with `ros2 run onboarding odom_publisher`. Try updating the parameters `v` and `d` through the command line (find how in ROS2 Humble documentation) and echoing the `drive` topic to see changes. Try running `ros2 topic hz /drive` in a separate terminal to see if your data is being published near the 1KHz requirement.
 
 The goal is to get you familiar with the conventions for writing ROS2 nodes and how to implement a publisher, which is used A LOT in robotics projects.
 
@@ -211,10 +211,11 @@ launch files are a tool for spinning up parts of the system that require each ot
 **requirements:**
 
 - create a launch file in a directory called `launch` just inside your package directory
-- spin up your publisher and your publisher/subscriber nodes inside this launch file
-- set default values for the `v` and `d` parameters in your launch file as well
+- add the launch folder to your package configuration (CMakeLists.txt if using C++, setup.py if using Python)
+    - the [ros2 docs](https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Launch-Main.html) on launch files may be of use here
+- spin up your `odom_publisher` and your `odom_relay` nodes inside this launch file in such a way that you can set the `v` and `d` parameters in the command line when running the `ros2 launch ...` command given below
 
-If you did it right, you should be able to build your package again and launch your nodes using `ros2 launch onboarding <launch_file>`. In another terminal, use the following commands (one at a time) to see if everything is working as expected
+If you did it right, you should be able to build your package again and launch your nodes using `ros2 launch onboarding <launch_file> v:=<value1> d:=<value2>`. In another terminal, use the following commands (one at a time) to see if everything is working as expected
 
 ```
 ros2 node list
@@ -228,6 +229,8 @@ ros2 topic echo drive_manipulated
 ```
 
 The goal is to get you used to writing launch files, as these are used everywhere to spin up specific parts of a robotic system, as well as for setting configuration details that nodes may need to run properly.
+
+**Note**: if your simulator is running at at the same time as launching, you may see the car start moving. This is because the simulator is listening to the `drive` topic, and we are publishing to that with the `odom_publisher` node. If you don't want the car to move, specify a namespace for your launch file node actions. More info is in the docs linked above.
 
 #### Step 5: Submitting your onboarding task
 
