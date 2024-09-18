@@ -4,7 +4,7 @@ ImageGenerator::ImageGenerator() : Node("image_generator") {
   fps = this->declare_parameter("fps", 30);
   image_topic = this->declare_parameter("image_topic", "/image_generator/image");
   dataset_path = this->declare_parameter(
-      "dataset_path", "/f1tenth/dev_ws/src/perception/image_generator/data/images");
+      "dataset_path", "/f1tenth/src/perception/sample_data/images");
 
   image_publisher = this->create_publisher<sensor_msgs::msg::Image>(image_topic, 10);
 

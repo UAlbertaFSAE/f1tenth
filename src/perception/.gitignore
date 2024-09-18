@@ -1,3 +1,9 @@
 *.png
 *.jpg
 *.jpeg
+
+# object detection models
+models/
+
+# sample dataset
+sample_data/
