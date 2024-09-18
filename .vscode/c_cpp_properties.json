@@ -1,29 +1,30 @@
 {
-  "configurations": [
-    {
-      "browse": {
-        "databaseFilename": "${default}",
-        "limitSymbolsToIncludedHeaders": false
-      },
-      "includePath": [
-        "/usr/include/**",
-        "/usr/include/aarch64-linux-gnu/c++/11/",
-        "/usr/include/x86_64-linux-gnu/c++/11/",
-        "/usr/include/c++/11/",
-        "/usr/include/clang/10/include/",
-        "/opt/ros/humble/include/**",
-        "/opt/ros/humble/install/include/**",
-        "/usr/local/cuda/include/**",
-        "/f1tenth/dev_ws/install/**",
-        "/f1tenth/dev_ws/src/**",
-        "/usr/local/zed/include"
-      ],
-      "name": "ROS",
-      "compilerPath": "/usr/bin/clang",
-      "cStandard": "c11",
-      "cppStandard": "c++17",
-      "compileCommands": "${workspaceFolder}/dev_ws/build/compile_commands.json"
-    }
-  ],
-  "version": 4
+    "configurations": [
+        {
+            "name": "ROS",
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/usr/include/**",
+                "/usr/include/aarch64-linux-gnu/c++/11/",
+                "/usr/include/x86_64-linux-gnu/c++/11/",
+                "/usr/include/c++/11/",
+                "/usr/include/clang/14/include/",
+                "/opt/ros/humble/include/**",
+                "/opt/ros/humble/install/include/**",
+                "/usr/local/cuda/include/**",
+                "/f1tenth/install/**",
+                "/f1tenth/src/**",
+                "/usr/local/zed/include"
+            ],
+            "compilerPath": "/usr/bin/clang-18",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
 }

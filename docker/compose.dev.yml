@@ -1,12 +1,16 @@
 services:
   dev:
     container_name: f1tenth_dev
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
     image:  ualbertaformula/f1tenth
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - IS_JETSON=FALSE
     volumes:
       - ..:/f1tenth:cached
@@ -19,11 +23,15 @@ services:
 
   sim:
     image:  ualbertaformula/f1tenth-sim
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sim
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_INDIRECT=0
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true

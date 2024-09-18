@@ -1,10 +1,9 @@
 {
   "editor.formatOnSave": true,
-  "files.trimTrailingWhitespace": true,
   "editor.formatOnPaste": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
-  "editor.tabSize": 4,
-  "terminal.integrated.defaultProfile.linux": "bash",
   "files.associations": {
     ".inputrc": "shellscript",
     "iostream": "cpp",
@@ -78,17 +77,21 @@
     "forward_list": "cpp",
     "fstream": "cpp"
   },
+  "files.exclude": {
+    "usr/include/ignition/**": true
+  },
+  "search.exclude": {
+    "usr/include/ignition/**": true
+  },
+  "terminal.integrated.defaultProfile.linux": "bash",
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
-    }
+    },
+    "editor.tabSize": 4,
   },
-  "black-formatter.args": [
-    "--line-length=100",
-    "--target-version=py310"
-  ],
   "python.languageServer": "Pylance",
   "python.autoComplete.extraPaths": [
     "/opt/ros/humble/lib/python3.10/site-packages",
@@ -98,23 +101,37 @@
     "/opt/ros/humble/lib/python3.10/site-packages",
     "/opt/ros/humble/local/lib/python3.10/dist-packages",
   ],
+  "ruff.configuration": "./pyproject.toml",
+  "ruff.logLevel": "debug",
+  "mypy-type-checker.args": [
+    "--config-file=pyproject.toml"
+  ],
+  "mypy-type-checker.path": [
+    "/usr/local/bin/mypy"
+  ],
+  // NOTE: the mypy extension runs on single files, so you need this for excludes
+  // to work when developing in vscode
+  "mypy-type-checker.ignorePatterns": [
+    "${workspaceFolder}/src/navigation/pure_pursuit/**",
+    "${workspaceFolder}/src/navigation/particle_filter/**"
+  ],
+  "autoDocstring.docstringFormat": "google",
+  "autoDocstring.generateDocstringOnEnter": true,
+  "autoDocstring.guessTypes": true,
   "[cpp]": {
-    "editor.defaultFormatter": "ms-vscode.cpptools",
-    "editor.detectIndentation": false
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2
   },
   "C_Cpp.default.cStandard": "c11",
   "C_Cpp.default.cppStandard": "c++17",
-  "C_Cpp.default.compilerPath": "/usr/bin/clang",
-  "C_Cpp.intelliSenseEngine": "default",
+  "C_Cpp.loggingLevel": "Debug",
   "C_Cpp.files.exclude": {
     "/usr/include/ignition/**": true
   },
-  "files.exclude": {
-    "usr/include/ignition/**": true
-  },
-  "search.exclude": {
-    "usr/include/ignition/**": true
-  },
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "clangd.path": "/usr/bin/clangd-18",
+  "clangd.enableCodeCompletion": true,
   "[dockerfile]": {
     "editor.detectIndentation": false,
   },
@@ -123,5 +140,4 @@
   },
   "ros.distro": "humble",
   "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
-  "mypy.configFile": "mypy.ini"
 }

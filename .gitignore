@@ -47,3 +47,12 @@ build/*.obj
 *.jpg
 *.svg
 *.jpeg
+*.png
+
+# python cache
+__pycache__
+.mypy_cache
+.ruff_cache
+
+# clangd cache
+.cache/

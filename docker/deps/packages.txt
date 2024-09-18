@@ -1,9 +1,7 @@
-clang
-clang-format
-clang-tidy
-clang-tools
-clangd
-
+wget
+lsb-release
+software-properties-common
+gnupg
 vim
 tmux
 python3-pip
@@ -11,6 +9,9 @@ libeigen3-dev
 
 ros-humble-turtlesim
 ros-humble-rviz2
+ros-humble-rqt
 ros-humble-ackermann-msgs
 ros-humble-teleop-twist-keyboard
 ros-humble-diagnostic-updater
+ros-humble-rmw-cyclonedds-cpp
+ros-humble-xacro

@@ -1,0 +1,80 @@
+name: Build ROS2 Packages and Lint Repo
+
+on:
+  push:
+    branches: [ "main" ]
+    # paths:
+    #   - 'src/**'
+  pull_request:
+    branches: [ "main" ]
+    # paths:
+    #   - 'src/**'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-and-lint-cpp:
+    runs-on: ubuntu-22.04
+    container:
+      image: ualbertaformula/f1tenth
+      options: --user root
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Packages
+        run: |
+          echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
+          source ~/.bashrc
+          rc_build
+
+      # NOTE: don't want to waste action minutes and rebuild everything for
+      # compilation database in a separate job, so doing linting and build in same job
+      - name: lint cpp code using clang-tidy and clang-format
+        uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        if: ${{ success() }} # only run linting if build was successful
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: 'file'  # use .clang-format file
+          tidy-checks: '' # use .clang-tidy config file.
+          database: './build/'
+          thread-comments: 'update'
+          no-lgtm: false
+          version: '18'
+
+      # we need this fail check since cpp-linter always succeeds even if checks fail
+      - name: Check fail
+        if: steps.linter.outputs.checks-failed > 0
+        run: exit 1
+
+  lint-python:
+    runs-on: ubuntu-22.04
+    container:
+      image: ualbertaformula/f1tenth
+      options: --user root
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # super-linter needs the full git history to get the
+          # list of files that changed across commits
+          fetch-depth: 0
+
+      # MegaLinter step
+      - name: MegaLinter for python linting
+        id: ml
+        # python flavor
+        uses: oxsecurity/megalinter/flavors/python@v7.13.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISABLE: COPYPASTE,SPELL
+
+      # run ruff format check for python (megalinter post command seems to be
+      # erroring so I am running this as a separate step)
+      - name: ruff python format check
+        if: success() || failure()
+        run: ruff format --check --config ./pyproject.toml ./src
