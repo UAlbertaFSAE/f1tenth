@@ -17,13 +17,13 @@ class OdomPublisher(Node):
         self.timer = self.create_timer(0.001, self.timer_callback)
 
     def timer_callback(self) -> None:
-        v = self.get_parameter("v").value
-        d = self.get_parameter("d").value
+        v = self.get_parameter("v").get_parameter_value().double_value
+        d = self.get_parameter("d").get_parameter_value().double_value
 
         msg = AckermannDriveStamped()
-        msg.drive.speed(v)
-        msg.drive.steering_angle(d)
-        msg.drive.stamp(self.get_clock().now())
+        msg.drive.speed = v
+        msg.drive.steering_angle = d
+        msg.drive.stamp = self.get_clock().now()
 
 
 def main(args: Any = None) -> None:
