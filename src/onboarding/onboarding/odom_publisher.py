@@ -1,6 +1,7 @@
 from typing import Any
 
 import rclpy
+import rclpy.time
 from ackermann_msgs.msg import AckermannDriveStamped
 from rclpy.node import Node
 
@@ -23,7 +24,16 @@ class OdomPublisher(Node):
         msg = AckermannDriveStamped()
         msg.drive.speed = v
         msg.drive.steering_angle = d
-        msg.drive.stamp = self.get_clock().now()
+        msg.header.stamp = self.get_clock().now().to_msg()
+
+        self.publisher_.publish(msg)
+        # string = "speed:", str(v), "steering angle:", str(d)
+        self.get_logger().info(
+            "speed: "
+            + str(msg.drive.speed)
+            + " steering angle: "
+            + str(msg.drive.steering_angle)
+        )
 
 
 def main(args: Any = None) -> None:
