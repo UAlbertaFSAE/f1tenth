@@ -10,8 +10,8 @@ class OdomPublisher(Node):
     def __init__(self) -> None:
         super().__init__("odom_publisher")
 
-        self.declare_parameter("v", 1)
-        self.declare_parameter("d", 1)
+        self.declare_parameter("v", 1.0)
+        self.declare_parameter("d", 1.0)
 
         self.publisher_ = self.create_publisher(AckermannDriveStamped, "drive", 10)
 

@@ -18,6 +18,9 @@ setup(
     license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": ["odom_publisher = onboarding.odom_publisher:main"],
+        "console_scripts": [
+            "odom_publisher = onboarding.odom_publisher:main",
+            "odom_relay = onboarding.odom_relay:main",
+        ],
     },
 )

@@ -10,9 +10,6 @@ class OdomRelay(Node):
     def __init__(self) -> None:
         super().__init__("odom_relay")
 
-        self.declare_parameter("v")
-        self.declare_parameter("d")
-
         self.subscription = self.create_subscription(
             AckermannDriveStamped, "drive", self.subscriberCallback, 10
         )
@@ -26,6 +23,7 @@ class OdomRelay(Node):
         msg.drive.speed *= 3
         msg.drive.steering_angle *= 3
         self.publisher_.publish(msg)
+
         self.get_logger().info(
             "speed: "
             + str(msg.drive.speed)
