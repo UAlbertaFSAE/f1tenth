@@ -68,4 +68,4 @@ strict_equality = true
 strict_concatenate = true
 
 ignore_missing_imports = true
-follow_imports = skip
+follow_imports = "skip"
