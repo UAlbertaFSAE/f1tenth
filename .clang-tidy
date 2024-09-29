@@ -17,7 +17,7 @@ Checks: "*,
         -readability-magic-numbers,
         -readability-identifier-length,
         -readability-function-cognitive-complexity,
-        -misc-header-cleaner,
+        -misc-include-cleaner,
         -misc-const-correctness
 "
 
