@@ -8,4 +8,4 @@ Diagnostics:
   UnusedIncludes: None
   MissingIncludes: None
   ClangTidy:
-    FastCheckFilter: Strict
+    FastCheckFilter: None

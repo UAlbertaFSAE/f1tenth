@@ -16,7 +16,9 @@ Checks: "*,
         -cppcoreguidelines-avoid-magic-numbers,
         -readability-magic-numbers,
         -readability-identifier-length,
-        -readability-function-cognitive-complexity
+        -readability-function-cognitive-complexity,
+        -misc-header-cleaner,
+        -misc-const-correctness
 "
 
 WarningsAsErrors: ''
