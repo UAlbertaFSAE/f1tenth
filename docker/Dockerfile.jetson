@@ -29,7 +29,7 @@ RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
 
 # install ZED SDK
 RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-release wget less udev sudo apt-transport-https zstd && \
-    wget -q --no-check-certificate -O ZED_SDK_Linux.run https://download.stereolabs.com/zedsdk/4.0/l4t35.3/jetsons && \
+    wget -q --no-check-certificate -O ZED_SDK_Linux.run https://download.stereolabs.com/zedsdk/4.1/l4t35.3/jetsons && \
     chmod +x ZED_SDK_Linux.run ; ./ZED_SDK_Linux.run silent skip_tools && \
     rm -rf /usr/local/zed/resources/* \
     rm -rf ZED_SDK_Linux.run && \
