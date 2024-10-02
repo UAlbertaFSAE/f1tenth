@@ -47,6 +47,8 @@ Finally, we need an X server to allow you to utilize GUI applications from withi
 
 ### Mac
 
+**Important**: the VM is not essential for basic development, but *as of right* now it is required for GUI applications to work from inside the container. If you are okay with that for now, you can skip the VM install and just install docker locally (this is vastly simpler if you just want to get up and running quickly, the onboarding task does not require any GUI's)
+
 The simplest virtual machine will be [UTM](https://mac.getutm.app/) (VirtualBox won't work with ARM-based systems, so if you aren't sure just go with UTM). After downloading and installing your virtual machine, you will need to download an Ubuntu ISO file and set it up following the instructions [here](https://docs.getutm.app/guides/ubuntu/) (**Note:** make sure to click "enable opengl and hardware acceleration")
 
 - If your VM hangs on a black screen when restarting at the end, go to the top right and click on the drive icon > eject and then click the backwards play button in the top left to restart the VM. It should hopefully work after this.
@@ -87,6 +89,23 @@ You will need to set up an SSH key to authenticate your computer with Github so 
 
 Log into github and click on your profile icon in the top right corner > click settings > click SSH and GPG keys > click add new SSH key. Add an informative title such as "Ubuntu VM" or "WSL" (just giving information on where the key was generated basically, if you ever end up with more keys in the future), and then paste the public key you copied into the necessary area. You should be all set up for cloning and pushing code :)
 
+## Building the Software Container
+
+**Note:** if you aren't yet comfortable with a terminal environment (i.e. bash) or git, we recommend you go through those tutorials in the following section first before attempting to build the software container.
+
+1. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well) with `git clone git@github.com:UAlbertaFSAE/f1tenth.git` and then change into it with `cd f1tenth`
+2. Make sure docker is installed and running in the background (either as docker desktop or start it through terminal commands, you can check its running by running `docker --version` in a terminal in your linux instance)
+3. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
+4. run `code .` to open up vscode inside the f1tenth directory (to ensure you are in the right directory beforehand, run `pwd` and you should see /f1tenth at the end of the output). **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
+5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
+6. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
+
+**NOTE:** if you are on windows using WSL, you will need to run the following command when in the dev container: `export DISPLAY=host.docker.internal:0.0`. This ensures GUI's can be used properly from within the container. You must also do this in the simulator container if you want the simulator GUI (RViz) to open. You can do this by following the instructions in the [sim docs](SIMULATOR.md).
+
+- this is just a temporary fix, we hope to have it automated in the future
+
+If everything is working, you can move on to software learning (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
+
 ## Software Learning
 
 If you don't have any experience with linux, programming, git, or the ROS framework, or just need a refresher listed below are some great resources that we highly advise each new member to watch/read through to get orientated with all the software we use. We **highly** recommend you be familiar with each of these tools, as it will make onboarding and future development a lot less daunting. Don't feel bad if you need to spend a long time getting familiar with these things, it'll save you (and the leads) much grief in the future.
@@ -121,6 +140,7 @@ Understanding the core principles and design patters of ROS will help immensely 
 and understanding the command line tools will make your life much easier:
 
 - [ROS2 command line interface](https://osrf.github.io/ros2multirobotbook/ros2_cli.html)
+  - **Note**: it is recommended to follow along with the cli tutorial inside our container as the ros2 environment is all set up for you (i.e. you will not have to install ros2 locally)
 
 If you still feel like you need more introduction, [the construct sim](https://app.theconstruct.ai/courses/) has some free courses that may be of some use.
 
@@ -131,26 +151,9 @@ Even though you will likely not have to touch any of the docker configuration du
 - [docker tutorial](https://docker-curriculum.com/)
 - [docker docs](https://docs.docker.com/)
 
-## Building the Software Container
-
-Now assuming you are feeling confident enough with the basics of monkeying around in a terminal environment, you can do the following:
-
-1. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well) with `git clone git@github.com:UAlbertaFSAE/f1tenth.git` and then change into it with `cd f1tenth`
-2. Make sure docker is installed and running in the background (either as docker desktop or start it through terminal commands, you can check its running by running `docker --version` in a terminal in your linux instance)
-3. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
-4. run `code .` to open up vscode inside the f1tenth directory (to ensure you are in the right directory beforehand, run `pwd` and you should see /f1tenth at the end of the output). **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
-5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
-6. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
-
-**NOTE:** if you are on windows using WSL, you will need to run the following command when in the dev container: `export DISPLAY=host.docker.internal:0.0`. This ensures GUI's can be used properly from within the container. You must also do this in the simulator container if you want the simulator GUI (RViz) to open. You can do this by following the instructions in the [sim docs](SIMULATOR.md).
-
-- this is just a temporary fix, we hope to have it automated in the future
-
-If everything is working, you can move on to the actual onboarding task (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
-
 ## Onboarding Task
 
-Once done those tutorials, you will be tasked with building your own [ros2 package](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html) and writing nodes, publishers, and subscribers. The goal is for you to get more comfortable with the ROS2 framework, as well as to build the skill of finding information and troubleshooting on your own. Lead's will be here to help, but try your best to find what you need online first (there are tons of resources out there that can help you complete this task, you just gotta channel your inner Sherlocke Holmes)
+Now that you are done those tutorials, you will be tasked with building your own [ros2 package](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html) and writing nodes, publishers, and subscribers. The goal is for you to get more comfortable with the ROS2 framework, as well as to build the skill of finding information and troubleshooting on your own. Lead's will be here to help, but try your best to find what you need online first (there are tons of resources out there that can help you complete this task, you just gotta channel your inner Sherlocke Holmes)
 
 You will want to create your own branch (following the branch naming convention in the [contributing guidelines](CONTRIBUTING.md), with \<modified\> being "onboarding". Make sure you are in the `f1tenth/` directory or a child of it when running this. Run `git branch` to see that you now have the branch `main` and your freshly created branch. The highlighted one is the one your currently on. You can now work to your hearts desire, committing your work as you go with `git add <files to stage>` and `git commit -m "<message attached to commit>"`.
 
