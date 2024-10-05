@@ -1,6 +1,7 @@
 from typing import Any
 
 import rclpy
+import rclpy.parameter
 import rclpy.time
 from ackermann_msgs.msg import AckermannDriveStamped
 from rclpy.node import Node
@@ -10,8 +11,8 @@ class OdomPublisher(Node):
     def __init__(self) -> None:
         super().__init__("odom_publisher")
 
-        self.declare_parameter("v")
-        self.declare_parameter("d")
+        self.declare_parameter("v", 0.0)
+        self.declare_parameter("d", 0.0)
 
         self.publisher_ = self.create_publisher(AckermannDriveStamped, "drive", 10)
 
@@ -34,6 +35,12 @@ class OdomPublisher(Node):
             + " steering angle: "
             + str(msg.drive.steering_angle)
         )
+        all_params = []
+        param_v = rclpy.parameter.Parameter("v", rclpy.Parameter.Type.DOUBLE, v)
+        param_d = rclpy.parameter.Parameter("d", rclpy.Parameter.Type.DOUBLE, d)
+        all_params.append(param_v)
+        all_params.append(param_d)
+        self.set_parameters(all_params)
 
 
 def main(args: Any = None) -> None:
