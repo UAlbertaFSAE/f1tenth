@@ -1,13 +1,12 @@
 services:
   dev:
     container_name: f1tenth_dev
+    image:  ualbertaformula/f1tenth
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
-    image:  ualbertaformula/f1tenth
     environment:
-      - DISPLAY=${DISPLAY}
-      - LIBGL_ALWAYS_INDIRECT=0
+      - DISPLAY=novnc:0.0
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
@@ -15,30 +14,39 @@ services:
     volumes:
       - ..:/f1tenth:cached
       - /dev:/dev
-      - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
     stdin_open: true
     networks:
-      - my_network
+      - x11
 
   sim:
+    depends_on:
+      novnc:
     image:  ualbertaformula/f1tenth-sim
     build:
       context: ..
       dockerfile: docker/Dockerfile.sim
     environment:
-      - DISPLAY=${DISPLAY}
-      - LIBGL_ALWAYS_INDIRECT=0
+      - DISPLAY=novnc:0.0
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
     tty: true
     stdin_open: true
     networks:
-      - my_network
+      - x11
+
+  novnc:
+    image: theasp/novnc:latest
+    environment:
+      - DISPLAY_WIDTH=1600
+      - DISPLAY_HEIGHT=900
+      - RUN_XTERM=no
+      - RUN_FLUXBOX=yes
+    ports:
+      - "8080:8080"
+    networks:
+      - x11
 
 networks:
-  my_network:
-    driver: bridge
+  x11:
