@@ -1,7 +1,7 @@
 services:
   dev:
     container_name: f1tenth_dev
-    # image:  ualbertaformula/f1tenth
+    image:  ualbertaformula/f1tenth
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
@@ -22,7 +22,7 @@ services:
   sim:
     depends_on:
       - novnc
-    # image:  ualbertaformula/f1tenth-sim
+    image:  ualbertaformula/f1tenth-sim
     build:
       context: ..
       dockerfile: docker/Dockerfile.sim
