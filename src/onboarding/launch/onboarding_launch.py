@@ -3,6 +3,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description() -> LaunchDescription:
+    """Launch the publisher and relay nodes."""
     return LaunchDescription(
         [
             Node(

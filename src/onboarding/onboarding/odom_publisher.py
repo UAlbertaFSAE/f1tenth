@@ -8,7 +8,10 @@ from rclpy.node import Node
 
 
 class OdomPublisher(Node):
+    """This class represents the pubisher node."""
+
     def __init__(self) -> None:
+        """Initialize the publisher node and parameter."""
         super().__init__("odom_publisher")
 
         self.declare_parameter("v", 0.0)
@@ -19,6 +22,7 @@ class OdomPublisher(Node):
         self.timer = self.create_timer(0.001, self.timer_callback)
 
     def timer_callback(self) -> None:
+        """This method is called for each publish."""
         v = self.get_parameter("v").get_parameter_value().double_value
         d = self.get_parameter("d").get_parameter_value().double_value
 
@@ -35,15 +39,10 @@ class OdomPublisher(Node):
             + " steering angle: "
             + str(msg.drive.steering_angle)
         )
-        # all_params = []
-        # param_v = rclpy.parameter.Parameter("v", rclpy.Parameter.Type.DOUBLE, v)
-        # param_d = rclpy.parameter.Parameter("d", rclpy.Parameter.Type.DOUBLE, d)
-        # all_params.append(param_v)
-        # all_params.append(param_d)
-        # self.set_parameters(all_params)
 
 
 def main(args: Any = None) -> None:
+    """Main functions."""
     rclpy.init(args=args)
     odom_publisher = OdomPublisher()
     rclpy.spin(odom_publisher)
