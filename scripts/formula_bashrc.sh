@@ -61,6 +61,8 @@ rc_build() {
 		cd $FORMULA_HOME && colcon build --packages-skip "${packages_to_skip[@]}" "${args[@]}" "$@"
 	fi
 }
+
+# ----------------- all aliases go here ---------------------------------------
 alias rc_all='rc_clean && rc_build && rc_source'
 alias launch_zed_wrapper='ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i ros_params_override_path:=src/perception/config/wrapper_params_override.yaml'
 
