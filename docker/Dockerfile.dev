@@ -7,9 +7,6 @@ ARG USER_GID=${USER_UID}
 
 SHELL ["/bin/bash", "-c"]
 
-# fix /tmp permissions for sharing unix sockets
-RUN chmod 1777 /tmp
-
 # Create the user
 RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
