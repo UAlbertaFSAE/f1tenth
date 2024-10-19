@@ -35,12 +35,12 @@ class OdomPublisher(Node):
             + " steering angle: "
             + str(msg.drive.steering_angle)
         )
-        all_params = []
-        param_v = rclpy.parameter.Parameter("v", rclpy.Parameter.Type.DOUBLE, v)
-        param_d = rclpy.parameter.Parameter("d", rclpy.Parameter.Type.DOUBLE, d)
-        all_params.append(param_v)
-        all_params.append(param_d)
-        self.set_parameters(all_params)
+        # all_params = []
+        # param_v = rclpy.parameter.Parameter("v", rclpy.Parameter.Type.DOUBLE, v)
+        # param_d = rclpy.parameter.Parameter("d", rclpy.Parameter.Type.DOUBLE, d)
+        # all_params.append(param_v)
+        # all_params.append(param_d)
+        # self.set_parameters(all_params)
 
 
 def main(args: Any = None) -> None:

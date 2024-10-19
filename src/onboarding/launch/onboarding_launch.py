@@ -7,13 +7,11 @@ def generate_launch_description() -> LaunchDescription:
         [
             Node(
                 package="onboarding",
-                namespace="odom_publisher",
                 executable="odom_publisher",
                 name="publisher",
             ),
             Node(
                 package="onboarding",
-                namespace="odom_relay",
                 executable="odom_relay",
                 name="relay",
             ),
