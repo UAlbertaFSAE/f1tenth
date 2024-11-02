@@ -14,7 +14,7 @@ below are some must-haves for our stack to allow for proper development/testing 
 
 As of right now, remotely ssh-ing into the jetson is possible through a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) being hosted on a [digital ocean cloud droplet](https://docs.digitalocean.com/products/droplets/). We have [rathole](https://github.com/rapiz1/rathole/tree/main) acting as the reverse proxy, forwarding ssh requests from your laptop to the jetson. For this to work, both the jetson and your laptop have to be connected to the internet. The droplet setup was done following [this tutorial](https://noway.moe/unix/reverse-proxy/).
 
-In order to get ssh access to the jetson, you must ask a lead for permission and help. The process requires adding your public ssh key to the authorized hosts on the digital ocean droplet and on the jetson. Once done, you can ssh into the jetson via the command `ssh -p 8022 nvidia@<droplet-ip>`.
+In order to get ssh access to the jetson, you must ask a lead for permission and help. The process requires adding your public ssh key to the authorized hosts on the digital ocean droplet and on the jetson. Once done, you can ssh into the jetson via the command `ssh -p 8022 nvidia@137.184.234.180`.
 
 **Note:** expect a lot of latency when developing remotely, as the digital ocean server is currently in san francisco (was the cheapest option).
 
