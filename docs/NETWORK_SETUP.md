@@ -41,7 +41,12 @@ TODO
 
 #### Windows Setup
 
-TODO
+All that is required is to manually set ipv4 in the settings:
+- On windows 11, go to Settings -> Network & Internet -> Ethernet, and click on edit
+- **IP** is 192.168.1.X (ask a lead for what X value you can use between 1-255)
+- **Subnet mask** is 255.255.255.0 (i.e we only get last 8 bits for host range, other 24 bits are for network ip)
+- **Gateway** is 192.168.1.1
+- **DNS** is 8.8.8.8 (Preferred) and 8.8.4.4 (Alternate)
 
 ## Remote Connection For Testing
 
