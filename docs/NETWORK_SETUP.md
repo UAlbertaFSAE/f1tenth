@@ -37,7 +37,22 @@ All that is required is just to manually set ipv4 in network manager settings:
 
 #### Mac Setup
 
-TODO
+All that is required is just to manually set ipv4 in network settings:
+
+- On Mac go into System Settings > Network > then click on the new LAN connection > click details
+- In the TCP/IP section,
+    - Set configure IP dropdown to "Manually"
+    - **IP** is 192.168.1.X (ask a lead for what X value you can use between 1-255)
+    - **subnet mask** is 255.255.255.0 (i.e we only get last 8 bits for host range, other 24 bits are for network ip)
+    - **router** is 192.168.1.1
+- In the DNS section,
+    - Add 8.8.8.8 and 8.8.4.4 to DNS Servers
+
+If your mac is unable to connect to the internet while connected to LAN follow these steps:
+- Navigate back to network settings
+- At the bottom of the settings click the "..." dropdown
+- Click "Set Service Order..."
+- Then ensure Wi-Fi is ordered above LAN connections
 
 #### Windows Setup
 
