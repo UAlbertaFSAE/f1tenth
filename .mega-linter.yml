@@ -1,6 +1,7 @@
 # analyze any source files except for packages we did not write ourselves
 FILTER_REGEX_INCLUDE: .*src/.*
-FILTER_REGEX_EXCLUDE: .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
+FILTER_REGEX_EXCLUDE: .*src/control/pure_pursuit(/.*)?
+FILTER_REGEX_EXCLUDE: .*src/estimation/particle_filter(/.*)?
 
 # don't really want to re-validate files that we already checked
 VALIDATE_ALL_CODEBASE: false
