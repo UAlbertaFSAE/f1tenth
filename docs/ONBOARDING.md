@@ -42,19 +42,8 @@ If you are using windows you can use WSL2 instead of a virtual machine (WSL2 is 
 
 Now that you have WSL2 and Ubuntu setup, it's time for docker setup. This part should be relatively easy as the docker-desktop install should handle a lot of the nonsense, so just follow [this tutorial](https://docs.docker.com/desktop/install/windows-install/) for getting docker-desktop installed. Once you have it installed, open Docker Desktop and go to Settings > Resources > WSL Integration and enable WSL integration for Ubuntu, then restart Docker Desktop.
 
-Finally, we need an X server to allow you to utilize GUI applications from within the Docker container. Install x-server for Windows from [here](https://sourceforge.net/projects/vcxsrv/). Once this is complete search “XLaunch” in the search bar and run it with the default options. You will not see anything after this, it is running in the background. Make sure you only launch one instance.
-**NOTE**: you will need to make sure you have this running any time you want to use any GUI's in the containers
-
 ### Mac
-
-**Important**: the VM is not essential for basic development, but *as of right* now it is required for GUI applications to work from inside the container. If you are okay with that for now, you can skip the VM install and just install docker locally (this is vastly simpler if you just want to get up and running quickly, the onboarding task does not require any GUI's)
-
-The simplest virtual machine will be [UTM](https://mac.getutm.app/) (VirtualBox won't work with ARM-based systems, so if you aren't sure just go with UTM). After downloading and installing your virtual machine, you will need to download an Ubuntu ISO file and set it up following the instructions [here](https://docs.getutm.app/guides/ubuntu/) (**Note:** make sure to click "enable opengl and hardware acceleration")
-
-- If your VM hangs on a black screen when restarting at the end, go to the top right and click on the drive icon > eject and then click the backwards play button in the top left to restart the VM. It should hopefully work after this.
-
-Once you have your VM set up, install docker **inside** the virtual machine:
-
+For mac, all you really need to do is install docker desktop following the guide below:
 - Installation Guide: https://docs.docker.com/desktop/install/ubuntu/#install-docker-desktop
 - If you have a M1/M2 mac, then you will need the ARM installation of docker, which currently does not support the docker desktop gui, so you will be stuck with just the docker engine, which will still work fine. Please follow [this](https://www.docker.com/blog/getting-started-with-docker-for-arm-on-linux/) tutorial to download and install the ARM version if needed
 
@@ -93,16 +82,11 @@ Log into github and click on your profile icon in the top right corner > click s
 
 **Note:** if you aren't yet comfortable with a terminal environment (i.e. bash) or git, we recommend you go through those tutorials in the following section first before attempting to build the software container.
 
-1. Clone the repository into a directory in your **Linux** instance (either in the VM, WSL, or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key on this linux instance as well) with `git clone git@github.com:UAlbertaFSAE/f1tenth.git` and then change into it with `cd f1tenth`
+1. Clone the repository into a directory in your **Linux or Mac** instance (either in WSL or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key in this instance as well) with `git clone git@github.com:UAlbertaFSAE/f1tenth.git` and then change into it with `cd f1tenth`
 2. Make sure docker is installed and running in the background (either as docker desktop or start it through terminal commands, you can check its running by running `docker --version` in a terminal in your linux instance)
-3. Run `xhost +` in a bash terminal in your linux instance to ensure GUI's will work in the container
-4. run `code .` to open up vscode inside the f1tenth directory (to ensure you are in the right directory beforehand, run `pwd` and you should see /f1tenth at the end of the output). **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
-5. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
-6. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
-
-**NOTE:** if you are on windows using WSL, you will need to run the following command when in the dev container: `export DISPLAY=host.docker.internal:0.0`. This ensures GUI's can be used properly from within the container. You must also do this in the simulator container if you want the simulator GUI (RViz) to open. You can do this by following the instructions in the [sim docs](SIMULATOR.md).
-
-- this is just a temporary fix, we hope to have it automated in the future
+3. run `code .` to open up vscode inside the f1tenth directory (to ensure you are in the right directory beforehand, run `pwd` and you should see /f1tenth at the end of the output). **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
+4. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
+5. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
 
 If everything is working, you can move on to software learning (get used to that setup process, everything but the git clone step will have to happen every time you go to work on the software stack). If you run into any issues feel free to reach out to one of the leads for help!
 
