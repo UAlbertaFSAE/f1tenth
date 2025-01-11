@@ -14,7 +14,7 @@ below are some must-haves for our stack to allow for proper development/testing 
 
 As of right now, remotely ssh-ing into the jetson is possible through a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) being hosted on a [digital ocean cloud droplet](https://docs.digitalocean.com/products/droplets/). We have [rathole](https://github.com/rapiz1/rathole/tree/main) acting as the reverse proxy, forwarding ssh requests from your laptop to the jetson. For this to work, both the jetson and your laptop have to be connected to the internet. The droplet setup was done following [this tutorial](https://noway.moe/unix/reverse-proxy/).
 
-In order to get ssh access to the jetson, you must ask a lead for permission and help. The process requires adding your public ssh key to the authorized hosts on the digital ocean droplet and on the jetson. Once done, you can ssh into the jetson via the command `ssh -p 8022 nvidia@<droplet-ip>`.
+In order to get ssh access to the jetson, you must ask a lead for permission and help. The process requires adding your public ssh key to the authorized hosts on the digital ocean droplet and on the jetson. Once done, you can ssh into the jetson via the command `ssh -p 8022 nvidia@137.184.234.180`.
 
 **Note:** expect a lot of latency when developing remotely, as the digital ocean server is currently in san francisco (was the cheapest option).
 
@@ -37,11 +37,31 @@ All that is required is just to manually set ipv4 in network manager settings:
 
 #### Mac Setup
 
-TODO
+All that is required is just to manually set ipv4 in network settings:
+
+- On Mac go into System Settings > Network > then click on the new LAN connection > click details
+- In the TCP/IP section,
+    - Set configure IP dropdown to "Manually"
+    - **IP** is 192.168.1.X (ask a lead for what X value you can use between 1-255)
+    - **subnet mask** is 255.255.255.0 (i.e we only get last 8 bits for host range, other 24 bits are for network ip)
+    - **router** is 192.168.1.1
+- In the DNS section,
+    - Add 8.8.8.8 and 8.8.4.4 to DNS Servers
+
+If your mac is unable to connect to the internet while connected to LAN follow these steps:
+- Navigate back to network settings
+- At the bottom of the settings click the "..." dropdown
+- Click "Set Service Order..."
+- Then ensure Wi-Fi is ordered above LAN connections
 
 #### Windows Setup
 
-TODO
+All that is required is to manually set ipv4 in the settings:
+- On windows 11, go to Settings -> Network & Internet -> Ethernet, and click on edit
+- **IP** is 192.168.1.X (ask a lead for what X value you can use between 1-255)
+- **Subnet mask** is 255.255.255.0 (i.e we only get last 8 bits for host range, other 24 bits are for network ip)
+- **Gateway** is 192.168.1.1
+- **DNS** is 8.8.8.8 (Preferred) and 8.8.4.4 (Alternate)
 
 ## Remote Connection For Testing
 
