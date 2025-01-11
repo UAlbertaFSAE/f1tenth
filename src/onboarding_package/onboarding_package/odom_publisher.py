@@ -33,3 +33,15 @@ class odom_publisher(Node):
         self.get_logger().info(
             f"Published speed = {speed}, steering angle = {steering_angle}, timestamp = {msg.header.stamp}"
         )
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    Odom_publisher = odom_publisher()
+    rclpy.spin(Odom_publisher)
+    Odom_publisher.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()

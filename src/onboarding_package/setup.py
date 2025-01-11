@@ -9,6 +9,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        ("share/onboarding_package/launch", ["launch/odom_launch.py"]),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -20,6 +21,7 @@ setup(
     entry_points={
         "console_scripts": [
             "odom_publisher = onboarding_package.odom_publisher:main",
+            "odom_relay = onboarding_package.odom_relay:main",
         ],
     },
 )
