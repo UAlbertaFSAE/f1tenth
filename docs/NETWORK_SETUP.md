@@ -71,6 +71,8 @@ as of right now, remote ssh through reverse proxy will have to do. There are pla
 
 If/When the wiress Access Point gets set up, the connection process will likely look similar to the ethernet connection process.
 
+If the remote ssh is not working, you can try to physically log into the jetson with mouse and keyboard and just turn the wifi off then back on again.
+
 ## To-Do
 
 There is still lots of room for improvement in this setup. Here are some potential updates:
