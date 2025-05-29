@@ -2,11 +2,8 @@ from typing import Any
 
 import rclpy
 from geometry_msgs.msg import Point
-from nav_msgs.msg import Odometry
 from rc_interfaces.msg import Cones
-from rclpy import clock
 from rclpy.node import Node
-from std_msgs.msg import String
 from visualization_msgs.msg import (
     Marker,
     MarkerArray,
@@ -14,7 +11,10 @@ from visualization_msgs.msg import (
 
 
 class ConesPublisher(Node):
+    """This class publishes visialzation topics for the simulator."""
+
     def __init__(self) -> None:
+        """Connect publishers and subscribers with their callbacks."""
         super().__init__("cones_publisher")
 
         self.subscription = self.create_subscription(
@@ -35,10 +35,11 @@ class ConesPublisher(Node):
         self.waypointPub = self.create_publisher(Marker, "/published_waypoint", 10)
 
         self.get_logger().info("Starting")
-        self.subscription
+        self.subscription  # noqa
 
     def waypoints_callback(self: Any, msg: Any) -> None:
-        self.get_logger().info('I heard: "%s"' % self.allWaypoints)
+        """Publishes current waypoint to /published_waypoint visualization topic."""
+        self.get_logger().info('I heard: "%s"' % self.allWaypoints)  # noqa
         if [msg.x, msg.y] not in self.allWaypoints:
             self.allWaypoints.append([msg.x, msg.y])
         marker = Marker()
@@ -65,12 +66,13 @@ class ConesPublisher(Node):
         self.waypointPub.publish(marker)
 
     def cones_callback(self: Any, msg: Any) -> None:
-        self.get_logger().info('I heard: "%s"' % msg.cones)
+        """Publishes visible cones to /visible_cones_viz visualization topic."""
+        self.get_logger().info('I heard: "%s"' % msg.cones)  # noqa
         if len(msg.cones) == 0:
             self.publisher_.publish(MarkerArray())
             return
 
-        allCones = MarkerArray()
+        allcones = MarkerArray()
         for i, cone in enumerate(msg.cones):
             marker = Marker()
             marker.header.frame_id = (
@@ -104,11 +106,12 @@ class ConesPublisher(Node):
                 marker.color.g = 1.0
                 marker.color.b = 0.0
 
-            allCones.markers.append(marker)
-        self.publisher_.publish(allCones)
+            allcones.markers.append(marker)
+        self.publisher_.publish(allcones)
 
 
 def main(args: Any = None) -> None:
+    """Initliaze class and spin up nodes."""
     rclpy.init(args=args)
 
     viz_subscriber = ConesPublisher()
