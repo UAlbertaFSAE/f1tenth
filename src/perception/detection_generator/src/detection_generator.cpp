@@ -1,5 +1,8 @@
 #include "detection_generator/detection_generator.hpp"
 
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
+
 DetectionGenerator::DetectionGenerator() : Node("detection_generator_node") {
   std::string csv_path = "/f1tenth/src/perception/detection_generator/data/cone_positions.csv";
   this->declare_parameter("radius", 5.0);
@@ -7,6 +10,9 @@ DetectionGenerator::DetectionGenerator() : Node("detection_generator_node") {
 
   radius = this->get_parameter("radius").as_double();
   std::string odom_topic = this->get_parameter("odom_topic").as_string();
+
+  cone_viz_pub =
+      create_publisher<visualization_msgs::msg::MarkerArray>("/cone_viz", rclcpp::QoS(10));
 
   cones = read_csv(csv_path);
   cone_publisher = create_publisher<rc_interfaces::msg::Cones>("cone_data", rclcpp::QoS(10));
@@ -19,11 +25,35 @@ std::vector<rc_interfaces::msg::Cone> DetectionGenerator::read_csv(std::string p
   file.open(path);
   RCLCPP_INFO(this->get_logger(), "%s", (file.is_open() ? "Opened file" : "Failed to open file"));
 
+  visualization_msgs::msg::MarkerArray allMarkers;
+
+  int idIndex = 0;
+
   std::string line, word;
   std::vector<rc_interfaces::msg::Cone> cones;
   while (!file.eof()) {
     std::getline(file, line, '\n');
     std::stringstream s(line);
+
+    visualization_msgs::msg::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = rclcpp::Time();
+    marker.ns = "my_namespace";
+    marker.id = idIndex;
+    marker.type = visualization_msgs::msg::Marker::CUBE;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+    marker.pose.position.z = 0.5;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 0.1;
+    marker.scale.y = 0.1;
+    marker.scale.z = 1;
+    marker.color.a = 1.0;
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
 
     int j = 0;
     rc_interfaces::msg::Cone cone;
@@ -31,21 +61,33 @@ std::vector<rc_interfaces::msg::Cone> DetectionGenerator::read_csv(std::string p
       if (!word.empty()) {
         if (j == 0) {
           cone.x = std::stod(word);
+          marker.pose.position.x = cone.x;
         }
 
         if (j == 1) {
           cone.y = std::stod(word);
+          marker.pose.position.y = cone.y;
         }
 
         if (j == 2) {
           cone.color = word;
+          char clr[] = "yellow";
+          if (word == clr) {
+            marker.color.r = 1.0;
+            marker.color.g = 1.0;
+            marker.color.b = 0.0;
+          }
         }
       }
 
       j++;
     }
+    allMarkers.markers.push_back(marker);
     cones.push_back(cone);
+    ++idIndex;
   }
+
+  cone_viz_pub->publish(allMarkers);
 
   file.close();
   return cones;
