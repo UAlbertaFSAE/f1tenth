@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #include "detection_generator/detection_generator.hpp"
 
 #include "visualization_msgs/msg/marker.hpp"
@@ -143,3 +144,4 @@ int main(int argc, char** argv) {
   rclcpp::shutdown();
   return 0;
 }
+// NOLINTEND
