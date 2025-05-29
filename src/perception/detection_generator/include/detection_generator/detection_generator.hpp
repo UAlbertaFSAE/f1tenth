@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #include <Eigen/Dense>
 #include <fstream>
 #include <string>
@@ -25,3 +26,4 @@ class DetectionGenerator : public rclcpp::Node {
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr cone_viz_pub;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber;
 };
+// NOLINTEND
