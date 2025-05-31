@@ -19,8 +19,8 @@ foreach(PACKAGE
   nav_msgs
   ackermann_msgs
   sensor_msgs
-  std_msgs
-  depthimage_to_laserscan)
+  std_msgs)
+#   depthimage_to_laserscan)
 
   find_package(${PACKAGE} REQUIRED)
 

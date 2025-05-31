@@ -12,6 +12,7 @@ foreach(PACKAGE
   rc_interfaces
   nav_msgs
   Eigen3
+  visualization_msgs
 )
   find_package(${PACKAGE} REQUIRED)
 endforeach()
@@ -29,6 +30,7 @@ ament_target_dependencies(detection_generator
     rclcpp
     rc_interfaces
     nav_msgs
+    visualization_msgs
 )
 
 # install cpp exectuables

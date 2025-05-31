@@ -32,12 +32,12 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
   this->declare_parameter("rviz_lookahead_waypoint_topic", "/lookahead_waypoint");
   this->declare_parameter("global_refFrame", "map");
-  this->declare_parameter("min_lookahead", 0.5);
-  this->declare_parameter("max_lookahead", 1.0);
+  this->declare_parameter("min_lookahead", 2.0);
+  this->declare_parameter("max_lookahead", 6.0);
   this->declare_parameter("lookahead_ratio", 8.0);
   this->declare_parameter("K_p", 0.5);
   this->declare_parameter("steering_limit", 25.0);
-  this->declare_parameter("velocity_percentage", 0.6);
+  this->declare_parameter("velocity_percentage", 0.9);  // 0.6 default
 
   // Default Values
   odom_topic = this->get_parameter("odom_topic").as_string();
@@ -141,6 +141,8 @@ void PurePursuit::get_waypoint() {
 
   if (end < start) {  // If we need to loop around
     for (int i = start; i < num_waypoints; i++) {
+      if (point_is_behind_car(waypoints.X[i], waypoints.Y[i])) continue;
+
       if (p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) <= lookahead &&
           p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) >= longest_distance) {
         longest_distance = p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world);
@@ -148,6 +150,8 @@ void PurePursuit::get_waypoint() {
       }
     }
     for (int i = 0; i < end; i++) {
+      if (point_is_behind_car(waypoints.X[i], waypoints.Y[i])) continue;
+
       if (p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) <= lookahead &&
           p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) >= longest_distance) {
         longest_distance = p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world);
@@ -156,6 +160,8 @@ void PurePursuit::get_waypoint() {
     }
   } else {
     for (int i = start; i < end; i++) {
+      if (point_is_behind_car(waypoints.X[i], waypoints.Y[i])) continue;
+
       if (p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) <= lookahead &&
           p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) >= longest_distance) {
         longest_distance = p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world);
@@ -167,6 +173,8 @@ void PurePursuit::get_waypoint() {
   if (final_i == -1) {  // if we haven't found anything, search from the beginning
     final_i = 0;
     for (int i = 0; i < num_waypoints; i++) {
+      if (point_is_behind_car(waypoints.X[i], waypoints.Y[i])) continue;
+
       if (p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) <= lookahead &&
           p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) >= longest_distance) {
         longest_distance = p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world);
@@ -179,6 +187,8 @@ void PurePursuit::get_waypoint() {
   double shortest_distance = p2pdist(waypoints.X[0], x_car_world, waypoints.Y[0], y_car_world);
   int velocity_i = 0;
   for (int i = 0; i < num_waypoints; i++) {
+    if (point_is_behind_car(waypoints.X[i], waypoints.Y[i])) continue;
+
     if (p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) <= shortest_distance) {
       shortest_distance = p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world);
       velocity_i = i;
@@ -188,6 +198,16 @@ void PurePursuit::get_waypoint() {
   // If a waypoint is not found within our radius, then waypoints.index = 0
   waypoints.index = final_i;
   waypoints.velocity_index = velocity_i;
+}
+
+bool PurePursuit::point_is_behind_car(double x, double y) {
+  Eigen::Matrix3d rotation_matrix =
+      Eigen::Quaterniond(car_orient_w, car_orient_x, car_orient_y, car_orient_z)
+          .toRotationMatrix();
+  Eigen::Vector3d cone_vector(x - x_car_world, y - y_car_world, 0.0);
+  Eigen::Vector3d transformed_vector = rotation_matrix.transpose() * cone_vector;
+  if (transformed_vector.x() >= 0) return false;
+  return true;
 }
 
 void PurePursuit::quat_to_rot(double q0, double q1, double q2, double q3) {
@@ -257,7 +277,8 @@ double PurePursuit::get_velocity(double steering_angle) {
   } else {  // For waypoints loaded without velocity profiles
     if (abs(steering_angle) >= to_radians(0.0) && abs(steering_angle) < to_radians(10.0)) {
       velocity = 6.0 * velocity_percentage;
-    } else if (abs(steering_angle) >= to_radians(10.0) && abs(steering_angle) <= to_radians(20.0)) {
+    } else if (abs(steering_angle) >= to_radians(10.0) &&
+               abs(steering_angle) <= to_radians(20.0)) {
       velocity = 2.5 * velocity_percentage;
     } else {
       velocity = 2.0 * velocity_percentage;
@@ -282,14 +303,15 @@ void PurePursuit::publish_message(double steering_angle) {
   curr_velocity = get_velocity(drive_msgObj.drive.steering_angle);
   drive_msgObj.drive.speed = curr_velocity;
 
-  RCLCPP_INFO(
-      this->get_logger(),
-      "index: %d ... distance: %.2fm ... Speed: %.2fm/s ... Steering Angle: %.2f ... K_p: %.2f ... "
-      "velocity_percentage: %.2f",
-      waypoints.index,
-      p2pdist(waypoints.X[waypoints.index], x_car_world, waypoints.Y[waypoints.index], y_car_world),
-      drive_msgObj.drive.speed, to_degrees(drive_msgObj.drive.steering_angle), K_p,
-      velocity_percentage);
+  RCLCPP_INFO(this->get_logger(),
+              "index: %d ... distance: %.2fm ... Speed: %.2fm/s ... Steering Angle: %.2f ... K_p: "
+              "%.2f ... "
+              "velocity_percentage: %.2f",
+              waypoints.index,
+              p2pdist(waypoints.X[waypoints.index], x_car_world, waypoints.Y[waypoints.index],
+                      y_car_world),
+              drive_msgObj.drive.speed, to_degrees(drive_msgObj.drive.steering_angle), K_p,
+              velocity_percentage);
 
   publisher_drive->publish(drive_msgObj);
 }
@@ -318,6 +340,12 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
 
   x_car_world = odom_submsgObj->pose.pose.position.x;
   y_car_world = odom_submsgObj->pose.pose.position.y;
+
+  car_orient_w = odom_submsgObj->pose.pose.orientation.w;
+  car_orient_x = odom_submsgObj->pose.pose.orientation.x;
+  car_orient_y = odom_submsgObj->pose.pose.orientation.y;
+  car_orient_z = odom_submsgObj->pose.pose.orientation.z;
+
   // interpolate between different way-points
   get_waypoint();
 

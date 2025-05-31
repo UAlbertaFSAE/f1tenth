@@ -55,6 +55,11 @@ class PurePursuit : public rclcpp::Node {
   double x_car_world;
   double y_car_world;
 
+  double car_orient_w;
+  double car_orient_x;
+  double car_orient_y;
+  double car_orient_z;
+
   std::string odom_topic;
   std::string waypoint_topic;
   std::string car_refFrame;
@@ -102,6 +107,7 @@ class PurePursuit : public rclcpp::Node {
   double to_radians(double degrees);
   double to_degrees(double radians);
   double p2pdist(double &x1, double &x2, double &y1, double &y2);
+  bool point_is_behind_car(double x, double y);
 
   void visualize_lookahead_point(Eigen::Vector3d &point);
   void visualize_current_point(Eigen::Vector3d &point);
