@@ -140,4 +140,5 @@
   },
   "ros.distro": "humble",
   "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
+  "cmake.sourceDirectory": "/wsl.localhost/Ubuntu-22.04/home/kkavin/f1tenth/src/onboarding",
 }
