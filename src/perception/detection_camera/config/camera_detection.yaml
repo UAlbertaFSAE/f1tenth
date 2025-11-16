@@ -1,13 +1,13 @@
 detection_camera:
   ros__parameters:
-    depth_node: "/zed/zed_node"         # example: zed depth node
-    camera_node: "/zed/zed_node"        # example: zed camera node
-    publishing_topic: "/cone_positions"  # example: topic to publish detections
+    depth_node: "/zed/zed_node" # example: zed depth node
+    camera_node: "/zed/zed_node" # example: zed camera node
+    publishing_topic: "/cone_positions" # example: topic to publish detections
 
     model_file: "/home/nvidia/Desktop/krupal_zed/src/zed-ros2-wrapper/detection_camera/models/model.pt"
     classes_file: "/home/nvidia/Desktop/krupal_zed/src/zed-ros2-wrapper/detection_camera/models/classes.txt"
-    
+
     include_depth: true
-    visualize: false
+    visualize: true
     detection_confidence: 0.5
     publish_rate_hz: 30
