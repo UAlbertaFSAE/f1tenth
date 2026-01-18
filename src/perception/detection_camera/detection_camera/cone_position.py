@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-import rclpy
-from rclpy.node import Node
-
-from ultralytics import YOLO
-from cv_bridge import CvBridge, CvBridgeError
-import torch
-
-from sensor_msgs.msg import Image, CameraInfo
-from zed_msgs.msg import ObjectsStamped, Object, BoundingBox2Di
-import numpy as np
 import math
-import traceback
-import cv2
 import os
+import traceback
+
+import cv2
+import numpy as np
+import rclpy
+import torch
+from cv_bridge import CvBridge, CvBridgeError
+from rclpy.node import Node
+from sensor_msgs.msg import CameraInfo, Image
+from ultralytics import YOLO
+from zed_msgs.msg import BoundingBox2Di, Object, ObjectsStamped
+
 
 class ConePublisher(Node):
     def __init__(self):
@@ -117,7 +117,7 @@ class ConePublisher(Node):
         try:
             # depth_registered commonly published as 32FC1 (meters)
             depth_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='32FC1')
-            # Convert to numpy float32 for safer operations
+            # Convert to numpy float32 for safePoseWithCovariancer operations
             self.latest_depth = np.array(depth_image, dtype=np.float32)
             # Store original message for visualization
             self.latest_depth_msg = msg
@@ -307,6 +307,7 @@ class ConePublisher(Node):
                                 var_xy = max(var_xy, 1e-6)
                                 obj.position_covariance = [var_xy, 0.0, 0.0, 0.0, var_xy, 0.0]
                                 obj.tracking_available = True
+                                self.get_logger().debug(f"3D position for {class_label}: X={X:.2f}, Y={Y:.2f}, Z={Z:.2f}")
                             else:
                                 # no valid depth in roi
                                 obj.tracking_available = False
@@ -326,7 +327,7 @@ class ConePublisher(Node):
 
                 # Append to list
                 cone_objects.append(obj)
-                
+
                 # Store info for visualization
                 detections_info.append({
                     'bbox': (int(x1), int(y1), int(x2), int(y2)),
@@ -348,17 +349,17 @@ class ConePublisher(Node):
         try:
             # Draw detections on the image
             viz_image = cv_image.copy()
-            
+
             for det in detections_info:
                 x1, y1, x2, y2 = det['bbox']
                 label = det['label']
                 confidence = det['confidence']
                 position_3d = det['position_3d']
-                
+
                 # Draw bounding box
                 color = (0, 255, 0)  # Green for cones
                 cv2.rectangle(viz_image, (x1, y1), (x2, y2), color, 2)
-                
+
                 # Prepare label text
                 label_text = f"{label}: {confidence:.2f}"
                 if position_3d is not None:
@@ -366,15 +367,15 @@ class ConePublisher(Node):
                     label_text += f" | D:{Z:.2f}m"
                     # Add position text below bbox
                     pos_text = f"X:{X:.2f} Y:{Y:.2f} Z:{Z:.2f}"
-                    cv2.putText(viz_image, pos_text, (x1, y2 + 20), 
+                    cv2.putText(viz_image, pos_text, (x1, y2 + 20),
                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                
+
                 # Draw label above bbox
                 (text_width, text_height), _ = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
                 cv2.rectangle(viz_image, (x1, y1 - text_height - 10), (x1 + text_width, y1), color, -1)
-                cv2.putText(viz_image, label_text, (x1, y1 - 5), 
+                cv2.putText(viz_image, label_text, (x1, y1 - 5),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
-            
+
             # Publish detection visualization
             try:
                 viz_msg = self.bridge.cv2_to_imgmsg(viz_image, encoding='bgr8')
@@ -382,8 +383,8 @@ class ConePublisher(Node):
                 self.viz_image_pub.publish(viz_msg)
             except CvBridgeError as e:
                 self.get_logger().error(f"Failed to publish visualization image: {e}")
-            
-            # Publish depth visualization if available
+
+            # Publish depth visualble
             if self.include_depth and self.latest_depth is not None:
                 try:
                     # Normalize depth for visualization (0-10m range)
@@ -391,22 +392,22 @@ class ConePublisher(Node):
                     depth_viz = np.nan_to_num(depth_viz, nan=0.0, posinf=10.0, neginf=0.0)
                     depth_viz = np.clip(depth_viz, 0.0, 10.0)
                     depth_viz_normalized = (depth_viz / 10.0 * 255).astype(np.uint8)
-                    
+
                     # Apply colormap
                     depth_colored = cv2.applyColorMap(depth_viz_normalized, cv2.COLORMAP_JET)
-                    
+
                     # Draw detection boxes on depth image too
                     for det in detections_info:
                         x1, y1, x2, y2 = det['bbox']
                         cv2.rectangle(depth_colored, (x1, y1), (x2, y2), (255, 255, 255), 2)
-                    
+
                     # Publish depth visualization
                     depth_viz_msg = self.bridge.cv2_to_imgmsg(depth_colored, encoding='bgr8')
                     depth_viz_msg.header = header
                     self.viz_depth_pub.publish(depth_viz_msg)
                 except Exception as e:
                     self.get_logger().error(f"Failed to publish depth visualization: {e}")
-                    
+
         except Exception as e:
             self.get_logger().error(f"Visualization failed: {e}\n{traceback.format_exc()}")
 
@@ -419,7 +420,7 @@ class ConePublisher(Node):
             if not os.path.exists(self.model_file):
                 self.get_logger().error(f"Model file not found: {self.model_file}")
                 raise FileNotFoundError(f"Model file not found: {self.model_file}")
-            
+
             # Load model based on file extension
             if self.model_file.endswith('.onnx'):
                 self.get_logger().info(f"Loading ONNX model from: {self.model_file}")
@@ -430,20 +431,20 @@ class ConePublisher(Node):
             else:
                 self.get_logger().warn(f"Unknown model format, attempting to load: {self.model_file}")
                 model = YOLO(self.model_file)
-            
+
             self.get_logger().info("YOLO model loaded successfully.")
             return model
         except Exception as e:
             self.get_logger().error(f"Failed to load YOLO model: {e}\n{traceback.format_exc()}")
             raise
-    
+
     def load_classes(self, file_path):
         """Load class names from file."""
         try:
             if not os.path.exists(file_path):
                 self.get_logger().warn(f"Classes file not found: {file_path}, using default 'cone' label")
                 return ['cone']
-            
+
             with open(file_path, 'r') as f:
                 classes = [line.strip() for line in f.readlines()]
             self.get_logger().info(f"Loaded {len(classes)} classes from {file_path}")
@@ -451,7 +452,7 @@ class ConePublisher(Node):
         except Exception as e:
             self.get_logger().error(f"Failed to load classes file: {e}")
             return ['cone']  # Default fallback
-        
+
 def main(args=None):
     rclpy.init(args=args)
     node = None

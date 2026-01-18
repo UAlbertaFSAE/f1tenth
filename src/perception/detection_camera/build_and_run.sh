@@ -6,5 +6,6 @@ colcon build --packages-select detection_camera --symlink-install --cmake-args=-
 source install/setup.bash
 
 # Codes to run
+ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i
 ros2 launch detection_camera camera_detection.launch.py
 # ros2 launch detection_camera camera_detection.launch.py parameter:=<value>
