@@ -4,3 +4,6 @@
 [submodule "src/perception/zed-ros2-examples"]
 	path = src/perception/zed-ros2-examples
 	url = https://github.com/stereolabs/zed-ros2-examples.git
+[submodule "src/perception/livox_ros_driver2"]
+	path = src/perception/livox_ros_driver2
+	url = https://github.com/Livox-SDK/livox_ros_driver2.git
