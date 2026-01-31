@@ -1,7 +1,8 @@
-from ultralytics import YOLO
+from contextlib import suppress
+
 import cv2
-import numpy as np
 import pyzed.sl as sl
+from ultralytics import YOLO
 
 try:
     import torch
@@ -10,7 +11,8 @@ except Exception:
     TORCH_AVAILABLE = False
 
 
-def main():
+def main() -> None:
+    """Run YOLO inference on ZED 2i camera stream."""
     model_path = 'src/zed-ros2-wrapper/detection_camera/models/model.pt'
     classes_path = 'src/zed-ros2-wrapper/detection_camera/models/classes.txt'
 
@@ -26,12 +28,10 @@ def main():
 
     # Load model and classes
     model = YOLO(model_path)
-    try:
+    with suppress(Exception):
         # Prefer explicit device for predict
         model.to(device)
-    except Exception:
-        pass
-    with open(classes_path, 'r') as f:
+    with open(classes_path) as f:
         class_names = [line.strip() for line in f if line.strip()]
 
     # Open ZED 2i
@@ -70,10 +70,8 @@ def main():
                 if 'no kernel image' in msg or 'cuda error' in msg:
                     print('CUDA execution failed; falling back to CPU for YOLO inference...')
                     device = 'cpu'
-                    try:
+                    with suppress(Exception):
                         model.to('cpu')
-                    except Exception:
-                        pass
                     results = model.predict(frame_bgr, conf=0.5, device='cpu', verbose=False)
                 else:
                     raise
