@@ -1,0 +1,5 @@
+0: yellow
+1: blue
+2: orange
+3: large_orange
+4: unknown
