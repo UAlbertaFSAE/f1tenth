@@ -1,5 +1,5 @@
-[submodule "src/perception/zed-ros2-wrapper"]
-	path = src/perception/zed-ros2-wrapper
+[submodule "src/perception/zed_wrapper"]
+	path = src/perception/zed_wrapper
 	url = https://github.com/stereolabs/zed-ros2-wrapper.git
 [submodule "src/perception/zed-ros2-examples"]
 	path = src/perception/zed-ros2-examples
