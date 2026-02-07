@@ -4,6 +4,3 @@
 [submodule "src/perception/livox_ros_driver2"]
 	path = src/perception/livox_ros_driver2
 	url = https://github.com/Livox-SDK/livox_ros_driver2.git
-[submodule "Livox-SDK2"]
-	path = Livox-SDK2
-	url = https://github.com/Livox-SDK/Livox-SDK2.git
