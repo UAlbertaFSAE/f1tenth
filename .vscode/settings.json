@@ -140,4 +140,5 @@
   },
   "ros.distro": "humble",
   "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
+  "ROS2.distro": "humble",
 }

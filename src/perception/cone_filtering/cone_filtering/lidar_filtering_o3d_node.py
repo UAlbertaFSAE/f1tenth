@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 import numpy as np
 import open3d as o3d
-
 import rclpy
+import sensor_msgs_py.point_cloud2 as pc2
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
-
+from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import PointCloud2
-from sensor_msgs_py import point_cloud2
 from visualization_msgs.msg import Marker, MarkerArray
 
 
@@ -79,14 +77,16 @@ class LidarFilteringOpen3D(Node):
         self.pub_centroids.publish(self.centroids_to_markers(centroids, msg.header))
 
     def pc2_to_xyz(self, msg: PointCloud2) -> np.ndarray:
-        pts = np.array(
-            list(point_cloud2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)),
-            dtype=np.float32,
-        )
-        return pts
+        # TODO: Convert to np.fromiter for better performance.
+        gen = pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)
+        points = list(gen)
+        if not points:
+            return np.empty((0, 3), dtype=np.float32)
+        points_np = np.array(points).view(np.float32).reshape(-1, 3)
+        return points_np
 
     def xyz_to_pc2(self, xyz: np.ndarray, header) -> PointCloud2:
-        return point_cloud2.create_cloud_xyz32(header, xyz.astype(np.float32).tolist())
+        return pc2.create_cloud_xyz32(header, xyz.astype(np.float32).tolist())
 
     def roi_crop(self, xyz: np.ndarray) -> np.ndarray:
         x_min = float(self.get_parameter("roi_x_min").value)
