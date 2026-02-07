@@ -23,5 +23,6 @@ from ament_copyright.main import main
 @pytest.mark.copyright  # type: ignore
 @pytest.mark.linter  # type: ignore
 def test_copyright() -> None:
+    """Test that all source files have a copyright header."""
     rc = main(argv=[".", "test"])
     assert rc == 0, "Found errors"

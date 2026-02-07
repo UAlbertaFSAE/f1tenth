@@ -242,7 +242,7 @@ class ConePublisher(Node):
                     class_id = int(box.cls[0].item())
                 except Exception:
                     try:
-                        x1, y1, x2, y2 = [float(v) for v in box.xyxy]
+                        x1, y1, x2, y2 = (float(v) for v in box.xyxy)
                         confidence = float(box.conf)
                         class_id = int(box.cls)
                     except Exception:

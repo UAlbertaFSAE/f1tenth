@@ -53,7 +53,7 @@ class ConfigTest(Node):
 def main() -> None:
     """Main."""
     rclpy.init()
-    node = ConfigTest()
+    ConfigTest()
     rclpy.shutdown()
 
 
