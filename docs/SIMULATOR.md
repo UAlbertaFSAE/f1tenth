@@ -12,4 +12,7 @@ We use the [F1Tenth ROS-Gym bridge](https://github.com/f1tenth/f1tenth_gym_ros) 
 
 you should see the rviz window with the little rc car in it. If you don't, let a lead know that something is up.
 
+Additionally to vizualise cones and waypoint positions make sure to spin up the cones_viz node.
+Once the node is spun up you can click "add" -> "add by topic" in the simulator and select the /visible_cones_viz and /published_waypoint markers.
+
 **Note**: to operate the simulated vehicle from the terminal, open up a new tmux pane with `ctrl+b c` and run `ros2 run teleop_twist_keyboard teleop_twist_keyboard`. The terminal will provide instructions on how to move the vehicle, and you must have the terminal as the active window in order for the keyboard inputs to be read.
