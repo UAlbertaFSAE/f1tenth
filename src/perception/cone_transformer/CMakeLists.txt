@@ -13,9 +13,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
-find_package(tf_ros REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(zed_msgs REQUIRED)
 
 
 include_directories(include)
@@ -25,9 +26,10 @@ ament_target_dependencies(cone_transformer
     rclcpp
     nav_msgs
     tf2
-    tf_ros
+    tf2_ros
     tf2_geometry_msgs
     geometry_msgs
+    zed_msgs
 )
 
 install(TARGETS

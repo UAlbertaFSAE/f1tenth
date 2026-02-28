@@ -1,7 +1,7 @@
 #include "cone_transformer.hpp"
 
-Transformer::Transformer() : Node("cone_transformer_node:"), 
-                             tf_buffer(this->get_clock()), 
+Transformer::Transformer() : Node("coneTransformerNode"),
+                             tf_buffer(this->get_clock()),
                              tf_listener(tf_buffer) {
   // this->declare_parameter("cones_topic", "/detection_generator/cone_data");
   this->declare_parameter("odom_topic", "/ego_racecar/odom");
@@ -59,13 +59,13 @@ void Transformer::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
 
 void Transformer::transform(double car_x, double car_y, double car_z, double cone_x, double cone_y, double cone_z) {
   geometry_msgs::msg::PointStamped cone_point;
-  cone_point.header.frame_id = "camera";
+  cone_point.header.frame_id = "zed_left_camera_optical_frame";
   cone_point.point.x = cone_x;
   cone_point.point.y = cone_y;
   cone_point.point.z = cone_z;
 
   try{
-    cone_point = tf_buffer.transform(cone_point, "base_link", tf2::durationFromSec(1.0));
+    cone_point = tf_buffer.transform(cone_point, "odom", tf2::durationFromSec(1.0));
 
     RCLCPP_INFO(this->get_logger(), "Transformed cone position - X: %.3f, Y: %.3f", cone_point.point.x,
                 cone_point.point.y);
