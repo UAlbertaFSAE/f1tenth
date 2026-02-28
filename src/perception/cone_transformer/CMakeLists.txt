@@ -17,6 +17,8 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(zed_msgs REQUIRED)
+find_package(rc_interfaces REQUIRED)
+
 
 
 include_directories(include)
@@ -30,6 +32,7 @@ ament_target_dependencies(cone_transformer
     tf2_geometry_msgs
     geometry_msgs
     zed_msgs
+    rc_interfaces
 )
 
 install(TARGETS

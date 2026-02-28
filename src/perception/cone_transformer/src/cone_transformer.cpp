@@ -1,4 +1,6 @@
 #include "cone_transformer.hpp"
+#include "rc_interfaces/msg/cone.hpp"
+#include "rc_interfaces/msg/cones.hpp"
 
 Transformer::Transformer() : Node("coneTransformerNode"),
                              tf_buffer(this->get_clock()),
@@ -19,6 +21,9 @@ Transformer::Transformer() : Node("coneTransformerNode"),
   odom_subscriber = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, rclcpp::QoS(10), std::bind(&Transformer::odom_callback, this, _1));
 
+  cone_publisher_ = this->create_publisher<rc_interfaces::msg::Cones>(
+      "/detection_generator/cone_data", rclcpp::QoS(10));
+
   RCLCPP_INFO(this->get_logger(), "Cone Transformer initialized");
   RCLCPP_INFO(this->get_logger(), "  Cones topic: %s", cone_topic.c_str());
   RCLCPP_INFO(this->get_logger(), "  Odometry topic: %s", odom_topic.c_str());
@@ -29,23 +34,33 @@ Transformer::~Transformer() {}
 void Transformer::cone_callback(const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "\n=== Received %ld cones ===", msg->objects.size());
 
+  rc_interfaces::msg::Cones transformed_cones;
   for (size_t i = 0; i < msg->objects.size(); i++) {
     const auto& obj = msg->objects[i];
     double cone_x = obj.position[0];
     double cone_y = obj.position[1];
     double cone_z = obj.position[2];
 
-    RCLCPP_INFO(this->get_logger(), "Cone %ld [%s]: X=%.3f, Y=%.3f, Z=%.3f, Conf=%.2f", i,
-                obj.label.c_str(), cone_x, cone_y, cone_z, obj.confidence);
+    std::string cone_color = obj.label;
+    cone_color.erase(0, 3);
 
-    // Calculate distance to car
-    // double dist = distance(car_x, car_y, car_z, cone_x, cone_y, cone_z);
-    transform(car_x, car_y, car_z, cone_x, cone_y, cone_z);
+    RCLCPP_INFO(this->get_logger(), "Cone %ld [%s]: X=%.3f, Y=%.3f, Z=%.3f, Conf=%.2f color=%s", i,
+                obj.label.c_str(), cone_x, cone_y, cone_z, obj.confidence, cone_color.c_str());
+    if (obj.confidence > 0.5) {
+      // Calculate distance to car
+      // double dist = distance(car_x, car_y, car_z, cone_x, cone_y, cone_z);
+      rc_interfaces::msg::Cone c = transform(car_x, car_y, car_z, cone_x, cone_y, cone_z, msg);
 
-    // get x and y distance from the car to cone
+      c.color = cone_color;
+      transformed_cones.cones.push_back(c);
 
-    // RCLCPP_INFO(this->get_logger(), "  Distance to car: %.3f m", dist);
+      // get x and y distance from the car to cone
+
+      // RCLCPP_INFO(this->get_logger(), "  Distance to car: %.3f m", dist);
+    }
   }
+
+  cone_publisher_->publish(transformed_cones);
 }
 
 void Transformer::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom) {
@@ -57,9 +72,9 @@ void Transformer::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
                car_y, car_z);
 }
 
-void Transformer::transform(double car_x, double car_y, double car_z, double cone_x, double cone_y, double cone_z) {
+rc_interfaces::msg::Cone Transformer::transform(double car_x, double car_y, double car_z, double cone_x, double cone_y, double cone_z, const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg) {
   geometry_msgs::msg::PointStamped cone_point;
-  cone_point.header.frame_id = "zed_left_camera_optical_frame";
+  cone_point.header.frame_id = msg->header.frame_id;
   cone_point.point.x = cone_x;
   cone_point.point.y = cone_y;
   cone_point.point.z = cone_z;
@@ -70,6 +85,16 @@ void Transformer::transform(double car_x, double car_y, double car_z, double con
     RCLCPP_INFO(this->get_logger(), "Transformed cone position - X: %.3f, Y: %.3f", cone_point.point.x,
                 cone_point.point.y);
 
+    rc_interfaces::msg::Cone c;
+    c.x = cone_point.point.x;
+    c.y = cone_point.point.y;
+    // c.color = msg->header.label;
+    return c;
+
+    // transformed_cones.cones.push_back(c);
+
+    // auto out_msg = rc_interfaces::msg::Cones(*msg);
+    // cone_publisher_->publish(*out_msg);
 
   } catch (tf2::TransformException &ex) {
     RCLCPP_ERROR(this->get_logger(), "Transform error: %s", ex.what());

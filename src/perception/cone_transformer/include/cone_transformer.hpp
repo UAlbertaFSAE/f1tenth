@@ -10,6 +10,9 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include "geometry_msgs/msg/point_stamped.hpp"
 
+#include "rc_interfaces/msg/cone.hpp"
+#include "rc_interfaces/msg/cones.hpp"
+
 using std::placeholders::_1;
 
 class Transformer : public rclcpp::Node {
@@ -26,6 +29,7 @@ class Transformer : public rclcpp::Node {
  private:
   rclcpp::Subscription<zed_msgs::msg::ObjectsStamped>::SharedPtr cone_subscriber;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber;
+  rclcpp::Publisher<rc_interfaces::msg::Cones>::SharedPtr cone_publisher_;
 
   tf2_ros::Buffer tf_buffer;
   tf2_ros::TransformListener tf_listener;
@@ -33,7 +37,7 @@ class Transformer : public rclcpp::Node {
   void cone_callback(const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg);
   void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom);
 
-  void transform(double car_x, double car_y, double car_z, double cone_x, double cone_y, double cone_z);
+  rc_interfaces::msg::Cone transform(double car_x, double car_y, double car_z, double cone_x, double cone_y, double cone_z, const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg);
 
   double car_x = 0.0;
   double car_y = 0.0;
