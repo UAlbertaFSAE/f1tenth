@@ -92,6 +92,10 @@ class Triangulator(Node):
         left_cone = self.find_cone(msg, 'LEFT')
         right_cone = self.find_cone(msg, 'RIGHT')
 
+        self.get_logger().debug(f'found {left_cone} and {right_cone}')
+        
+
+
 
     # If we don't have enough cones for pairing, fall back to closest pair if available
         if not left_cones or not right_cones:
