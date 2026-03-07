@@ -4,12 +4,24 @@
   <name>waypoint_triangulation</name>
   <version>0.0.0</version>
   <description>Generates Waypoint through Triangulation</description>
-  <maintainer email="jparsons@ualberta.ca">autonomous</maintainer>
+  <maintainer email="mparek1@ualberta.ca">autonomous</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+
+  <depend>rclcpp</depend>
+  <depend>nav_msgs</depend>
   <depend>rc_interfaces</depend>
+
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>zed_msgs</exec_depend>
+
+  <!-- Launch (needed if you use ros2 launch with a launch file in this package) -->
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
