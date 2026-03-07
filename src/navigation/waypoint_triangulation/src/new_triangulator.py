@@ -67,6 +67,7 @@ class Triangulator(Node):
     def odom_callback(self, msg):
         """Store the latest odometry data"""
         self.latest_odom = msg
+
         self.get_logger().debug('Received odometry data')
 
     def cones_callback(self, msg):
@@ -147,7 +148,7 @@ class Triangulator(Node):
      # Publish the full path
         path_msg = Path()
         path_msg.header.stamp = self.get_clock().now().to_msg()
-        path_msg.header.frame_id = 'map'
+        path_msg.header.frame_id = 'odom'
 
         for waypoint in waypoints:
             pose = PoseStamped()
