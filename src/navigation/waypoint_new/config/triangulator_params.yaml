@@ -1,0 +1,20 @@
+triangulator:
+  ros__parameters:
+    # --- Topics ---
+    cones_topic: "/detection_generator/cone_data"
+    odom_topic: "/ego_racecar/odom"
+    waypoint_topic: "/waypoints"
+    path_topic: "/planned_path"
+
+    # --- Triangulation tuning ---
+    lookahead_distance: 10.0
+    num_waypoints: 5
+    min_track_width: 2.0
+    max_track_width: 6.0
+
+    # --- Start gate (orange cones) ---
+    use_start_gate: true
+    start_gate_max_width: 8.0
+    start_colors:
+      - "orange"
+      - "large_orange"
