@@ -25,9 +25,9 @@
 
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   // initialise parameters
-  this->declare_parameter("odom_topic", "/ego_racecar/odom");
-  this->declare_parameter("waypoint_topic", "/waypoint_triangulation/waypoints");
-  this->declare_parameter("car_refFrame", "ego_racecar/base_link");
+  this->declare_parameter("odom_topic", "/odom");
+  this->declare_parameter("waypoint_topic", "/waypoints");
+  this->declare_parameter("car_refFrame", "/base_link");
   this->declare_parameter("drive_topic", "/drive");
   this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
   this->declare_parameter("rviz_lookahead_waypoint_topic", "/lookahead_waypoint");

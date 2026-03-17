@@ -36,13 +36,6 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# ----------------------------
-# Python Node (installed as an executable program)
-# ----------------------------
-install(PROGRAMS
-  src/new_triangulator.py
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 # ----------------------------
 # Launch files (optional but recommended)

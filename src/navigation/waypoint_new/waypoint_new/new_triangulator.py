@@ -24,7 +24,7 @@ class Triangulator(Node):
 
         # Parameters / topics
         self.declare_parameter("cones_topic", "/detection_generator/cone_data")
-        self.declare_parameter("odom_topic", "/ego_racecar/odom")
+        self.declare_parameter("odom_topic", "/odom")
         self.declare_parameter("waypoint_topic", "/waypoints")
         self.declare_parameter("path_topic", "/planned_path")
 
@@ -125,10 +125,12 @@ class Triangulator(Node):
         # --- 2) Normal triangulation with BLUE/YELLOW boundaries ---
         left_cones = self.extract_cones_by_color(msg, "blue")
         right_cones = self.extract_cones_by_color(msg, "yellow")
+        
 
         # fallback: closest blue/yellow if pairing fails
         left_cone = self.find_closest_cone(msg, "blue", vehicle_pos)
         right_cone = self.find_closest_cone(msg, "yellow", vehicle_pos)
+        self.get_logger().info(f"Extracting color: {left_cone} {right_cone}")
 
         if not left_cones or not right_cones:
             if left_cone and right_cone:
