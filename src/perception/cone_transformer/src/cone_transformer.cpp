@@ -5,23 +5,49 @@
 
 Transformer::Transformer()
     : Node("coneTransformerNode"), tf_buffer(this->get_clock()), tf_listener(tf_buffer) {
-  // this->declare_parameter("cones_topic", "/detection_generator/cone_data");
-
+  this->declare_parameter("odom_topic", "/odom");
   this->declare_parameter("cones_topic", "/cone_positions");
-
+  std::string odom_topic = this->get_parameter("odom_topic").as_string();
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
 
-  cone_subscriber = this->create_subscription<zed_msgs::msg::ObjectsStamped>(
-      cone_topic, rclcpp::QoS(10), std::bind(&Transformer::cone_callback, this, _1));
+  odom_subscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
+      odom_topic, rclcpp::QoS(50),
+      std::bind(&Transformer::odom_callback, this, _1));
+
+  cone_subscriber_ = this->create_subscription<zed_msgs::msg::ObjectsStamped>(
+      cone_topic, rclcpp::QoS(10),
+      std::bind(&Transformer::cone_callback, this, _1));
 
   cone_publisher_ = this->create_publisher<rc_interfaces::msg::Cones>(
       "/detection_generator/cone_data", rclcpp::QoS(10));
-
+  
   RCLCPP_INFO(this->get_logger(), "Cone Transformer initialized");
   RCLCPP_INFO(this->get_logger(), "  Cones topic: %s", cone_topic.c_str());
 }
 
 Transformer::~Transformer() {}
+
+void Transformer::odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+  odom_buffer_.push_back(*msg);
+
+  if (odom_buffer_.size() > buffer_size_) {
+    odom_buffer_.pop_front();
+  }
+}
+
+nav_msgs::msg::Odometry Transformer::get_closest_odom(rclcpp::Time stamp) {
+  nav_msgs::msg::Odometry best;
+  double best_dt = std::numeric_limits<double>::max();
+
+  for (const auto& odom : odom_buffer_) {
+    double dt = fabs((rclcpp::Time(odom.header.stamp) - stamp).seconds());
+    if (dt < best_dt) {
+      best_dt = dt;
+      best = odom;
+    }
+  }
+  return best;
+}
 
 void Transformer::cone_callback(const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "\n=== Received %ld cones ===", msg->objects.size());
@@ -46,8 +72,6 @@ void Transformer::cone_callback(const zed_msgs::msg::ObjectsStamped::ConstShared
       c.color = cone_color;
       transformed_cones.cones.push_back(c);
 
-      // get x and y distance from the car to cone
-
       // RCLCPP_INFO(this->get_logger(), "  Distance to car: %.3f m", dist);
     }
   }
@@ -58,33 +82,34 @@ void Transformer::cone_callback(const zed_msgs::msg::ObjectsStamped::ConstShared
 rc_interfaces::msg::Cone Transformer::transform(
     double cone_x, double cone_y, double cone_z,
     const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg) {
-  geometry_msgs::msg::PointStamped cone_point;
-  cone_point.header.frame_id = msg->header.frame_id;
+
+  geometry_msgs::msg::PointStamped cone_point, transformed_point;
+
+  cone_point.header = msg->header;
   cone_point.point.x = cone_x;
   cone_point.point.y = cone_y;
   cone_point.point.z = cone_z;
-
+  
+  // Transform 
   try {
-    cone_point = tf_buffer.transform(cone_point, "odom", tf2::durationFromSec(1.0));
-
-    RCLCPP_INFO(this->get_logger(), "Transformed cone position - X: %.3f, Y: %.3f",
-                cone_point.point.x, cone_point.point.y);
-
-    rc_interfaces::msg::Cone c;
-    c.x = cone_point.point.x;
-    c.y = cone_point.point.y;
-    // c.color = msg->header.label;
-    return c;
-
-    // transformed_cones.cones.push_back(c);
-
-    // auto out_msg = rc_interfaces::msg::Cones(*msg);
-    // cone_publisher_->publish(*out_msg);
-
-  } catch (tf2::TransformException& ex) {
-    RCLCPP_ERROR(this->get_logger(), "Transform error: %s", ex.what());
-    // return -1.0; // Return an error value
+    transformed_point = tf_buffer.transform(
+        cone_point, "odom", tf2::durationFromSec(0.1));
+  } catch (tf2::TransformException &ex) {
+    RCLCPP_WARN(this->get_logger(), "TF failed: %s", ex.what());
+    return rc_interfaces::msg::Cone();
   }
+
+  rc_interfaces::msg::Cone c;
+
+  // Final ENU position of cone
+  c.x = transformed_point.point.x;
+  c.y = transformed_point.point.y;
+
+  RCLCPP_INFO(this->get_logger(),
+              "Cone global position: X=%.3f Y=%.3f",
+              c.x, c.y);
+
+  return c;
 }
 
 int main(int argc, char** argv) {
