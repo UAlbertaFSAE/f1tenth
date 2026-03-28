@@ -12,6 +12,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rc_interfaces REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 include_directories(include)
 
@@ -25,6 +27,13 @@ ament_target_dependencies(triangulator
   rc_interfaces
 )
 
+add_executable(waypoint_visualizer src/waypoint_visualizer.cpp)
+ament_target_dependencies(waypoint_visualizer
+  rclcpp
+  geometry_msgs
+  visualization_msgs
+)
+
 target_include_directories(triangulator PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
@@ -33,6 +42,7 @@ target_compile_features(triangulator PUBLIC c_std_99 cxx_std_17)
 
 install(TARGETS
   triangulator
+  waypoint_visualizer
   DESTINATION lib/${PROJECT_NAME}
 )
 

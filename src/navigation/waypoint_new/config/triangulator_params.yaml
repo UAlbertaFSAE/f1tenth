@@ -1,8 +1,8 @@
 triangulator:
   ros__parameters:
     # --- Topics ---
-    cones_topic: "/detection_generator/cone_data"
-    odom_topic: "/ego_racecar/odom"
+    cones_topic: "/cone_transformed"
+    odom_topic: "/odom"
     waypoint_topic: "/waypoints"
     path_topic: "/planned_path"
 

@@ -1,7 +1,7 @@
 #include "triangulator.hpp"
 
 Triangulator::Triangulator() : Node("triangulator_node") {
-  this->declare_parameter("cones_topic", "/detection_generator/cone_data");
+  this->declare_parameter("cones_topic", "/cone_transformed");
   this->declare_parameter("odom_topic", "/odom");
   this->declare_parameter("waypoint_topic", "waypoints");
 

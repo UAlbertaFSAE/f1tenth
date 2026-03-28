@@ -1,7 +1,7 @@
 pure_pursuit:
   ros__parameters:
     waypoints_path: "/f1tenth_ws/src/pure_pursuit/racelines/e7_floor5_biggest.csv"
-    odom_topic: "/pf/pose/odom"
+    odom_topic: "/odom"
     car_refFrame: "laser"
     global_refFrame: "map"
     drive_topic: "/drive"
