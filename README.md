@@ -7,15 +7,25 @@ Welcome to our autonomous remote control car repository. We are developing an au
 **Note**: As of right now, we are only accepting contributions from UofA students.
 
 
+
 First run the camera zed
 then the detection node
 then run the following command:
-    ros2 run tf2_ros static_transform_publisher 0.2 0.0 0.5 0.0 0.0 0.0 base_link zed_camera_link
-then run jayden cone_transfomer
-then run run waypoint_new
+    ros2 run tf2_ros static_transform_publisher -0.05 -0.15 0.40 0.0 0.0 0.0 base_link zed_camera_link
+then run cone_transfomer
+then run waypoint_new
 finally pure-pursuit
 
 run the f1tenth bringup stack
 
 5.5 from base link to top of zed
 1.5 cm from camera moving to the left to the base_link
+0.5cm forward
+
+x = 0.5cm = 0.05m
+y = 1.5cm = 0.15m
+z = -4.0cm = -0.4m
+We swap the signs.
+
+Even this may be required:
+ ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
