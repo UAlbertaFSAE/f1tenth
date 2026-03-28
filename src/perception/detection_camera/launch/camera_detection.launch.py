@@ -12,7 +12,8 @@ def generate_launch_description() -> LaunchDescription:
         [pkg_share, "config", "camera_detection.yaml"]
     )
 
-    rviz_config_path = PathJoinSubstitution([pkg_share, "config", "detection_viz.rviz"])
+    rviz_config_path = PathJoinSubstitution(
+        [pkg_share, "config", "detection_viz.rviz"])
 
     detection_camera_node = Node(
         package="detection_camera",
@@ -32,5 +33,5 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription([
         detection_camera_node,
-        rviz_node,
+        # rviz_node,
     ])
