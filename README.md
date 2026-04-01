@@ -6,17 +6,19 @@ Welcome to our autonomous remote control car repository. We are developing an au
 
 **Note**: As of right now, we are only accepting contributions from UofA students.
 
+For building the package please use: colcon build --packages-ignore livox_ros_driver2 --parallel-workers 1
 
-
-First run the camera zed
-then the detection node
+cd fsae_f1tenth_ws/ && source install/setup.bash
+First run the camera zed: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i
+then the detection node: ros2 launch detection_camera camera_detection.launch.py
 then run the following command:
     ros2 run tf2_ros static_transform_publisher -0.05 -0.15 0.40 0.0 0.0 0.0 base_link zed_camera_link
-then run cone_transfomer
-then run waypoint_new
-finally pure-pursuit
+    ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
+then run cone_transfomer: ros2 run cone_transformer cone_transformer
+then run waypoint_new: ros2 launch waypoint_new new_triangulator.launch.py or ros2 run waypoint_triangulation triangulator 
+finally pure-pursuit: ros2 run pure_pursuit pure_pursuit
 
-run the f1tenth bringup stack
+run the f1tenth bringup stack: ros2 launch f1tenth_stack bringup_launch.py
 
 5.5 from base link to top of zed
 1.5 cm from camera moving to the left to the base_link

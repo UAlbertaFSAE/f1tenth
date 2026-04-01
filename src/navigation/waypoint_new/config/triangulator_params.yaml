@@ -7,13 +7,13 @@ triangulator:
     path_topic: "/planned_path"
 
     # --- Triangulation tuning ---
-    lookahead_distance: 10.0
+    lookahead_distance: 5.0
     num_waypoints: 5
-    min_track_width: 2.0
+    min_track_width: 0.5
     max_track_width: 6.0
 
     # --- Start gate (orange cones) ---
-    use_start_gate: true
+    use_start_gate: false
     start_gate_max_width: 8.0
     start_colors:
       - "orange"

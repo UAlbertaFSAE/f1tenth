@@ -33,5 +33,5 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription([
         detection_camera_node,
-        # rviz_node,
+        rviz_node,
     ])

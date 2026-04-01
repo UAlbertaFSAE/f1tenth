@@ -1,9 +1,9 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch.actions import ExecuteProcess
 
 
 def generate_launch_description():
@@ -31,29 +31,42 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
-    # Declare args
-    for name in [
-        ('zed_pkg', 'Package that runs the ZED camera'),
-        ('zed_exe', 'Executable for ZED camera node'),
-        ('detection_pkg', 'Package for detection node'),
-        ('detection_exe', 'Executable for detection node'),
-        ('cone_pkg', 'Package for cone_transformer'),
-        ('cone_exe', 'Executable for cone_transformer'),
-        ('waypoint_pkg', 'Package for waypoint node'),
-        ('waypoint_exe', 'Executable for waypoint node'),
-        ('pure_pursuit_pkg', 'Package for pure-pursuit'),
-        ('pure_pursuit_exe', 'Executable for pure-pursuit'),
-    ]:
-        ld.add_action(DeclareLaunchArgument(name[0], default_value=LaunchConfiguration(
-            name[0]).perform({}), description=name[1]))
+    # Declare args with concrete default values (avoid using LaunchConfiguration as default_value)
+    ld.add_action(DeclareLaunchArgument('zed_pkg', default_value='zed_wrapper', description='Package that runs the ZED camera'))
+    ld.add_action(DeclareLaunchArgument('zed_exe', default_value='zed_wrapper_node', description='Executable for ZED camera node'))
+    ld.add_action(DeclareLaunchArgument('detection_pkg', default_value='detection_camera', description='Package for detection node'))
+    ld.add_action(DeclareLaunchArgument('detection_exe', default_value='detection_node', description='Executable for detection node'))
+    ld.add_action(DeclareLaunchArgument('cone_pkg', default_value='cone_transformer', description='Package for cone_transformer'))
+    ld.add_action(DeclareLaunchArgument('cone_exe', default_value='cone_transformer', description='Executable for cone_transformer'))
+    ld.add_action(DeclareLaunchArgument('waypoint_pkg', default_value='waypoint_triangulation', description='Package for waypoint node'))
+    ld.add_action(DeclareLaunchArgument('waypoint_exe', default_value='waypoint_new', description='Executable for waypoint node'))
+    ld.add_action(DeclareLaunchArgument('pure_pursuit_pkg', default_value='pure_pursuit', description='Package for pure-pursuit'))
+    ld.add_action(DeclareLaunchArgument('pure_pursuit_exe', default_value='pure_pursuit', description='Executable for pure-pursuit'))
 
-    # 1) ZED camera
-    zed_node = Node(
-        package=zed_pkg,
-        executable=zed_exe,
-        name='zed_camera',
-        output='screen'
+    # Include zed_camera.launch.py
+    zed_camera_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare('zed_wrapper'),
+                'launch',
+                'zed_camera.launch.py'
+            ])
+        ]),
+        launch_arguments={'camera_model': 'zed2i'}.items()
     )
+
+    # Include camera_detection.launch.py
+    camera_detection_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare('detection_camera'),
+                'launch',
+                'camera_detection.launch.py'
+            ])
+        ])
+    )
+
+    # 1) ZED camera node is now included only via zed_camera.launch.py with camera_model:=zed2i
 
     # 2) Detection node
     detection_node = Node(
@@ -103,9 +116,9 @@ def generate_launch_description():
         arguments=['-d', rviz_config]
     )
 
-    # Add nodes to launch description in the requested order
-    ld.add_action(zed_node)
-    ld.add_action(detection_node)
+    # Add nodes and included launch files to launch description in the requested order
+    ld.add_action(zed_camera_launch)
+    ld.add_action(camera_detection_launch)
     ld.add_action(static_tf)
     ld.add_action(cone_node)
     ld.add_action(waypoint_node)
