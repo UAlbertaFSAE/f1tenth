@@ -77,6 +77,8 @@ class Triangulator(Node):
     def odom_callback(self, msg: Odometry):
         self.latest_odom = msg
 
+    # This function is the function that calls all the other functions where it matches the cone pairs first
+    # and extracts the position with odom data.
     def cones_callback(self, msg: Cones):
         self.get_logger().info(f"Received cone data with {len(msg.cones)} cones")
 
@@ -87,19 +89,17 @@ class Triangulator(Node):
         vehicle_pos = self.latest_odom.pose.pose.position
         vehicle_heading = self.calculate_heading_from_quaternion(self.latest_odom.pose.pose.orientation)
 
-        # --- DEBUG: vehicle pose/heading + colors seen
+        # Debug statment to make sure the colors are seen
         colors_seen = sorted({str(c.color) for c in msg.cones})
         self.get_logger().info(
             f"vehicle_pos=({vehicle_pos.x:.2f},{vehicle_pos.y:.2f}) "
             f"heading_deg={math.degrees(vehicle_heading):.1f} colors_seen={colors_seen}"
         )
-        # show raw cones briefly (first up to 10)
+        # show first 10 detected cones
         for i, c in enumerate(msg.cones[:10]):
-            self.get_logger().info(
-                f"raw[{i}] color='{c.color}' pos=({c.x:.3f},{c.y:.3f})"
-            )
+            self.get_logger().info(f"raw[{i}] color='{c.color}' pos=({c.x:.3f},{c.y:.3f})")
 
-        # --- 1) Try START gate first (orange / large_orange)
+        # tries the start gate before looking and matching blue/yellow cone pairs
         start_midpoint = None
         if self.use_start_gate:
             start_midpoint = self.try_start_gate(msg, vehicle_pos, vehicle_heading)
@@ -212,9 +212,10 @@ class Triangulator(Node):
 
         filtered = []
         for cone in start_cones:
-            distance = math.hypot(cone.x - vehicle_pos.x, cone.y - vehicle_pos.y)
             dx = cone.x - vehicle_pos.x
             dy = cone.y - vehicle_pos.y
+            distance = math.sqrt((dx * dx) + (dy * dy))
+
             cone_angle = math.atan2(dy, dx)
             angle = self.normalize_angle(cone_angle - vehicle_heading)
 
@@ -239,7 +240,10 @@ class Triangulator(Node):
             for j in range(i + 1, len(filtered)):
                 c1 = filtered[i]
                 c2 = filtered[j]
-                width = math.hypot(c1.x - c2.x, c1.y - c2.y)
+
+                wdx = c1.x - c2.x
+                wdy = c1.y - c2.y
+                width = math.sqrt((wdx * wdx) + (wdy * wdy))
 
                 if width > self.start_gate_max_width:
                     self.get_logger().info(
@@ -247,8 +251,14 @@ class Triangulator(Node):
                     )
                     continue
 
-                d1 = math.hypot(c1.x - vehicle_pos.x, c1.y - vehicle_pos.y)
-                d2 = math.hypot(c2.x - vehicle_pos.x, c2.y - vehicle_pos.y)
+                d1x = c1.x - vehicle_pos.x
+                d1y = c1.y - vehicle_pos.y
+                d1 = math.sqrt((d1x * d1x) + (d1y * d1y))
+
+                d2x = c2.x - vehicle_pos.x
+                d2y = c2.y - vehicle_pos.y
+                d2 = math.sqrt((d2x * d2x) + (d2y * d2y))
+
                 score = (d1 + d2) / 2.0
 
                 self.get_logger().info(
@@ -270,30 +280,35 @@ class Triangulator(Node):
         )
         return midpoint
 
-    # Cone utilities (Cones msg)
+    # Cone utilities
     def extract_cones_by_color(self, msg: Cones, color: str):
         cones = [cone for cone in msg.cones if cone.color == color]
         return cones
 
+    # finds closest left or right cone pair depending on distance
     def find_closest_cone(self, msg: Cones, color: str, vehicle_pos):
         min_distance = float("inf")
         result = None
         for cone in msg.cones:
             if cone.color != color:
                 continue
-            dist = math.hypot(cone.x - vehicle_pos.x, cone.y - vehicle_pos.y)
+
+            dx = cone.x - vehicle_pos.x
+            dy = cone.y - vehicle_pos.y
+            dist = math.sqrt((dx * dx) + (dy * dy))
+
             if dist < min_distance:
                 min_distance = dist
                 result = cone
         return result
-
+    #makes sure its less than lookahead distance
     def filter_and_sort_cones(self, cones, position, heading):
         cones_with_dist = []
         for cone in cones:
-            distance = math.hypot(cone.x - position.x, cone.y - position.y)
-
             dx = cone.x - position.x
             dy = cone.y - position.y
+            distance = math.sqrt((dx * dx) + (dy * dy))
+
             cone_angle = math.atan2(dy, dx)
             angle = self.normalize_angle(cone_angle - heading)
 
@@ -324,7 +339,10 @@ class Triangulator(Node):
             left = left_cones[left_idx]
             right = right_cones[right_idx]
 
-            width = math.hypot(left.cone.x - right.cone.x, left.cone.y - right.cone.y)
+            wdx = left.cone.x - right.cone.x
+            wdy = left.cone.y - right.cone.y
+            width = math.sqrt((wdx * wdx) + (wdy * wdy))
+
             valid = self.is_valid_gate(left.cone, right.cone)
 
             self.get_logger().info(
@@ -345,7 +363,9 @@ class Triangulator(Node):
         return pairs
 
     def is_valid_gate(self, left_cone: Cone, right_cone: Cone):
-        distance_between = math.hypot(left_cone.x - right_cone.x, left_cone.y - right_cone.y)
+        dx = left_cone.x - right_cone.x
+        dy = left_cone.y - right_cone.y
+        distance_between = math.sqrt((dx * dx) + (dy * dy))
         return self.min_track_width <= distance_between <= self.max_track_width
 
     def calculate_midpoint(self, cone1: Cone, cone2: Cone):
