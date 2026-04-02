@@ -39,6 +39,7 @@ build/*.obj
 **/install
 **/build
 **/log
+**/recordings
 
 # macOS
 .DS_Store
