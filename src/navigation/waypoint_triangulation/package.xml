@@ -11,12 +11,12 @@
 
 
   <depend>rclcpp</depend>
-  <depend>nav_msgs</depend>
   <depend>rc_interfaces</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
 
 
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>zed_msgs</exec_depend>
 
   <!-- Launch (needed if you use ros2 launch with a launch file in this package) -->

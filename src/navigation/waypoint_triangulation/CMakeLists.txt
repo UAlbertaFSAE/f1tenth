@@ -10,10 +10,10 @@ find_package(ament_cmake REQUIRED)
 
 # C++ dependencies
 find_package(rclcpp REQUIRED)
-find_package(nav_msgs REQUIRED)
 find_package(rc_interfaces REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(CDT REQUIRED CONFIG)
 
 include_directories(include)
 
@@ -23,9 +23,14 @@ include_directories(include)
 add_executable(triangulator src/triangulator.cpp)
 ament_target_dependencies(triangulator
   rclcpp
-  nav_msgs
   rc_interfaces
+  geometry_msgs
+  visualization_msgs
 )
+
+if(TARGET CDT::CDT)
+  target_link_libraries(triangulator CDT::CDT)
+endif()
 
 add_executable(waypoint_visualizer src/waypoint_visualizer.cpp)
 ament_target_dependencies(waypoint_visualizer
@@ -53,6 +58,7 @@ install(TARGETS
 # ----------------------------
 install(DIRECTORY
   launch
+  config
   DESTINATION share/${PROJECT_NAME}
   OPTIONAL
 )

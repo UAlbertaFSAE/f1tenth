@@ -9,10 +9,10 @@ endif()
 foreach(PACKAGE
   rclcpp
   ament_cmake
+  ament_index_cpp
   rc_interfaces
   nav_msgs
   Eigen3
-  visualization_msgs
 )
   find_package(${PACKAGE} REQUIRED)
 endforeach()
@@ -28,9 +28,9 @@ add_executable(detection_generator src/detection_generator.cpp)
 
 ament_target_dependencies(detection_generator
     rclcpp
+  ament_index_cpp
     rc_interfaces
     nav_msgs
-    visualization_msgs
 )
 
 # install cpp exectuables
@@ -47,6 +47,11 @@ target_compile_features(detection_generator PUBLIC c_std_99 cxx_std_17)  # Requi
 
 install(TARGETS detection_generator
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  data
+  DESTINATION share/${PROJECT_NAME}
 )
 
 

@@ -47,21 +47,21 @@ Visualization Manager:
         Value: /odom
       Value: true
 
-    - Class: rviz_default_plugins/Marker
+    - Class: rviz_default_plugins/MarkerArray
       Enabled: true
-      Name: Waypoints Marker
+      Name: Triangulation + Waypoints
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /waypoint_marker
+        Value: /triangulation_markers
       Value: true
 
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -85,7 +85,7 @@ Visualization Manager:
       Name: Current View
       Near Clip Distance: 0.01
       Pitch: 0.785398
-      Target Frame: odom
+      Target Frame: map
       Value: Orbit (rviz)
       Yaw: 0.785398
 

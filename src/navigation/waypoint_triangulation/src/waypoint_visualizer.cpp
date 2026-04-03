@@ -1,29 +1,32 @@
 #include <memory>
 #include <string>
-#include <cmath>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "visualization_msgs/msg/marker.hpp"
-#include "builtin_interfaces/msg/duration.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 class WaypointVisualizer : public rclcpp::Node {
 public:
   WaypointVisualizer()
       : Node("waypoint_visualizer") {
     this->declare_parameter("waypoint_topic", "waypoints");
-    this->declare_parameter("marker_topic", "waypoint_marker");
-    this->declare_parameter("frame_id", "odom");
-    this->declare_parameter("scale", 0.3);
-    this->declare_parameter("lifetime", 1.0);
+    this->declare_parameter("triangulation_marker_topic", "/triangulation_markers");
+    this->declare_parameter("marker_topic", "/waypoint_visualization");
+    this->declare_parameter("frame_id", "map");
+    this->declare_parameter("max_waypoints", 2000);
 
     waypoint_topic_ = this->get_parameter("waypoint_topic").as_string();
+    triangulation_marker_topic_ = this->get_parameter("triangulation_marker_topic").as_string();
     marker_topic_ = this->get_parameter("marker_topic").as_string();
     frame_id_ = this->get_parameter("frame_id").as_string();
-    scale_ = this->get_parameter("scale").as_double();
-    lifetime_sec_ = this->get_parameter("lifetime").as_double();
+    max_waypoints_ = this->get_parameter("max_waypoints").as_int();
 
-    marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>(marker_topic_, 10);
+    marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(marker_topic_, 10);
+    triangulation_marker_sub_ = this->create_subscription<visualization_msgs::msg::MarkerArray>(
+        triangulation_marker_topic_, rclcpp::QoS(10),
+        std::bind(&WaypointVisualizer::triangulation_marker_callback, this, std::placeholders::_1));
     waypoint_sub_ = this->create_subscription<geometry_msgs::msg::Point>(
         waypoint_topic_, rclcpp::QoS(10),
         std::bind(&WaypointVisualizer::waypoint_callback, this, std::placeholders::_1));
@@ -33,54 +36,71 @@ public:
   }
 
 private:
+  void triangulation_marker_callback(const visualization_msgs::msg::MarkerArray::SharedPtr markers) {
+    latest_triangulation_markers_ = *markers;
+    publish_combined_markers();
+  }
+
   void waypoint_callback(const geometry_msgs::msg::Point::SharedPtr point) {
-    visualization_msgs::msg::Marker marker;
-    marker.header.stamp = this->now();
-    marker.header.frame_id = frame_id_;
-    marker.ns = "waypoint";
-    marker.id = 0;
-    marker.type = visualization_msgs::msg::Marker::SPHERE;
-    marker.action = visualization_msgs::msg::Marker::ADD;
+    waypoint_history_.push_back(*point);
+    if (static_cast<int64_t>(waypoint_history_.size()) > max_waypoints_) {
+      waypoint_history_.erase(waypoint_history_.begin());
+    }
 
-    marker.pose.position.x = point->x;
-    marker.pose.position.y = point->y;
-    marker.pose.position.z = point->z;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
+    publish_combined_markers();
+  }
 
-    marker.scale.x = scale_;
-    marker.scale.y = scale_;
-    marker.scale.z = scale_;
+  void publish_combined_markers() {
+    visualization_msgs::msg::MarkerArray combined = latest_triangulation_markers_;
 
-    // green color
-    marker.color.r = 0.0f;
-    marker.color.g = 1.0f;
-    marker.color.b = 0.0f;
-    marker.color.a = 1.0f;
+    visualization_msgs::msg::Marker history;
+    history.header.stamp = this->now();
+    history.header.frame_id = frame_id_;
+    history.ns = "waypoint_history";
+    history.id = 100;
+    history.type = visualization_msgs::msg::Marker::LINE_STRIP;
+    history.action = visualization_msgs::msg::Marker::ADD;
+    history.pose.orientation.w = 1.0;
+    history.scale.x = 0.12;
+    history.color.r = 0.0f;
+    history.color.g = 1.0f;
+    history.color.b = 0.4f;
+    history.color.a = 1.0f;
+    history.points = waypoint_history_;
 
-    // lifetime
-    builtin_interfaces::msg::Duration dur;
-    int sec = static_cast<int>(std::floor(lifetime_sec_));
-    double frac = lifetime_sec_ - sec;
-    dur.sec = sec;
-    dur.nanosec = static_cast<uint32_t>(frac * 1e9);
-    marker.lifetime = dur;
+    visualization_msgs::msg::Marker latest;
+    latest.header = history.header;
+    latest.ns = "waypoint_latest";
+    latest.id = 101;
+    latest.type = visualization_msgs::msg::Marker::SPHERE;
+    latest.action = visualization_msgs::msg::Marker::ADD;
+    latest.pose.orientation.w = 1.0;
+    latest.scale.x = 0.28;
+    latest.scale.y = 0.28;
+    latest.scale.z = 0.28;
+    latest.color.r = 0.0f;
+    latest.color.g = 1.0f;
+    latest.color.b = 0.0f;
+    latest.color.a = 1.0f;
+    if (!waypoint_history_.empty()) {
+      latest.pose.position = waypoint_history_.back();
+    }
 
-    marker_pub_->publish(marker);
-
-    RCLCPP_INFO(this->get_logger(), "Published waypoint marker at (%.3f, %.3f, %.3f)", point->x,
-                point->y, point->z);
+    combined.markers.push_back(history);
+    combined.markers.push_back(latest);
+    marker_pub_->publish(combined);
   }
 
   std::string waypoint_topic_;
+  std::string triangulation_marker_topic_;
   std::string marker_topic_;
   std::string frame_id_;
-  double scale_;
-  double lifetime_sec_;
+  int64_t max_waypoints_;
+  std::vector<geometry_msgs::msg::Point> waypoint_history_;
+  visualization_msgs::msg::MarkerArray latest_triangulation_markers_;
 
-  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
+  rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr triangulation_marker_sub_;
   rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr waypoint_sub_;
 };
 
