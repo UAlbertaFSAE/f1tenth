@@ -34,8 +34,8 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("global_refFrame", "odom");
   this->declare_parameter("min_lookahead", 0.8);
   this->declare_parameter("max_lookahead", 5.0);
-  this->declare_parameter("lookahead_ratio", 3.5);
-  this->declare_parameter("K_p", 0.25);
+  this->declare_parameter("lookahead_ratio", 3.0);
+  this->declare_parameter("K_p", 0.05);
   this->declare_parameter("steering_limit", 25.0);
   this->declare_parameter("velocity_percentage", 0.9);  // 0.6 default
 
@@ -317,6 +317,8 @@ void PurePursuit::publish_message(double steering_angle) {
 }
 
 void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint) {
+  constexpr int kWaypointHistoryLimit = 20;
+
   // don't push the same point on multiple times
   if (num_waypoints > 0) {
     double last_x = waypoints.X[waypoints.X.size() - 1];
@@ -325,6 +327,17 @@ void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstShared
     if (waypoint->x == last_x && waypoint->y == last_y) {
       return;
     }
+  }
+
+  // Keep only the most recent waypoints so stale cone positions do not dominate control.
+  while (num_waypoints >= kWaypointHistoryLimit) {
+    waypoints.X.erase(waypoints.X.begin());
+    waypoints.Y.erase(waypoints.Y.begin());
+    waypoints.V.erase(waypoints.V.begin());
+    num_waypoints--;
+
+    waypoints.index = std::max(0, waypoints.index - 1);
+    waypoints.velocity_index = std::max(0, waypoints.velocity_index - 1);
   }
 
   waypoints.X.push_back(waypoint->x);
