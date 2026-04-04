@@ -74,6 +74,15 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
 
   RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched");
 
+  waypoints.index = 0;
+  waypoints.velocity_index = 0;
+  x_car_world = 0.0;
+  y_car_world = 0.0;
+  car_orient_w = 1.0;
+  car_orient_x = 0.0;
+  car_orient_y = 0.0;
+  car_orient_z = 0.0;
+
   num_waypoints = 0;
 }
 
@@ -226,7 +235,7 @@ void PurePursuit::quat_to_rot(double q0, double q1, double q2, double q3) {
   rotation_m << r00, r01, r02, r10, r11, r12, r20, r21, r22;
 }
 
-void PurePursuit::transformandinterp_waypoint() {  // pass old waypoint here
+bool PurePursuit::transformandinterp_waypoint() {  // pass old waypoint here
   // initialise vectors
   waypoints.lookahead_point_world << waypoints.X[waypoints.index], waypoints.Y[waypoints.index],
       0.0;
@@ -245,6 +254,7 @@ void PurePursuit::transformandinterp_waypoint() {  // pass old waypoint here
         tf_buffer_->lookupTransform(car_refFrame, global_refFrame, tf2::TimePointZero);
   } catch (tf2::TransformException &ex) {
     RCLCPP_INFO(this->get_logger(), "Could not transform. Error: %s", ex.what());
+    return false;
   }
 
   // transform points (rotate first and then translate)
@@ -255,10 +265,14 @@ void PurePursuit::transformandinterp_waypoint() {  // pass old waypoint here
               transformStamped.transform.rotation.y, transformStamped.transform.rotation.z);
 
   waypoints.lookahead_point_car = (rotation_m * waypoints.lookahead_point_world) + translation_v;
+  return true;
 }
 
 double PurePursuit::p_controller() {
   double r = waypoints.lookahead_point_car.norm();  // r = sqrt(x^2 + y^2)
+  if (r < 1e-6) {
+    return 0.0;
+  }
   double y = waypoints.lookahead_point_car(1);
   double angle =
       K_p * 2 * y /
@@ -363,7 +377,9 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
   get_waypoint();
 
   // use tf2 transform the goal point
-  transformandinterp_waypoint();
+  if (!transformandinterp_waypoint()) {
+    return;
+  }
 
   // Calculate curvature/steering angle
   double steering_angle = p_controller();

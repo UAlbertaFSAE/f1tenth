@@ -43,18 +43,24 @@ class Triangulator(Node):
         waypoint_topic = self.get_parameter("waypoint_topic").value
         path_topic = self.get_parameter("path_topic").value
 
-        self.min_track_width = float(self.get_parameter("min_track_width").value)
-        self.max_track_width = float(self.get_parameter("max_track_width").value)
-        self.lookahead_distance = float(self.get_parameter("lookahead_distance").value)
+        self.min_track_width = float(
+            self.get_parameter("min_track_width").value)
+        self.max_track_width = float(
+            self.get_parameter("max_track_width").value)
+        self.lookahead_distance = float(
+            self.get_parameter("lookahead_distance").value)
         self.num_waypoints = int(self.get_parameter("num_waypoints").value)
 
         self.use_start_gate = bool(self.get_parameter("use_start_gate").value)
         self.start_colors = list(self.get_parameter("start_colors").value)
-        self.start_gate_max_width = float(self.get_parameter("start_gate_max_width").value)
+        self.start_gate_max_width = float(
+            self.get_parameter("start_gate_max_width").value)
 
         # Subscribers
-        self.cones_sub = self.create_subscription(Cones, cones_topic, self.cones_callback, 10)
-        self.odom_sub = self.create_subscription(Odometry, odom_topic, self.odom_callback, 10)
+        self.cones_sub = self.create_subscription(
+            Cones, cones_topic, self.cones_callback, 10)
+        self.odom_sub = self.create_subscription(
+            Odometry, odom_topic, self.odom_callback, 10)
 
         # Publishers
         self.waypoint_pub = self.create_publisher(Point, waypoint_topic, 10)
@@ -78,14 +84,16 @@ class Triangulator(Node):
         self.latest_odom = msg
 
     def cones_callback(self, msg: Cones):
-        self.get_logger().info(f"Received cone data with {len(msg.cones)} cones")
+        self.get_logger().info(
+            f"Received cone data with {len(msg.cones)} cones")
 
         if self.latest_odom is None:
             self.get_logger().warn("Odometry not received yet. Skipping processing.")
             return
 
         vehicle_pos = self.latest_odom.pose.pose.position
-        vehicle_heading = self.calculate_heading_from_quaternion(self.latest_odom.pose.pose.orientation)
+        vehicle_heading = self.calculate_heading_from_quaternion(
+            self.latest_odom.pose.pose.orientation)
 
         # --- DEBUG: vehicle pose/heading + colors seen
         colors_seen = sorted({str(c.color) for c in msg.cones})
@@ -102,7 +110,8 @@ class Triangulator(Node):
         # --- 1) Try START gate first (orange / large_orange)
         start_midpoint = None
         if self.use_start_gate:
-            start_midpoint = self.try_start_gate(msg, vehicle_pos, vehicle_heading)
+            start_midpoint = self.try_start_gate(
+                msg, vehicle_pos, vehicle_heading)
 
         if start_midpoint is not None:
             self.waypoint_pub.publish(start_midpoint)
@@ -128,7 +137,8 @@ class Triangulator(Node):
         left_cones = self.extract_cones_by_color(msg, "blue")
         right_cones = self.extract_cones_by_color(msg, "yellow")
 
-        self.get_logger().info(f"Raw extracted: blue={len(left_cones)} yellow={len(right_cones)}")
+        self.get_logger().info(
+            f"Raw extracted: blue={len(left_cones)} yellow={len(right_cones)}")
 
         # fallback: closest blue/yellow if pairing fails
         left_cone = self.find_closest_cone(msg, "blue", vehicle_pos)
@@ -151,10 +161,13 @@ class Triangulator(Node):
                 self.get_logger().warn("No cones available for fallback waypoint")
             return
 
-        sorted_left = self.filter_and_sort_cones(left_cones, vehicle_pos, vehicle_heading)
-        sorted_right = self.filter_and_sort_cones(right_cones, vehicle_pos, vehicle_heading)
+        sorted_left = self.filter_and_sort_cones(
+            left_cones, vehicle_pos, vehicle_heading)
+        sorted_right = self.filter_and_sort_cones(
+            right_cones, vehicle_pos, vehicle_heading)
 
-        self.get_logger().info(f"Filtered: blue={len(sorted_left)} yellow={len(sorted_right)}")
+        self.get_logger().info(
+            f"Filtered: blue={len(sorted_left)} yellow={len(sorted_right)}")
         if sorted_left:
             c = sorted_left[0]
             self.get_logger().info(
@@ -175,7 +188,8 @@ class Triangulator(Node):
 
         self.get_logger().info(f"Matched {len(cone_pairs)} cone pairs (gates)")
 
-        waypoints = [self.calculate_midpoint(left, right) for (left, right) in cone_pairs]
+        waypoints = [self.calculate_midpoint(
+            left, right) for (left, right) in cone_pairs]
         if not waypoints:
             self.get_logger().warn("No waypoints generated")
             return
@@ -197,11 +211,13 @@ class Triangulator(Node):
             path_msg.poses.append(pose)
 
         self.path_pub.publish(path_msg)
-        self.get_logger().info(f"Published path with {len(waypoints)} waypoints")
+        self.get_logger().info(
+            f"Published path with {len(waypoints)} waypoints")
 
     # START gate logic (orange)
     def try_start_gate(self, msg: Cones, vehicle_pos, vehicle_heading):
-        start_cones = [cone for cone in msg.cones if cone.color in self.start_colors]
+        start_cones = [
+            cone for cone in msg.cones if cone.color in self.start_colors]
 
         self.get_logger().info(
             f"Start-gate: found {len(start_cones)} cones with colors={self.start_colors}"
@@ -212,13 +228,15 @@ class Triangulator(Node):
 
         filtered = []
         for cone in start_cones:
-            distance = math.hypot(cone.x - vehicle_pos.x, cone.y - vehicle_pos.y)
+            distance = math.hypot(cone.x - vehicle_pos.x,
+                                  cone.y - vehicle_pos.y)
             dx = cone.x - vehicle_pos.x
             dy = cone.y - vehicle_pos.y
             cone_angle = math.atan2(dy, dx)
             angle = self.normalize_angle(cone_angle - vehicle_heading)
 
-            passes = distance <= self.lookahead_distance
+            passes = distance <= self.lookahead_distance and abs(
+                angle) <= (math.pi / 2.0)
 
             self.get_logger().info(
                 f"[start-filter] color={cone.color} pos=({cone.x:.3f},{cone.y:.3f}) "
@@ -297,7 +315,8 @@ class Triangulator(Node):
             cone_angle = math.atan2(dy, dx)
             angle = self.normalize_angle(cone_angle - heading)
 
-            passes = distance <= self.lookahead_distance
+            passes = distance <= self.lookahead_distance and abs(
+                angle) <= (math.pi / 2.0)
 
             self.get_logger().info(
                 f"[filter] color={cone.color} pos=({cone.x:.3f},{cone.y:.3f}) "
@@ -324,7 +343,8 @@ class Triangulator(Node):
             left = left_cones[left_idx]
             right = right_cones[right_idx]
 
-            width = math.hypot(left.cone.x - right.cone.x, left.cone.y - right.cone.y)
+            width = math.hypot(left.cone.x - right.cone.x,
+                               left.cone.y - right.cone.y)
             valid = self.is_valid_gate(left.cone, right.cone)
 
             self.get_logger().info(
@@ -345,7 +365,8 @@ class Triangulator(Node):
         return pairs
 
     def is_valid_gate(self, left_cone: Cone, right_cone: Cone):
-        distance_between = math.hypot(left_cone.x - right_cone.x, left_cone.y - right_cone.y)
+        distance_between = math.hypot(
+            left_cone.x - right_cone.x, left_cone.y - right_cone.y)
         return self.min_track_width <= distance_between <= self.max_track_width
 
     def calculate_midpoint(self, cone1: Cone, cone2: Cone):

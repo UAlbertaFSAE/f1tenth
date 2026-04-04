@@ -2,6 +2,7 @@
 #include <tf2_ros/transform_listener.h>
 
 #include <cmath>
+#include <string>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include "geometry_msgs/msg/point_stamped.hpp"
@@ -31,8 +32,12 @@ class Transformer : public rclcpp::Node {
   tf2_ros::Buffer tf_buffer;
   tf2_ros::TransformListener tf_listener;
 
+  std::string target_frame_;
+
   void cone_callback(const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg);
 
-  rc_interfaces::msg::Cone transform(double cone_x, double cone_y, double cone_z,
-                                     const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg);
+  bool transform(double cone_x, double cone_y, double cone_z,
+                 const zed_msgs::msg::ObjectsStamped::ConstSharedPtr msg,
+                 rc_interfaces::msg::Cone* transformed_cone);
+  std::string normalize_color(const std::string& raw_label) const;
 };
