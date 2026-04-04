@@ -31,11 +31,11 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("drive_topic", "/drive");
   this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
   this->declare_parameter("rviz_lookahead_waypoint_topic", "/lookahead_waypoint");
-  this->declare_parameter("global_refFrame", "map");
-  this->declare_parameter("min_lookahead", 2.0);
-  this->declare_parameter("max_lookahead", 6.0);
-  this->declare_parameter("lookahead_ratio", 8.0);
-  this->declare_parameter("K_p", 0.5);
+  this->declare_parameter("global_refFrame", "odom");
+  this->declare_parameter("min_lookahead", 0.8);
+  this->declare_parameter("max_lookahead", 5.0);
+  this->declare_parameter("lookahead_ratio", 3.5);
+  this->declare_parameter("K_p", 0.25);
   this->declare_parameter("steering_limit", 25.0);
   this->declare_parameter("velocity_percentage", 0.9);  // 0.6 default
 
@@ -94,7 +94,7 @@ double PurePursuit::p2pdist(double &x1, double &x2, double &y1, double &y2) {
 
 void PurePursuit::visualize_lookahead_point(Eigen::Vector3d &point) {
   auto marker = visualization_msgs::msg::Marker();
-  marker.header.frame_id = "map";
+  marker.header.frame_id = global_refFrame;
   marker.header.stamp = rclcpp::Clock().now();
   marker.type = visualization_msgs::msg::Marker::SPHERE;
   marker.action = visualization_msgs::msg::Marker::ADD;
@@ -112,7 +112,7 @@ void PurePursuit::visualize_lookahead_point(Eigen::Vector3d &point) {
 
 void PurePursuit::visualize_current_point(Eigen::Vector3d &point) {
   auto marker = visualization_msgs::msg::Marker();
-  marker.header.frame_id = "map";
+  marker.header.frame_id = global_refFrame;
   marker.header.stamp = rclcpp::Clock().now();
   marker.type = visualization_msgs::msg::Marker::SPHERE;
   marker.action = visualization_msgs::msg::Marker::ADD;

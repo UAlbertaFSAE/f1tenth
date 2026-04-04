@@ -3,7 +3,7 @@ pure_pursuit:
     waypoints_path: "/f1tenth/src/navigation/waypoint_generator/src/waypoints_odom.csv"
     odom_topic: "/ego_racecar/odom"
     car_refFrame: "ego_racecar/base_link"
-    global_refFrame: "map" # Should work fine, not sure why its failing
+    global_refFrame: "odom" # Keep everything in odom for this stack
     drive_topic: "/drive"
     rviz_current_waypoint_topic: "/current_waypoint"
     rviz_lookahead_waypoint_topic: "/lookahead_waypoint"
