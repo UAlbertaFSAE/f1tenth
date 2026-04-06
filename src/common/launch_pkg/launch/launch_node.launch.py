@@ -2,7 +2,10 @@ from datetime import datetime
 from pathlib import Path
 
 from launch import LaunchDescription
+from launch.substitutions import PathJoinSubstitution
 from launch.actions import ExecuteProcess, SetLaunchConfiguration
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
@@ -72,6 +75,20 @@ def generate_launch_description():
         output='screen',
     )
 
+    pkg_share = FindPackageShare("launch_pkg")
+
+    rviz_config_path = PathJoinSubstitution(
+        [pkg_share, "config", "waypoint_viz.rviz"])
+
+    rviz_node = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="launch_rviz",
+        arguments=["-d", rviz_config_path],
+        output="screen",
+    )
+
+
     return LaunchDescription(
         [
             SetLaunchConfiguration('log_dir', str(run_log_dir)),
@@ -111,5 +128,6 @@ def generate_launch_description():
                 name='rosbag_record',
                 output='log',
             ),
+            # rviz_node,
         ]
     )

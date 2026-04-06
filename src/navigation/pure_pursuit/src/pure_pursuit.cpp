@@ -35,7 +35,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("min_lookahead", 0.8);
   this->declare_parameter("max_lookahead", 5.0);
   this->declare_parameter("lookahead_ratio", 3.0);
-  this->declare_parameter("K_p", 0.05);
+  this->declare_parameter("K_p", 0.21);
   this->declare_parameter("steering_limit", 25.0);
   this->declare_parameter("velocity_percentage", 0.9);  // 0.6 default
 

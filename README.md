@@ -11,7 +11,7 @@ For building the package please use: colcon build --packages-ignore livox_ros_dr
 cd fsae_f1tenth_ws/ && source install/setup.bash
 First run the camera zed: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i
 then the detection node: ros2 launch detection_camera camera_detection.launch.py
-then run the following command:
+then run the following command:ros2
     ros2 run tf2_ros static_transform_publisher -0.05 -0.15 0.40 0.0 0.0 0.0 base_link zed_camera_link
     ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
 then run cone_transfomer: ros2 run cone_transformer cone_transformer

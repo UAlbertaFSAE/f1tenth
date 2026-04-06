@@ -236,8 +236,7 @@ class Triangulator(Node):
             cone_angle = math.atan2(dy, dx)
             angle = self.normalize_angle(cone_angle - vehicle_heading)
 
-            passes = distance <= self.lookahead_distance and abs(
-                angle) <= (math.pi / 2.0)
+            passes = distance <= self.lookahead_distance
 
             self.get_logger().info(
                 f"[start-filter] color={cone.color} pos=({cone.x:.3f},{cone.y:.3f}) "
@@ -331,8 +330,7 @@ class Triangulator(Node):
             cone_angle = math.atan2(dy, dx)
             angle = self.normalize_angle(cone_angle - heading)
 
-            passes = distance <= self.lookahead_distance and abs(
-                angle) <= (math.pi / 2.0)
+            passes = distance <= self.lookahead_distance
 
             self.get_logger().info(
                 f"[filter] color={cone.color} pos=({cone.x:.3f},{cone.y:.3f}) "
