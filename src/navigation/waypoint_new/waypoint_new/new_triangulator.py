@@ -30,7 +30,7 @@ class Triangulator(Node):
 
         self.declare_parameter("lookahead_distance", 10.0)
         self.declare_parameter("num_waypoints", 5)
-        self.declare_parameter("min_track_width", 0.05)
+        self.declare_parameter("min_track_width", 0.01)
         self.declare_parameter("max_track_width", 6.0)
 
         # Start gate parameters (string colors, since Cone.msg says `string color`)
@@ -195,9 +195,14 @@ class Triangulator(Node):
             self.get_logger().warn("No waypoints generated")
             return
 
-        self.waypoint_pub.publish(waypoints[0])
+        # NOTE: Previously this published waypoints[0] (closest gate).
+        # On curves / end-of-visibility, that tends to straighten the car.
+        # Publishing the farthest gate encourages committing to the turn.
+        target_wp = waypoints[-1]
+
+        self.waypoint_pub.publish(target_wp)
         self.get_logger().info(
-            f"Published waypoint: ({waypoints[0].x:.2f}, {waypoints[0].y:.2f}, {waypoints[0].z:.2f})"
+            f"Published waypoint: ({target_wp.x:.2f}, {target_wp.y:.2f}, {target_wp.z:.2f})"
         )
 
         path_msg = Path()
@@ -346,37 +351,54 @@ class Triangulator(Node):
 
     def match_cone_pairs(self, left_cones, right_cones):
         pairs = []
-        left_idx = 0
-        right_idx = 0
 
-        while (
-            left_idx < len(left_cones)
-            and right_idx < len(right_cones)
-            and len(pairs) < self.num_waypoints
-        ):
-            left = left_cones[left_idx]
-            right = right_cones[right_idx]
+        # NEW pairing logic:
+        # The old two-pointer approach (closest-left with closest-right) can fail on curves
+        # and cause the car to "straighten out" between cones near the end of visibility.
+        # This pairs each left cone to the best matching right cone that forms a valid gate.
+        used_right = set()
 
-            wdx = left.cone.x - right.cone.x
-            wdy = left.cone.y - right.cone.y
-            width = math.sqrt((wdx * wdx) + (wdy * wdy))
+        left_list = [c.cone for c in left_cones]
+        right_list = [c.cone for c in right_cones]
 
-            valid = self.is_valid_gate(left.cone, right.cone)
+        for left in left_list:
+            best_right_idx = None
+            best_right = None
+            best_score = float("inf")
 
-            self.get_logger().info(
-                f"[pair-attempt] L=({left.cone.x:.3f},{left.cone.y:.3f}) dL={left.distance:.3f} "
-                f"R=({right.cone.x:.3f},{right.cone.y:.3f}) dR={right.distance:.3f} "
-                f"width={width:.3f} valid={valid}"
-            )
+            for idx, right in enumerate(right_list):
+                if idx in used_right:
+                    continue
 
-            if valid:
-                pairs.append((left.cone, right.cone))
-                left_idx += 1
-                right_idx += 1
-            elif left.distance < right.distance:
-                left_idx += 1
-            else:
-                right_idx += 1
+                valid = self.is_valid_gate(left, right)
+
+                if not valid:
+                    continue
+
+                wdx = left.x - right.x
+                wdy = left.y - right.y
+                width = math.sqrt((wdx * wdx) + (wdy * wdy))
+
+                # Score based on gate width (stable on curves).
+                score = width
+
+                self.get_logger().info(
+                    f"[pair-attempt] L=({left.x:.3f},{left.y:.3f}) "
+                    f"R=({right.x:.3f},{right.y:.3f}) "
+                    f"width={width:.3f} valid={valid} score={score:.3f}"
+                )
+
+                if score < best_score:
+                    best_score = score
+                    best_right_idx = idx
+                    best_right = right
+
+            if best_right is not None:
+                used_right.add(best_right_idx)
+                pairs.append((left, best_right))
+
+            if len(pairs) >= self.num_waypoints:
+                break
 
         return pairs
 

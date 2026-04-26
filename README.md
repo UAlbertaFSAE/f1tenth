@@ -31,3 +31,29 @@ We swap the signs.
 
 Even this may be required:
  ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
+
+
+Notes:
+  ("min_lookahead", 0.8);    // Can be ignored.
+  ("max_lookahead", 4.0);    // If this is too far, the smoothing is too much, and hence a very small correction will also not work.
+  ("lookahead_ratio", 4.0);  // This was I think set to 8.0, which is the ratio between distance and speed.
+        Higher lookahead ratio
+            Larger lookahead distance at a given speed
+            Smoother steering
+            Better at high speed
+            May cut corners or track less precisely
+        Lower lookahead ratio
+            Shorter lookahead distance
+            Tighter path tracking
+            Faster reactions
+            Can become twitchy or oscillatory
+  ("K_p", 0.30);    
+        Lower value will correct less - smoother
+        higher value will correct less - aggressive
+  ("steering_limit", 25.0);     - Limit of vesc (which is 25.0)
+  ("velocity_percentage", 1.0);  // 0.6 default
+        Keep it as 1.0, going lower jitters the vechiles. (this is directly proportional to the currently set value in vesc.)
+
+
+    Also vesc.yaml has a parameter of steering_angle which has a 0.543 offset, we set it to 0.5 so that it goes straight.
+    no offset causes a problem to detection.

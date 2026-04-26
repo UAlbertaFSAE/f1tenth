@@ -33,11 +33,11 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("rviz_lookahead_waypoint_topic", "/lookahead_waypoint");
   this->declare_parameter("global_refFrame", "odom");
   this->declare_parameter("min_lookahead", 0.8);
-  this->declare_parameter("max_lookahead", 5.0);
-  this->declare_parameter("lookahead_ratio", 3.0);
-  this->declare_parameter("K_p", 0.21);
+  this->declare_parameter("max_lookahead", 4.0);
+  this->declare_parameter("lookahead_ratio", 4.0);
+  this->declare_parameter("K_p", 0.30);
   this->declare_parameter("steering_limit", 25.0);
-  this->declare_parameter("velocity_percentage", 0.9);  // 0.6 default
+  this->declare_parameter("velocity_percentage", 1.0);  // 0.6 default
 
   // Default Values
   odom_topic = this->get_parameter("odom_topic").as_string();
@@ -245,26 +245,17 @@ bool PurePursuit::transformandinterp_waypoint() {  // pass old waypoint here
   visualize_lookahead_point(waypoints.lookahead_point_world);
   visualize_current_point(waypoints.current_point_world);
 
-  // look up transformation at that instant from tf_buffer_
-  geometry_msgs::msg::TransformStamped transformStamped;
+  // Transform the waypoint from the global frame into the car frame.
+  //
+  // NOTE: We intentionally use the /odom pose (already used elsewhere in this node)
+  // instead of depending on TF. This avoids mismatches when TF is missing, stale,
+  // or configured with different frames than the odometry topic.
+  const Eigen::Vector3d car_pos_world(x_car_world, y_car_world, 0.0);
+  const Eigen::Quaterniond q_world_from_car(car_orient_w, car_orient_x, car_orient_y, car_orient_z);
+  const Eigen::Matrix3d R_world_from_car = q_world_from_car.toRotationMatrix();
 
-  try {
-    // Get the transform from the base_link reference to world reference frame
-    transformStamped =
-        tf_buffer_->lookupTransform(car_refFrame, global_refFrame, tf2::TimePointZero);
-  } catch (tf2::TransformException &ex) {
-    RCLCPP_INFO(this->get_logger(), "Could not transform. Error: %s", ex.what());
-    return false;
-  }
-
-  // transform points (rotate first and then translate)
-  Eigen::Vector3d translation_v(transformStamped.transform.translation.x,
-                                transformStamped.transform.translation.y,
-                                transformStamped.transform.translation.z);
-  quat_to_rot(transformStamped.transform.rotation.w, transformStamped.transform.rotation.x,
-              transformStamped.transform.rotation.y, transformStamped.transform.rotation.z);
-
-  waypoints.lookahead_point_car = (rotation_m * waypoints.lookahead_point_world) + translation_v;
+  const Eigen::Vector3d waypoint_world = waypoints.lookahead_point_world;
+  waypoints.lookahead_point_car = R_world_from_car.transpose() * (waypoint_world - car_pos_world);
   return true;
 }
 

@@ -7,7 +7,7 @@ triangulator:
     path_topic: "/planned_path"
 
     # --- Triangulation tuning ---
-    lookahead_distance: 5.0
+    lookahead_distance: 4.0
     num_waypoints: 5
     min_track_width: 0.0
     max_track_width: 6.0

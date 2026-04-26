@@ -84,6 +84,8 @@ bool Transformer::transform(
   try {
     tf_buffer.transform(input_point, output_point, target_frame_,
                         tf2::durationFromSec(0.5));
+
+    
   } catch (tf2::TransformException& ex) {
     RCLCPP_WARN(this->get_logger(), "TF transform failed: %s", ex.what());
     return false;
