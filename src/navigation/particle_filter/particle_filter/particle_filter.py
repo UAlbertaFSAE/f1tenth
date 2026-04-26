@@ -28,16 +28,11 @@ import range_libc
 import rclpy
 import tf_transformations
 from geometry_msgs.msg import (
-    Point,
-    Point32,
     PointStamped,
-    Polygon,
     PolygonStamped,
-    Pose,
     PoseArray,
     PoseStamped,
     PoseWithCovarianceStamped,
-    Quaternion,
     TransformStamped,
 )
 from nav_msgs.msg import Odometry
@@ -94,9 +89,11 @@ class ParticleFiler(Node):
         self.ANGLE_STEP = self.get_parameter("angle_step").value
         self.MAX_PARTICLES = self.get_parameter("max_particles").value
         self.MAX_VIZ_PARTICLES = self.get_parameter("max_viz_particles").value
-        self.INV_SQUASH_FACTOR = 1.0 / self.get_parameter("squash_factor").value
+        self.INV_SQUASH_FACTOR = 1.0 / \
+            self.get_parameter("squash_factor").value
         self.MAX_RANGE_METERS = self.get_parameter("max_range").value
-        self.THETA_DISCRETIZATION = self.get_parameter("theta_discretization").value
+        self.THETA_DISCRETIZATION = self.get_parameter(
+            "theta_discretization").value
         self.WHICH_RM = self.get_parameter("range_method").value
         self.RANGELIB_VAR = self.get_parameter("rangelib_variant").value
         self.SHOW_FINE_TIMING = self.get_parameter("fine_timing").value
@@ -111,8 +108,10 @@ class ParticleFiler(Node):
         self.SIGMA_HIT = self.get_parameter("sigma_hit").value
 
         # motion model constants
-        self.MOTION_DISPERSION_X = self.get_parameter("motion_dispersion_x").value
-        self.MOTION_DISPERSION_Y = self.get_parameter("motion_dispersion_y").value
+        self.MOTION_DISPERSION_X = self.get_parameter(
+            "motion_dispersion_x").value
+        self.MOTION_DISPERSION_Y = self.get_parameter(
+            "motion_dispersion_y").value
         self.MOTION_DISPERSION_THETA = self.get_parameter(
             "motion_dispersion_theta"
         ).value
@@ -164,10 +163,14 @@ class ParticleFiler(Node):
 
         # Pub Subs
         # these topics are for visualization
-        self.pose_pub = self.create_publisher(PoseStamped, "/pf/viz/inferred_pose", 1)
-        self.particle_pub = self.create_publisher(PoseArray, "/pf/viz/particles", 1)
-        self.pub_fake_scan = self.create_publisher(LaserScan, "/pf/viz/fake_scan", 1)
-        self.rect_pub = self.create_publisher(PolygonStamped, "/pf/viz/poly1", 1)
+        self.pose_pub = self.create_publisher(
+            PoseStamped, "/pf/viz/inferred_pose", 1)
+        self.particle_pub = self.create_publisher(
+            PoseArray, "/pf/viz/particles", 1)
+        self.pub_fake_scan = self.create_publisher(
+            LaserScan, "/pf/viz/fake_scan", 1)
+        self.rect_pub = self.create_publisher(
+            PolygonStamped, "/pf/viz/poly1", 1)
 
         if self.PUBLISH_ODOM:
             self.odom_pub = self.create_publisher(Odometry, "/pf/pose/odom", 1)
@@ -180,7 +183,8 @@ class ParticleFiler(Node):
             LaserScan, self.get_parameter("scan_topic").value, self.lidarCB, 1
         )
         self.odom_sub = self.create_subscription(
-            Odometry, self.get_parameter("odometry_topic").value, self.odomCB, 1
+            Odometry, self.get_parameter(
+                "odometry_topic").value, self.odomCB, 1
         )
         self.pose_sub = self.create_subscription(
             PoseWithCovarianceStamped, "/initialpose", self.clicked_pose, 1
@@ -206,12 +210,14 @@ class ParticleFiler(Node):
         self.map_info = map_msg.info
 
         oMap = range_libc.PyOMap(map_msg)
-        self.MAX_RANGE_PX = int(self.MAX_RANGE_METERS / self.map_info.resolution)
+        self.MAX_RANGE_PX = int(
+            self.MAX_RANGE_METERS / self.map_info.resolution)
 
         # initialize range method
         self.get_logger().info("Initializing range method: " + self.WHICH_RM)
         if self.WHICH_RM == "bl":
-            self.range_method = range_libc.PyBresenhamsLine(oMap, self.MAX_RANGE_PX)
+            self.range_method = range_libc.PyBresenhamsLine(
+                oMap, self.MAX_RANGE_PX)
         elif "cddt" in self.WHICH_RM:
             self.range_method = range_libc.PyCDDTCast(
                 oMap, self.MAX_RANGE_PX, self.THETA_DISCRETIZATION
@@ -220,9 +226,11 @@ class ParticleFiler(Node):
                 self.get_logger().info("Pruning...")
                 self.range_method.prune()
         elif self.WHICH_RM == "rm":
-            self.range_method = range_libc.PyRayMarching(oMap, self.MAX_RANGE_PX)
+            self.range_method = range_libc.PyRayMarching(
+                oMap, self.MAX_RANGE_PX)
         elif self.WHICH_RM == "rmgpu":
-            self.range_method = range_libc.PyRayMarchingGPU(oMap, self.MAX_RANGE_PX)
+            self.range_method = range_libc.PyRayMarchingGPU(
+                oMap, self.MAX_RANGE_PX)
         elif self.WHICH_RM == "glt":
             self.range_method = range_libc.PyGiantLUTCast(
                 oMap, self.MAX_RANGE_PX, self.THETA_DISCRETIZATION
@@ -293,7 +301,8 @@ class ParticleFiler(Node):
             ps.header.frame_id = "/map"
             ps.pose.position.x = self.inferred_pose[0]
             ps.pose.position.y = self.inferred_pose[1]
-            ps.pose.orientation = Utils.angle_to_quaternion(self.inferred_pose[2])
+            ps.pose.orientation = Utils.angle_to_quaternion(
+                self.inferred_pose[2])
             self.pose_pub.publish(ps)
 
         if self.particle_pub.get_subscription_count() > 0:
@@ -314,8 +323,10 @@ class ParticleFiler(Node):
             # generate the scan from the point of view of the inferred position for visualization
             self.viz_queries[:, 0] = self.inferred_pose[0]
             self.viz_queries[:, 1] = self.inferred_pose[1]
-            self.viz_queries[:, 2] = self.downsampled_angles + self.inferred_pose[2]
-            self.range_method.calc_range_many(self.viz_queries, self.viz_ranges)
+            self.viz_queries[:, 2] = self.downsampled_angles + \
+                self.inferred_pose[2]
+            self.range_method.calc_range_many(
+                self.viz_queries, self.viz_ranges)
             self.publish_scan(self.downsampled_angles, self.viz_ranges)
 
     def publish_particles(self, particles):
@@ -349,7 +360,7 @@ class ParticleFiler(Node):
                 msg.angle_min, msg.angle_max, len(msg.ranges)
             )
             self.downsampled_angles = np.copy(
-                self.laser_angles[0 :: self.ANGLE_STEP]
+                self.laser_angles[0:: self.ANGLE_STEP]
             ).astype(np.float32)
             self.viz_queries = np.zeros(
                 (self.downsampled_angles.shape[0], 3), dtype=np.float32
@@ -370,7 +381,8 @@ class ParticleFiler(Node):
 
         Odometry data is accumulated via dead reckoning, so it is very inaccurate on its own.
         """
-        position = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y])
+        position = np.array(
+            [msg.pose.pose.position.x, msg.pose.pose.position.y])
 
         orientation = Utils.quaternion_to_angle(msg.pose.pose.orientation)
         pose = np.array([position[0], position[1], orientation])
@@ -383,7 +395,8 @@ class ParticleFiler(Node):
             local_delta = (rot * delta).transpose()
 
             self.odometry_data = np.array(
-                [local_delta[0, 0], local_delta[0, 1], orientation - self.last_pose[2]]
+                [local_delta[0, 0], local_delta[0, 1],
+                    orientation - self.last_pose[2]]
             )
             self.last_pose = pose
             self.last_stamp = msg.header.stamp
@@ -431,12 +444,14 @@ class ParticleFiler(Node):
         # randomize over grid coordinate space
         self.state_lock.acquire()
         permissible_x, permissible_y = np.where(self.permissible_region == 1)
-        indices = np.random.randint(0, len(permissible_x), size=self.MAX_PARTICLES)
+        indices = np.random.randint(
+            0, len(permissible_x), size=self.MAX_PARTICLES)
 
         permissible_states = np.zeros((self.MAX_PARTICLES, 3))
         permissible_states[:, 0] = permissible_y[indices]
         permissible_states[:, 1] = permissible_x[indices]
-        permissible_states[:, 2] = np.random.random(self.MAX_PARTICLES) * np.pi * 2.0
+        permissible_states[:, 2] = np.random.random(
+            self.MAX_PARTICLES) * np.pi * 2.0
 
         Utils.map_to_world(permissible_states, self.map_info)
         self.particles = permissible_states
@@ -556,10 +571,13 @@ class ParticleFiler(Node):
                     (num_rays * self.MAX_PARTICLES, 3), dtype=np.float32
                 )
             else:
-                self.queries = np.zeros((self.MAX_PARTICLES, 3), dtype=np.float32)
+                self.queries = np.zeros(
+                    (self.MAX_PARTICLES, 3), dtype=np.float32)
 
-            self.ranges = np.zeros(num_rays * self.MAX_PARTICLES, dtype=np.float32)
-            self.tiled_angles = np.tile(self.downsampled_angles, self.MAX_PARTICLES)
+            self.ranges = np.zeros(
+                num_rays * self.MAX_PARTICLES, dtype=np.float32)
+            self.tiled_angles = np.tile(
+                self.downsampled_angles, self.MAX_PARTICLES)
             self.first_sensor_update = False
 
         if self.RANGELIB_VAR == VAR_RADIAL_CDDT_OPTIMIZATIONS:
@@ -665,7 +683,7 @@ class ParticleFiler(Node):
             for i in range(self.MAX_PARTICLES):
                 weight = np.product(
                     self.sensor_model_table[
-                        intobs, intrng[i * num_rays : (i + 1) * num_rays]
+                        intobs, intrng[i * num_rays: (i + 1) * num_rays]
                     ]
                 )
                 weight = np.power(weight, self.INV_SQUASH_FACTOR)
@@ -747,7 +765,8 @@ class ParticleFiler(Node):
                 self.iters += 1
 
                 t1 = time.time()
-                observation = np.copy(self.downsampled_ranges).astype(np.float32)
+                observation = np.copy(
+                    self.downsampled_ranges).astype(np.float32)
                 action = np.copy(self.odometry_data)
                 self.odometry_data = np.zeros(3)
 
@@ -780,28 +799,6 @@ class ParticleFiler(Node):
                 self.visualize()
 
 
-# import argparse
-# import sys
-# parser = argparse.ArgumentParser(description='Particle filter.')
-# parser.add_argument('--config', help='Path to yaml file containing config parameters. Helpful for calling node directly with Python for profiling.')
-
-# def load_params_from_yaml(fp):
-#     from yaml import load
-#     with open(fp, 'r') as infile:
-#         yaml_data = load(infile)
-#         for param in yaml_data:
-#             print 'param:', param, ':', yaml_data[param]
-#             rospy.set_param('~'+param, yaml_data[param])
-
-# # this function can be used to generate flame graphs easily
-# def make_flamegraph(filterx=None):
-#     import flamegraph, os
-#     perf_log_path = os.path.join(os.path.dirname(__file__), '../tmp/perf.log')
-#     flamegraph.start_profile_thread(fd=open(perf_log_path, 'w'),
-#                                     filter=filterx,
-#                                     interval=0.001)
-
-
 def main(args=None):
     rclpy.init(args=args)
     pf = ParticleFiler()
@@ -810,15 +807,3 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
-
-# if __name__=='__main__':
-#     rospy.init_node('particle_filter')
-
-#     args,_ = parser.parse_known_args()
-#     if args.config:
-#         load_params_from_yaml(args.config)
-
-#     # make_flamegraph(r'update')
-
-#     pf = ParticleFiler()
-#     rospy.spin()

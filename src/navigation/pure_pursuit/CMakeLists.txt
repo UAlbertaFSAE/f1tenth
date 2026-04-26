@@ -20,7 +20,6 @@ foreach(PACKAGE
   ackermann_msgs
   sensor_msgs
   std_msgs
-  visualization_msgs
   eigen3_cmake_module
   Eigen3
   tf2_ros
@@ -41,19 +40,12 @@ include_directories(
 add_executable(pure_pursuit src/pure_pursuit.cpp)
 
 ament_target_dependencies(pure_pursuit
-  rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs visualization_msgs tf2_ros tf2 eigen3_cmake_module Eigen3
-)
-
-add_executable(waypoint_visualizer src/waypoint_visualizer.cpp)
-
-ament_target_dependencies(waypoint_visualizer
-  rclcpp geometry_msgs std_msgs visualization_msgs eigen3_cmake_module Eigen3
+  rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs tf2_ros tf2 eigen3_cmake_module Eigen3
 )
 
 # Install Cpp executables
 install(TARGETS
   pure_pursuit
-  waypoint_visualizer
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files and config

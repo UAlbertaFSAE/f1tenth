@@ -22,8 +22,6 @@ waypoint interpolation yet.
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
 
 #define _USE_MATH_DEFINES
 using std::placeholders::_1;
@@ -65,8 +63,6 @@ class PurePursuit : public rclcpp::Node {
   std::string car_refFrame;
   std::string drive_topic;
   std::string global_refFrame;
-  std::string rviz_current_waypoint_topic;
-  std::string rviz_lookahead_waypoint_topic;
 
   double K_p;
   double min_lookahead;
@@ -96,9 +92,6 @@ class PurePursuit : public rclcpp::Node {
   // declare publisher sharedpointer obj
   rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr publisher_drive;
 
-  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr vis_current_point_pub;
-  rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr vis_lookahead_point_pub;
-
   // declare tf shared pointers
   std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -108,9 +101,6 @@ class PurePursuit : public rclcpp::Node {
   double to_degrees(double radians);
   double p2pdist(double &x1, double &x2, double &y1, double &y2);
   bool point_is_behind_car(double x, double y);
-
-  void visualize_lookahead_point(Eigen::Vector3d &point);
-  void visualize_current_point(Eigen::Vector3d &point);
 
   void get_waypoint();
 

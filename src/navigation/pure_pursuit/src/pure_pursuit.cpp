@@ -20,8 +20,6 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
 
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   // initialise parameters
@@ -29,23 +27,19 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("waypoint_topic", "/waypoints");
   this->declare_parameter("car_refFrame", "base_link");
   this->declare_parameter("drive_topic", "/drive");
-  this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
-  this->declare_parameter("rviz_lookahead_waypoint_topic", "/lookahead_waypoint");
   this->declare_parameter("global_refFrame", "odom");
   this->declare_parameter("min_lookahead", 0.8);
-  this->declare_parameter("max_lookahead", 5.0);
-  this->declare_parameter("lookahead_ratio", 3.0);
-  this->declare_parameter("K_p", 0.05);
+  this->declare_parameter("max_lookahead", 4.0);
+  this->declare_parameter("lookahead_ratio", 4.0);
+  this->declare_parameter("K_p", 0.30);
   this->declare_parameter("steering_limit", 25.0);
-  this->declare_parameter("velocity_percentage", 0.9);  // 0.6 default
+  this->declare_parameter("velocity_percentage", 1.0);  // 0.6 default
 
   // Default Values
   odom_topic = this->get_parameter("odom_topic").as_string();
   waypoint_topic = this->get_parameter("waypoint_topic").as_string();
   car_refFrame = this->get_parameter("car_refFrame").as_string();
   drive_topic = this->get_parameter("drive_topic").as_string();
-  rviz_current_waypoint_topic = this->get_parameter("rviz_current_waypoint_topic").as_string();
-  rviz_lookahead_waypoint_topic = this->get_parameter("rviz_lookahead_waypoint_topic").as_string();
   global_refFrame = this->get_parameter("global_refFrame").as_string();
   min_lookahead = this->get_parameter("min_lookahead").as_double();
   max_lookahead = this->get_parameter("max_lookahead").as_double();
@@ -64,10 +58,6 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
 
   publisher_drive =
       this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>(drive_topic, 25);
-  vis_current_point_pub =
-      this->create_publisher<visualization_msgs::msg::Marker>(rviz_current_waypoint_topic, 10);
-  vis_lookahead_point_pub =
-      this->create_publisher<visualization_msgs::msg::Marker>(rviz_lookahead_waypoint_topic, 10);
 
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -99,42 +89,6 @@ double PurePursuit::to_degrees(double radians) {
 double PurePursuit::p2pdist(double &x1, double &x2, double &y1, double &y2) {
   double dist = sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
   return dist;
-}
-
-void PurePursuit::visualize_lookahead_point(Eigen::Vector3d &point) {
-  auto marker = visualization_msgs::msg::Marker();
-  marker.header.frame_id = global_refFrame;
-  marker.header.stamp = rclcpp::Clock().now();
-  marker.type = visualization_msgs::msg::Marker::SPHERE;
-  marker.action = visualization_msgs::msg::Marker::ADD;
-  marker.scale.x = 0.25;
-  marker.scale.y = 0.25;
-  marker.scale.z = 0.25;
-  marker.color.a = 1.0;
-  marker.color.r = 1.0;
-
-  marker.pose.position.x = point(0);
-  marker.pose.position.y = point(1);
-  marker.id = 1;
-  vis_lookahead_point_pub->publish(marker);
-}
-
-void PurePursuit::visualize_current_point(Eigen::Vector3d &point) {
-  auto marker = visualization_msgs::msg::Marker();
-  marker.header.frame_id = global_refFrame;
-  marker.header.stamp = rclcpp::Clock().now();
-  marker.type = visualization_msgs::msg::Marker::SPHERE;
-  marker.action = visualization_msgs::msg::Marker::ADD;
-  marker.scale.x = 0.25;
-  marker.scale.y = 0.25;
-  marker.scale.z = 0.25;
-  marker.color.a = 1.0;
-  marker.color.b = 1.0;
-
-  marker.pose.position.x = point(0);
-  marker.pose.position.y = point(1);
-  marker.id = 1;
-  vis_current_point_pub->publish(marker);
 }
 
 void PurePursuit::get_waypoint() {
@@ -241,9 +195,6 @@ bool PurePursuit::transformandinterp_waypoint() {  // pass old waypoint here
       0.0;
   waypoints.current_point_world << waypoints.X[waypoints.velocity_index],
       waypoints.Y[waypoints.velocity_index], 0.0;
-
-  visualize_lookahead_point(waypoints.lookahead_point_world);
-  visualize_current_point(waypoints.current_point_world);
 
   // look up transformation at that instant from tf_buffer_
   geometry_msgs::msg::TransformStamped transformStamped;

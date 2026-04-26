@@ -59,7 +59,7 @@ __pycache__
 .cache/
 notes.txt
 
-*.vscode/
+*.vscode
 *__pycache__/
 *.mypy_cache/
 *.ruff_cache/

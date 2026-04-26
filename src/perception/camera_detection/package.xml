@@ -1,15 +1,19 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>detection_generator</name>
+  <name>camera_detection</name>
   <version>0.0.0</version>
-  <description>Generates Detections</description>
+  <description>Camera detection using model</description>
   <maintainer email="krupalhi@ualberta.ca">Krupal Shah</maintainer>
   <license>MIT</license>
 
-  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>rc_interfaces</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>zed_msgs</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>

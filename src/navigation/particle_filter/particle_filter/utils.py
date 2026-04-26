@@ -4,19 +4,9 @@ import time
 import numpy as np
 import tf_transformations
 from geometry_msgs.msg import (
-    Point,
-    Point32,
-    PointStamped,
-    Polygon,
-    PolygonStamped,
     Pose,
-    PoseArray,
-    PoseStamped,
-    PoseWithCovarianceStamped,
     Quaternion,
 )
-from std_msgs.msg import Header
-from visualization_msgs.msg import Marker
 
 
 class CircularArray(object):
@@ -105,17 +95,6 @@ def particles_to_poses(particles):
     Particles can be a array like [[x0, y0, theta0], [x1, y1, theta1]...]
     """
     return list(map(particle_to_pose, particles))
-
-
-# DEPRECATED: should make the header inside the node now
-# def make_header(frame_id, stamp=None):
-#     ''' Creates a Header object for stamped ROS objects '''
-#     if stamp == None:
-#         stamp = rospy.Time.now()
-#     header = Header()
-#     header.stamp = stamp
-#     header.frame_id = frame_id
-#     return header
 
 
 def map_to_world_slow(x, y, t, map_info):
