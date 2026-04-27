@@ -1,0 +1,54 @@
+recording:
+  save: false
+  folder: recordings
+
+packages:
+  - name: generator
+    package: detection_generator
+    launch_file: generator.launch.py
+
+  - name: waypoint
+    package: path_planning
+    launch_file: triangulator.launch.py
+
+  - name: pure_pursuit
+    package: pure_pursuit
+    launch_file: sim_pure_pursuit.launch.py
+    args:
+      - config_file:=sim_config.yaml
+
+  - name: f1tenth_sim
+    package: f1tenth_gym_ros
+    launch_file: gym_bridge_launch.py
+    args:
+      - open_foxglove:=false
+
+rviz:
+  config_file: vizualizer.rviz
+
+static_transforms:
+  - translation: [-0.05, -0.15, 0.40]
+    rotation_rpy: [0.0, 0.0, 0.0]
+    parent_frame: base_link
+    child_frame: zed_camera_link
+  - translation: [0.00, 0.00, 0.00]
+    rotation_rpy: [0.0, 0.0, 0.0]
+    parent_frame: map
+    child_frame: base_link
+
+rosbag:
+  enabled: false
+  topics:
+    - /clicked_point
+    - /cone_positions
+    - /current_waypoint
+    - /diagnostics
+    - /drive
+    - /lookahead_waypoint
+    - /odom
+    - /parameter_events
+    - /planned_path
+    - /rosout
+    - /tf
+    - /tf_static
+    - /waypoints

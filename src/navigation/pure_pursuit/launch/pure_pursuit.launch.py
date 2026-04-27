@@ -1,12 +1,14 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch.substitutions import PathJoinSubstitution
 
 
 def generate_launch_description() -> LaunchDescription:
+    config_file = LaunchConfiguration("config_file")
     config_file_path = PathJoinSubstitution(
-        [FindPackageShare("pure_pursuit"), "config", "config.yaml"]
+        [FindPackageShare("pure_pursuit"), "config", config_file]
     )
 
     pure_pursuit_node = Node(
@@ -17,5 +19,10 @@ def generate_launch_description() -> LaunchDescription:
     )
 
     return LaunchDescription([
+        DeclareLaunchArgument(
+            "config_file",
+            default_value="config.yaml",
+            description="Pure Pursuit parameter file name or path.",
+        ),
         pure_pursuit_node,
     ])

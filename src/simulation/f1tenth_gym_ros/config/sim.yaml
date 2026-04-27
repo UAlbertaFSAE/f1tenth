@@ -23,22 +23,22 @@
 bridge:
   ros__parameters:
     # topics and namespaces
-    ego_namespace: 'ego_racecar'
-    ego_scan_topic: 'scan'
-    ego_odom_topic: 'odom'
-    ego_opp_odom_topic: 'opp_odom'
-    ego_drive_topic: 'drive'
-    opp_namespace: 'opp_racecar'
-    opp_scan_topic: 'opp_scan'
-    opp_odom_topic: 'odom'
-    opp_ego_odom_topic: 'opp_odom'
-    opp_drive_topic: 'opp_drive'
+    ego_namespace: "ego_racecar"
+    ego_scan_topic: "scan"
+    ego_odom_topic: "odom"
+    ego_opp_odom_topic: "opp_odom"
+    ego_drive_topic: "drive"
+    opp_namespace: "opp_racecar"
+    opp_scan_topic: "opp_scan"
+    opp_odom_topic: "odom"
+    opp_ego_odom_topic: "opp_odom"
+    opp_drive_topic: "opp_drive"
 
     # LiDAR related parameters
     lidar_enabled: True
     lidar_base_link_to_lidar_tf: [0.275, 0.0, 0.0] # x, y, yaw from base_link to lidar
     lidar_noise_std: 0.01 # LiDAR accuracy - modelled as zero-mean Gaussian noise with this standard deviation (in meters)
-    
+
     # laserscan parameters (default values are SICK TIM571 configuration (270° FOV))
     scan_num_beams: 819 # Number of laser beams in LiDAR scan (resolution = (scan_angle_max - scan_angle_min) / scan_num_beams)
     scan_range_min: 0.05 # 5cm
@@ -48,12 +48,12 @@ bridge:
     scan_angle_max: 135.0 # 135°
 
     # map parameters
-    map_path: 'maps/levine'
-    map_img_ext: '.png'
+    map_path: "maps/levine"
+    map_img_ext: ".png"
 
     # car parameters and scale
     # Supported vehicle parameters are 'f1tenth', 'fullscale', and 'f1fifth'
-    vehicle_params: 'f1tenth'
+    vehicle_params: "f1tenth"
     scale: 1.0
 
     # number of agents, currently only supports 1 or 2
@@ -84,6 +84,6 @@ bridge:
 foxglove:
   ros__parameters:
     # Automatically open Foxglove when the launch file starts.
-    open_foxglove: True
+    open_foxglove: False
     # Where to open Foxglove. Valid values: 'browser' or 'studio'.
-    target: 'browser'
+    target: "browser"

@@ -1,6 +1,5 @@
 pure_pursuit:
   ros__parameters:
-    waypoints_path: "/f1tenth/src/navigation/waypoint_generator/src/waypoints_odom.csv"
     odom_topic: "/ego_racecar/odom"
     car_refFrame: "ego_racecar/base_link"
     global_refFrame: "odom" # Keep everything in odom for this stack

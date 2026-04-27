@@ -112,7 +112,7 @@ class DetectionGenerator(Node):
 
     def resolve_csv_path(self, configured_path: str, track_type: str) -> str:
         """Resolve configured or default track CSV path from package share."""
-        share_dir = Path(get_package_share_directory("detections_generator"))
+        share_dir = Path(get_package_share_directory("detection_generator"))
 
         if configured_path:
             configured = Path(configured_path)

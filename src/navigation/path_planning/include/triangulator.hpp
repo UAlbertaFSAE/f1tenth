@@ -45,7 +45,7 @@ struct LR {
  * for pure pursuit
  */
 class Triangulator : public rclcpp::Node {
- public:
+ public: 
   Triangulator();
 
  private:

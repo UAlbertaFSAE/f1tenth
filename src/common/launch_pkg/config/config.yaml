@@ -1,61 +1,67 @@
 recording:
-	save: true
-	folder: recordings
+  save: true
+  folder: recordings
 
-zed_wrapper:
-	package: zed_wrapper
-	launch_file: zed_camera.launch.py
-	camera_model: zed2i
-	publish_tf: false
-	publish_map_tf: false
-	publish_urdf: true
+packages:
+  - name: zed
+    package: zed_wrapper
+    launch_file: zed_camera.launch.py
+    args:
+      - camera_model:=zed2i
+      - publish_tf:=false
+      - publish_map_tf:=false
+      - publish_urdf:=true
 
-detection:
-	package: camera_detection
-	launch_file: detection.launch.py
+  - name: detection
+    package: camera_detection
+    launch_file: detection.launch.py
 
-waypoint:
-	package: path_planning
-	launch_file: triangulator.launch.py
+  - name: waypoint
+    package: path_planning
+    launch_file: triangulator.launch.py
 
-pure_pursuit:
-	package: pure_pursuit
-	executable: pure_pursuit.launch.py
+  - name: pure_pursuit
+    package: pure_pursuit
+    executable: pure_pursuit
+
+  - name: f1tenth_sim
+    package: f1tenth_system
+    launch_file: bringup_launch.py
 
 rviz:
-	config_file: visualizer.rviz
+  config_file: vizualizer.rviz
 
 static_transforms:
-	- translation: [-0.05, -0.15, 0.40]
-		rotation_rpy: [0.0, 0.0, 0.0]
-		parent_frame: base_link
-		child_frame: zed_camera_link
-	- translation: [0.00, 0.00, 0.00]
-		rotation_rpy: [0.0, 0.0, 0.0]
-		parent_frame: map
-		child_frame: base_link
+  - translation: [-0.05, -0.15, 0.40]
+    rotation_rpy: [0.0, 0.0, 0.0]
+    parent_frame: base_link
+    child_frame: zed_camera_link
+  - translation: [0.00, 0.00, 0.00]
+    rotation_rpy: [0.0, 0.0, 0.0]
+    parent_frame: map
+    child_frame: base_link
 
 rosbag:
-	enabled: true
-	topics:
-		- /clicked_point
-		- /cone_positions
-		- /cone_transformed
-		- /current_waypoint
-		- /detection_visualization/depth
-		- /detection_visualization/detections
-		- /diagnostics
-		- /drive
-		- /lookahead_waypoint
-		- /odom
-		- /parameter_events
-		- /planned_path
-		- /rosout
-		- /tf
-		- /tf_static
-		- /waypoints
-		- /zed/zed_node/depth/depth_registered
-		- /zed/zed_node/depth/depth_registered/camera_info
-		- /zed/zed_node/imu/data
-		- /zed/zed_node/odom
-		- /zed/zed_node/rgb/color/rect/image
+  enabled: true
+  topics:
+    - /clicked_point
+    - /cone_positions
+    - /current_waypoint
+    - /detection_visualization/depth
+    - /detection_visualization/detections
+    - /diagnostics
+    - /drive
+    - /lookahead_waypoint
+    - /odom
+    - /parameter_events
+    - /planned_path
+    - /rosout
+    - /tf
+    - /tf_static
+    - /waypoints
+    - /zed/zed_node/depth/depth_registered
+    - /zed/zed_node/depth/depth_registered/camera_info
+    - /zed/zed_node/imu/data
+    - /zed/zed_node/odom
+    - /zed/zed_node/rgb/color/rect/image
+

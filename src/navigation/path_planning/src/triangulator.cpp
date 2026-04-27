@@ -194,7 +194,7 @@ void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr co
     return;
   }
 
-  const rc_interfaces::msg::Cones filtered_frame = filter_frame_cones(cones_msg);
+  const rc_interfaces::msg::Cones filtered_frame = filter_frame_cones(*cones_msg);
   if (filtered_frame.cones.empty()) {
     RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
                           "Filtered frame has no valid cones");

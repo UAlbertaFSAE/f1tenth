@@ -1,8 +1,8 @@
 detection_generator_node:
-	ros__parameters:
-		track_type: straight
-		csv_path: ""
-		cone_topic: /cone_data
-		loop_track: true
-		frame_rate_hz: 5.0
-		qos_depth: 10
+  ros__parameters:
+    track_type: straight
+    csv_path: ""
+    cone_topic: /cone_positions
+    loop_track: true
+    frame_rate_hz: 5.0
+    qos_depth: 10
