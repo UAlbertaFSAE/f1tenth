@@ -6,7 +6,7 @@ Welcome to our autonomous remote control car repository. We are developing an au
 
 **Note**: As of right now, we are only accepting contributions from UofA students.
 
-For building the package please use: colcon build --packages-ignore livox_ros_driver2 --parallel-workers 1
+For building the package please use: colcon build --parallel-workers 1 --cmake-args -DDISTRO_ROS=${VERSION_HUMBLE}
 
 cd fsae_f1tenth_ws/ && source install/setup.bash
 First run the camera zed: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i
@@ -31,3 +31,4 @@ We swap the signs.
 
 Even this may be required:
  ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
+
