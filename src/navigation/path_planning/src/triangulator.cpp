@@ -81,7 +81,7 @@ bool segments_intersect(double ax, double ay, double bx, double by, double cx, d
 }  // namespace
 
 Triangulator::Triangulator() : Node("triangulator_node") {
-  this->declare_parameter("cones_topic", "/cone_data");
+  this->declare_parameter("cones_topic", "/cone_positions");
   this->declare_parameter("waypoint_topic", "/waypoints");
   this->declare_parameter("marker_topic", "/triangulation_markers");
   this->declare_parameter("frame_id", "map");
@@ -156,9 +156,10 @@ Triangulator::Triangulator() : Node("triangulator_node") {
       create_publisher<visualization_msgs::msg::MarkerArray>(marker_topic, rclcpp::QoS(qos_depth));
 
   RCLCPP_INFO(this->get_logger(),
-              "Starting triangulator (gate_enabled=%s, publishing=%s, stop_distance=%.2fm)",
+              "Starting triangulator (gate_enabled=%s, publishing=%s, stop_distance=%.2fm, "
+              "cone_topic=%s, waypoint_topic=%s, marker_topic=%s)",
               gate_enabled_ ? "true" : "false", publish_enabled_ ? "true" : "false",
-              stop_distance_m_);
+              stop_distance_m_, cone_topic.c_str(), waypoint_topic.c_str(), marker_topic.c_str());
 }
 
 void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones_msg) {

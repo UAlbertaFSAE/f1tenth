@@ -1,6 +1,6 @@
 triangulator_node:
   ros__parameters:
-    cones_topic: /cone_data
+    cones_topic: /cone_positions
     waypoint_topic: /waypoints
     marker_topic: /triangulation_markers
     frame_id: map
@@ -14,7 +14,7 @@ triangulator_node:
     max_track_width: 10.0
     qos_depth: 10
 
-    gate_enabled: true
+    gate_enabled: false
     start_colors: [orange, small_orange]
     stop_colors: [orange, small_orange]
     gate_min_cone_count: 2

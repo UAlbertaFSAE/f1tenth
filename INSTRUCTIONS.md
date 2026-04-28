@@ -44,8 +44,15 @@ rosdep install -i --from-path src --rosdistro humble -y
 
 Build the repository
 ```bash
-colcon build --cmake-args -DDISTRO_ROS=${VERSION_HUMBLE} --parallel-workers 1 --symlink-install
+colcon build --cmake-args -DDISTRO_ROS=${VERSION_HUMBLE} --parallel-workers 1
+colcon build --packages-ignore zed_components camera_detection livox_ros_driver2 livox_sdk2
 ```
+
+Install f1tenth_gym
+```bash
+cd src/src/simulation/f1tenth_gym && pip3 install -e .
+```
+
 ## Run
 ```bash
 source install/setup.bash

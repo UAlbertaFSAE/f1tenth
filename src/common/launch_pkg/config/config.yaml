@@ -22,14 +22,14 @@ packages:
 
   - name: pure_pursuit
     package: pure_pursuit
-    executable: pure_pursuit
+    launch_file: pure_pursuit.launch.py
 
   - name: f1tenth_sim
     package: f1tenth_system
     launch_file: bringup_launch.py
 
 rviz:
-  config_file: vizualizer.rviz
+  config_file: visualizer.rviz
 
 static_transforms:
   - translation: [-0.05, -0.15, 0.40]

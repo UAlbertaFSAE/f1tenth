@@ -11,12 +11,6 @@ packages:
     package: path_planning
     launch_file: triangulator.launch.py
 
-  - name: pure_pursuit
-    package: pure_pursuit
-    launch_file: sim_pure_pursuit.launch.py
-    args:
-      - config_file:=sim_config.yaml
-
   - name: f1tenth_sim
     package: f1tenth_gym_ros
     launch_file: gym_bridge_launch.py
@@ -24,7 +18,7 @@ packages:
       - open_foxglove:=false
 
 rviz:
-  config_file: vizualizer.rviz
+  config_file: visualizer.rviz
 
 static_transforms:
   - translation: [-0.05, -0.15, 0.40]

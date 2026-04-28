@@ -20,16 +20,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
 from datetime import datetime
 from pathlib import Path
 
 import yaml
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction, SetLaunchConfiguration
-from launch.substitutions import LaunchConfiguration
+from launch.actions import (
+    DeclareLaunchArgument,
+    ExecuteProcess,
+    OpaqueFunction,
+    SetLaunchConfiguration,
+)
+from launch.substitutions import (
+    LaunchConfiguration,
+    PathJoinSubstitution,
+)
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 
 def _build_cmd(entry, log_suffix):
@@ -51,41 +58,15 @@ def _build_cmd(entry, log_suffix):
     return None
 
 
-def _resolve_config_path(pkg_share_dir: str, config_value: str) -> Path:
-    """Resolve a config path.
-
-    - If `config_value` is absolute, use it.
-    - Else, first try `${share}/config/<config_value>`.
-    - Else, treat as a path relative to the current working directory.
-    """
-    if not config_value:
-        config_value = "config.yaml"
-
-    candidate = Path(config_value)
-    if candidate.is_absolute():
-        return candidate
-
-    in_pkg_config_dir = Path(pkg_share_dir) / "config" / config_value
-    if in_pkg_config_dir.exists():
-        return in_pkg_config_dir
-
-    # Fall back to CWD-relative path (useful for custom configs).
-    return (Path.cwd() / config_value).resolve()
-
-
 def _launch_setup(context, *args, **kwargs):
-    pkg_share_dir = get_package_share_directory("launch_pkg")
     config_value = LaunchConfiguration("config").perform(context)
-    cfg_path = _resolve_config_path(pkg_share_dir, config_value)
+    config_file = Path(config_value)
+    if not config_file.is_absolute():
+        config_file = PathJoinSubstitution(
+            [FindPackageShare("launch_pkg"), "config", config_value]
+        ).perform(context)
 
-    if not cfg_path.exists():
-        raise RuntimeError(
-            "Config file not found: "
-            f"{cfg_path}. Pass `config:=config.yaml` (from launch_pkg/config/) "
-            "or an absolute path."
-        )
-
-    with open(cfg_path, encoding="utf-8") as f:
+    with open(config_file, encoding="utf-8") as f:
         cfg = yaml.safe_load(f) or {}
 
     recording_cfg = cfg.get("recording", {})
@@ -168,8 +149,10 @@ def _launch_setup(context, *args, **kwargs):
         )
 
     # RViz
-    rviz_config_value = rviz_cfg.get("config_file", "vizualizer.rviz")
-    rviz_config_path = _resolve_config_path(pkg_share_dir, rviz_config_value)
+    rviz_config_file = rviz_cfg.get("config_file", "visualizer.rviz")
+    rviz_config_path = PathJoinSubstitution(
+        [FindPackageShare("launch_pkg"), "config", rviz_config_file]
+    ).perform(context)
     launch_actions.append(
         Node(
             package="rviz2",
@@ -210,7 +193,7 @@ def generate_launch_description():
           launch_file: something.launch.py   # or `executable: bin_name`
           args: ["arg1:=value", "--flag"]
       static_transforms: [...]  # same format as other launch files
-      rviz: { config_file: vizualizer.rviz }
+      rviz: { config_file: visualizer.rviz }
       rosbag: { enabled: true, topics: [...] }
     """
     return LaunchDescription(

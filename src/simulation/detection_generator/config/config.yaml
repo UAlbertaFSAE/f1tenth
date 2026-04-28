@@ -1,6 +1,6 @@
 detection_generator_node:
   ros__parameters:
-    track_type: straight
+    track_type: curved
     csv_path: ""
     cone_topic: /cone_positions
     loop_track: true
