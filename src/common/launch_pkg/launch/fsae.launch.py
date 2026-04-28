@@ -115,7 +115,7 @@ def _launch_setup(context, *args, **kwargs):
 
         launch_actions.append(
             ExecuteProcess(
-                cmd=["bash", "-lc", cmd],
+                cmd=["bash", "-c", cmd],
                 name=f"{name}_launch",
                 output="screen",
             )

@@ -62,7 +62,8 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
-  RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched, odom_topic: %s", odom_topic.c_str());
+  RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched, odom_topic: %s",
+              odom_topic.c_str());
 
   waypoints.index = 0;
   waypoints.velocity_index = 0;
@@ -255,6 +256,7 @@ double PurePursuit::get_velocity(double steering_angle) {
 
 void PurePursuit::publish_message(double steering_angle) {
   auto drive_msgObj = ackermann_msgs::msg::AckermannDriveStamped();
+  drive_msgObj.header.stamp = this->now();
   if (steering_angle < 0.0) {
     drive_msgObj.drive.steering_angle =
         std::max(steering_angle,

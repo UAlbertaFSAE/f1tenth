@@ -3,19 +3,25 @@ recording:
   folder: recordings
 
 packages:
-  - name: generator
-    package: detection_generator
-    launch_file: generator.launch.py
-
-  - name: waypoint
-    package: path_planning
-    launch_file: triangulator.launch.py
-
   - name: f1tenth_sim
     package: f1tenth_gym_ros
     launch_file: gym_bridge_launch.py
     args:
       - open_foxglove:=false
+
+  - name: pure_pursuit
+    package: pure_pursuit
+    launch_file: pure_pursuit.launch.py
+    args:
+      - config_file:=sim_config.yaml
+
+  - name: waypoint
+    package: path_planning
+    launch_file: triangulator.launch.py
+
+  - name: generator
+    package: detection_generator
+    launch_file: generator.launch.py
 
 rviz:
   config_file: visualizer.rviz
