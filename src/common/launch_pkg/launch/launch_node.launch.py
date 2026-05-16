@@ -21,7 +21,7 @@ def generate_launch_description():
 
     zed_launch_log = node_log_dir / "zed_camera_launch.txt"
     detection_launch_log = node_log_dir / "camera_detection_launch.txt"
-    waypoint_launch_log = node_log_dir / "new_triangulator_launch.txt"
+    waypoint_launch_log = node_log_dir / "waypoint_generator_launch.txt"
     cone_transformer_log = node_log_dir / "cone_transformer.txt"
     pure_pursuit_log = node_log_dir / "pure_pursuit.txt"
 
@@ -113,9 +113,9 @@ def generate_launch_description():
         cmd=[
             "bash",
             "-lc",
-            f'ros2 launch waypoint_new new_triangulator.launch.py 2>&1 | tee -a "{waypoint_launch_log}"',
+            f'ros2 launch waypoint_generator waypoint_generator.launch.py 2>&1 | tee -a "{waypoint_launch_log}"',
         ],
-        name="new_triangulator_launch",
+        name="waypoint_generator_launch",
         output="screen",
     )
 
@@ -153,14 +153,38 @@ def generate_launch_description():
             zed_launch,
             detection_launch,
             ExecuteProcess(
-                cmd=['ros2', 'run', 'tf2_ros', 'static_transform_publisher', '-0.05',
-                    '-0.15', '0.40', '0.0', '0.0', '0.0', 'base_link', 'zed_camera_link'],
-                output='screen'
+                cmd=[
+                    "ros2",
+                    "run",
+                    "tf2_ros",
+                    "static_transform_publisher",
+                    "-0.05",
+                    "-0.15",
+                    "0.40",
+                    "0.0",
+                    "0.0",
+                    "0.0",
+                    "base_link",
+                    "zed_camera_link",
+                ],
+                output="screen",
             ),
             ExecuteProcess(
-                cmd=['ros2', 'run', 'tf2_ros', 'static_transform_publisher', '0.00',
-                    '0.00', '0.00', '0.0', '0.0', '0.0', 'map', 'base_link'],
-                output='screen'
+                cmd=[
+                    "ros2",
+                    "run",
+                    "tf2_ros",
+                    "static_transform_publisher",
+                    "0.00",
+                    "0.00",
+                    "0.00",
+                    "0.0",
+                    "0.0",
+                    "0.0",
+                    "map",
+                    "base_link",
+                ],
+                output="screen",
             ),
             cone_transformer,
             triangulator_launch,

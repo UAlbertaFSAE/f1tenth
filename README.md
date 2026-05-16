@@ -15,10 +15,11 @@ then run the following command:ros2
     ros2 run tf2_ros static_transform_publisher -0.05 -0.15 0.40 0.0 0.0 0.0 base_link zed_camera_link
     ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
 then run cone_transfomer: ros2 run cone_transformer cone_transformer
-then run waypoint_new: ros2 launch waypoint_new new_triangulator.launch.py or ros2 run waypoint_triangulation triangulator 
+then run waypoint_new: ros2 launch waypoint_generator waypoint_generator.launch.py
 finally pure-pursuit: ros2 run pure_pursuit pure_pursuit
 
-run the f1tenth bringup stack: ros2 launch f1tenth_stack bringup_launch.py
+run the f1tenth bringup stack: `ros2 launch f1tenth_stack bringup_launch.py`
+run our stack using the launch file: `ros2 launch launch_pkg launch_node.launch.py`
 
 5.5 from base link to top of zed
 1.5 cm from camera moving to the left to the base_link
@@ -47,7 +48,7 @@ Notes:
             Tighter path tracking
             Faster reactions
             Can become twitchy or oscillatory
-  ("K_p", 0.30);    
+  ("K_p", 0.30);
         Lower value will correct less - smoother
         higher value will correct less - aggressive
   ("steering_limit", 25.0);     - Limit of vesc (which is 25.0)

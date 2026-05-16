@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>waypoint_new</name>
+  <name>waypoint_generator</name>
   <version>0.0.0</version>
   <description>Waypoint triangulation node for F1TENTH</description>
   <maintainer email="mokshdip0804@gmail.com">autonomous</maintainer>
   <license>Apache-2.0</license>
 
-  
+
   <exec_depend>rclpy</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
