@@ -11,6 +11,7 @@
   <depend>sensor_msgs</depend>
   <depend>visualization_msgs</depend>
   <depend>sensor_msgs_py</depend>
+  <depend>std_msgs</depend>
 
 
   <test_depend>ament_copyright</test_depend>

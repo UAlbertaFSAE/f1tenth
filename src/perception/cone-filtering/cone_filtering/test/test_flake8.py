@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ament_flake8.main import main_with_errors
 import pytest
+from ament_flake8.main import main_with_errors
 
 
-@pytest.mark.flake8
-@pytest.mark.linter
-def test_flake8():
+@pytest.mark.flake8  # type: ignore[untyped-decorator]
+@pytest.mark.linter  # type: ignore[untyped-decorator]
+def test_flake8() -> None:
+    """Run ament_flake8 on package sources."""
     rc, errors = main_with_errors(argv=[])
-    assert rc == 0, \
-        'Found %d code style errors / warnings:\n' % len(errors) + \
-        '\n'.join(errors)
+    assert rc == 0, (
+        f'Found {len(errors)} code style errors / warnings:\n' + '\n'.join(errors)
+    )

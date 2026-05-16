@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ament_copyright.main import main
 import pytest
+from ament_copyright.main import main
 
 
 # Remove the `skip` decorator once the source file(s) have a copyright header
-@pytest.mark.skip(reason='No copyright header has been placed in the generated source file.')
-@pytest.mark.copyright
-@pytest.mark.linter
-def test_copyright():
+@pytest.mark.skip(reason='No copyright header has been placed in the generated source file.')  # type: ignore[untyped-decorator]
+@pytest.mark.copyright  # type: ignore[untyped-decorator]
+@pytest.mark.linter  # type: ignore[untyped-decorator]
+def test_copyright() -> None:
+    """Run ament_copyright on package sources."""
     rc = main(argv=['.', 'test'])
     assert rc == 0, 'Found errors'

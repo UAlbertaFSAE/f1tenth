@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ament_pep257.main import main
 import pytest
+from ament_pep257.main import main
 
 
-@pytest.mark.linter
-@pytest.mark.pep257
-def test_pep257():
+@pytest.mark.linter  # type: ignore[untyped-decorator]
+@pytest.mark.pep257  # type: ignore[untyped-decorator]
+def test_pep257() -> None:
+    """Run ament_pep257 on package sources."""
     rc = main(argv=['.', 'test'])
     assert rc == 0, 'Found code style errors / warnings'
