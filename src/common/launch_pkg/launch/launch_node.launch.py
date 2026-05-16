@@ -129,18 +129,6 @@ def generate_launch_description():
         output="screen",
     )
 
-    # RViz (loads your config from launch_pkg/config/waypoint_viz.rviz)
-    pkg_share = FindPackageShare("launch_pkg")
-    rviz_config_path = PathJoinSubstitution([pkg_share, "config", "waypoint_viz.rviz"])
-
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        arguments=["-d", rviz_config_path],
-        output="screen",
-    )
-
     rosbag_record = ExecuteProcess(
         cmd=["ros2", "bag", "record", "-o", str(bag_output_dir), *rosbag_topics],
         name="rosbag_record",
@@ -190,6 +178,5 @@ def generate_launch_description():
             triangulator_launch,
             pure_pursuit,
             rosbag_record,
-            rviz_node,
         ]
     )
