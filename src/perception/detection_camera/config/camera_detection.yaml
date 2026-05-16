@@ -5,7 +5,7 @@ detection_camera:
     publishing_topic: "/cone_positions" # example: topic to publish detections
 
     model_file: "/home/nvidia/Desktop/fsae_f1tenth_ws/src/f1tenth/src/perception/detection_camera/models/model.pt"
-    classes_file: "/home/nvidia/Desktop/krupal_zed/src/zed-ros2-wrapper/detection_camera/models/classes.txt"
+    classes_file: "/home/nvidia/Desktop/fsae_f1tenth_ws/src/f1tenth/src/perception/detection_camera/models/classes.txt"
 
     include_depth: true
     visualize: true
