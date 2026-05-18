@@ -20,11 +20,14 @@ services:
       - x11
 
   novnc:
-    image: ifrstr/novnc:latest
+    image: theasp/novnc:latest
     environment:
-      - RESOLUTION=1600x900
+      - DISPLAY_WIDTH=1600
+      - DISPLAY_HEIGHT=900
+      - RUN_XTERM=no
+      - RUN_FLUXBOX=yes
     ports:
-      - "6080:6080"
+      - "8080:8080"
     networks:
       - x11
 

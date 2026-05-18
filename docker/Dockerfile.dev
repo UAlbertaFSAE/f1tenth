@@ -70,9 +70,20 @@ RUN apt-get update && \
         build-essential \
         python3-dev
 
-COPY . /workspace
-RUN cd /workspace/src/simulation/f1tenth_gym && \
-    pip3 install -e .
+COPY . /tmp/workspace
+RUN cd /tmp/workspace/src/simulation/f1tenth_gym && \
+    pip3 install .
+
+# install f1tenth_gym_ros dependencies
+RUN source /opt/ros/humble/setup.bash && \
+    cd /tmp/workspace && \
+    rosdep update && \
+    rosdep install -i --from-path src --rosdistro humble -y
+
+RUN apt-get update && \
+    apt-get install -y ros-humble-asio-cmake-module
+
+RUN rm -rf /tmp/workspace
 
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export FORMULA_HOME=$(
-	cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+	cd "$(dirname "${BASH_SOURCE[0]}")/.."
 	pwd -P
 )
 alias rc_home="cd $FORMULA_HOME"
@@ -68,8 +68,8 @@ rc_build() {
 	fi
 
 	local args=(
-		--executor parallel
-		--parallel-workers $($sys_py -c "import math; print(math.ceil($(nproc) ** 0.5) + 1)")
+		--executor sequential
+		# --parallel-workers $($sys_py -c "import math; print(math.ceil($(nproc) ** 0.5) + 1)")
 		--continue-on-error
 		--cmake-args "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" "-DPython3_EXECUTABLE=$sys_py"
 		-Wall -Wextra -Wpedantic
@@ -96,9 +96,9 @@ rc_build() {
 
 # ----------------- all aliases go here ---------------------------------------
 alias rc_all='rc_clean && rc_build && rc_source'
-alias rc_run_auto='rc_source && ros2 launch launch_pkg fsae.launch.py config:=src/src/common/launch_pkg/config/config.yaml'
-alias rc_run_sim='rc_source && ros2 launch launch_pkg fsae.launch.py config:=src/src/common/launch_pkg/config/sim_config.yaml'
-alias launch_zed_wrapper='ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i ros_params_override_path:=src/perception/config/wrapper_params_override.yaml'
+alias rc_run_auto='rc_source && ros2 launch launch_pkg fsae.launch.py config:=config.yaml'
+alias rc_run_sim='source $FORMULA_HOME/scripts/simulator_setup.sh && run_sim'
+alias launch_zed_wrapper='ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i'
 
 source_ros_humble() {
 	if [[ ! -f /opt/ros/humble/setup.bash ]]; then
