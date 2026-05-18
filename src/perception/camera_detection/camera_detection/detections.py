@@ -28,7 +28,7 @@ import traceback
 import cv2
 import numpy as np
 import rclpy
-import tf2_geometry_msgs  # noqa: F401  # Registers geometry msg transforms.
+import tf2_geometry_msgs
 import torch
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped

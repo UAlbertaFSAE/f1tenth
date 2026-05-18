@@ -22,6 +22,7 @@
 
 import os
 import pathlib
+import shutil
 import yaml
 
 from launch import LaunchDescription
@@ -61,9 +62,11 @@ def _resolve_map_yaml_path(map_path: str, package_share: str) -> pathlib.Path:
     except Exception:
         return _resolve_yaml_path(pathlib.Path(package_share) / 'maps' / map_path)
 
+
 def generate_launch_description():
     ld = LaunchDescription()
     package_share = get_package_share_directory('f1tenth_gym_ros')
+    ros_python = shutil.which('python3.10') or '/opt/ros/humble/bin/python3'
     config = os.path.join(package_share, 'config', 'sim.yaml')
     with open(config, 'r') as config_file:
         config_dict = yaml.safe_load(config_file)
@@ -73,19 +76,24 @@ def generate_launch_description():
     foxglove_config = config_dict.get('foxglove', {})
     if 'ros__parameters' in foxglove_config:
         foxglove_config = foxglove_config['ros__parameters']
-    open_foxglove_default = str(foxglove_config.get('open_foxglove', True)).lower()
-    foxglove_target_default = str(foxglove_config.get('target', 'browser')).lower()
+    open_foxglove_default = str(
+        foxglove_config.get('open_foxglove', True)).lower()
+    foxglove_target_default = str(
+        foxglove_config.get('target', 'browser')).lower()
     if foxglove_target_default not in ('browser', 'studio'):
-        raise ValueError("config/foxglove/target must be either 'browser' or 'studio'.")
+        raise ValueError(
+            "config/foxglove/target must be either 'browser' or 'studio'.")
 
     bridge_node = Node(
         package='f1tenth_gym_ros',
         executable='gym_bridge',
         name='bridge',
+        prefix=f'{ros_python} -u',
         parameters=[config, {
             'use_sim_time': False,  # Always use real time for the bridge node
-            'use_sim_time_bridge': use_sim_time, # Whether to internally use and publish sim time
-            }], 
+            # Whether to internally use and publish sim time
+            'use_sim_time_bridge': use_sim_time,
+        }],
     )
     foxglove_host = LaunchConfiguration('foxglove_host')
     foxglove_port = LaunchConfiguration('foxglove_port')
@@ -108,10 +116,14 @@ def generate_launch_description():
         condition=IfCondition(open_foxglove),
         output='screen',
     )
-    foxglove_log = LogInfo(msg=['\033[34mFoxglove app: ', foxglove_app_url, '\033[0m'])
-    foxglove_ws_log = LogInfo(msg=['\033[34mFoxglove WebSocket: '] + foxglove_ws_url_parts + ['\033[0m'])
-    foxglove_target_log = LogInfo(msg=['\033[34mFoxglove target: ', foxglove_target, '\033[0m'])
-    foxglove_layout_log = LogInfo(msg=['\033[34mFoxglove layout: ', foxglove_layout, '\033[0m'])
+    foxglove_log = LogInfo(
+        msg=['\033[34mFoxglove app: ', foxglove_app_url, '\033[0m'])
+    foxglove_ws_log = LogInfo(
+        msg=['\033[34mFoxglove WebSocket: '] + foxglove_ws_url_parts + ['\033[0m'])
+    foxglove_target_log = LogInfo(
+        msg=['\033[34mFoxglove target: ', foxglove_target, '\033[0m'])
+    foxglove_layout_log = LogInfo(
+        msg=['\033[34mFoxglove layout: ', foxglove_layout, '\033[0m'])
 
     # Create custom yaml file for map server by copying the original yaml file and scaling the resolution.
     map_path = config_dict['bridge']['ros__parameters']['map_path']
@@ -175,7 +187,6 @@ def generate_launch_description():
                     {'node_names': ['map_server']}]
     )
 
-
     ego_xacro = None
     if config_dict['bridge']['ros__parameters']['vehicle_params'] == 'f1tenth':
         ego_xacro = "ego_racecar.xacro"
@@ -184,8 +195,9 @@ def generate_launch_description():
     elif config_dict['bridge']['ros__parameters']['vehicle_params'] == 'f1fifth':
         ego_xacro = "ego_racecar_f1fifth.xacro"
     else:
-        raise ValueError('vehicle_params should be either f1tenth, fullscale, or f1fifth.')
-    
+        raise ValueError(
+            'vehicle_params should be either f1tenth, fullscale, or f1fifth.')
+
     ego_robot_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -193,7 +205,8 @@ def generate_launch_description():
         parameters=[
             {'robot_description': Command([
                 'xacro ',
-                os.path.join(get_package_share_directory('f1tenth_gym_ros'), 'urdf', ego_xacro)
+                os.path.join(get_package_share_directory(
+                    'f1tenth_gym_ros'), 'urdf', ego_xacro)
             ])},
             {'use_sim_time': use_sim_time},
         ],
@@ -206,7 +219,8 @@ def generate_launch_description():
         parameters=[
             {'robot_description': Command([
                 'xacro ',
-                os.path.join(get_package_share_directory('f1tenth_gym_ros'), 'urdf', 'opp_racecar.xacro')
+                os.path.join(get_package_share_directory(
+                    'f1tenth_gym_ros'), 'urdf', 'opp_racecar.xacro')
             ])},
             {'use_sim_time': use_sim_time},
         ],
@@ -238,7 +252,8 @@ def generate_launch_description():
     ld.add_action(
         DeclareLaunchArgument(
             'foxglove_layout',
-            default_value=os.path.join(package_share, 'config', 'foxglove', 'gym_bridge_foxglove.json'),
+            default_value=os.path.join(
+                package_share, 'config', 'foxglove', 'gym_bridge_foxglove.json'),
             description='Path to Foxglove layout JSON.',
         )
     )
@@ -259,13 +274,15 @@ def generate_launch_description():
     ld.add_action(
         SetLaunchConfiguration(
             'foxglove_open_url',
-            [foxglove_app_url, '/?ds=foxglove-websocket&ds.url=ws://', foxglove_host, ':', foxglove_port],
+            [foxglove_app_url, '/?ds=foxglove-websocket&ds.url=ws://',
+                foxglove_host, ':', foxglove_port],
         )
     )
     ld.add_action(
         SetLaunchConfiguration(
             'foxglove_open_url',
-            ['foxglove://open?ds=foxglove-websocket&ds.url=ws://', foxglove_host, ':', foxglove_port],
+            ['foxglove://open?ds=foxglove-websocket&ds.url=ws://',
+                foxglove_host, ':', foxglove_port],
             condition=LaunchConfigurationEquals('foxglove_target', 'studio'),
         )
     )

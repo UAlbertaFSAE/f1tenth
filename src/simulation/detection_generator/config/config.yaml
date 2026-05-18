@@ -4,5 +4,5 @@ detection_generator_node:
     csv_path: ""
     cone_topic: /cone_positions
     loop_track: true
-    frame_rate_hz: 5.0
+    frame_rate_hz: 2.0
     qos_depth: 10

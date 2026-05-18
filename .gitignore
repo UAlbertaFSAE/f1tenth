@@ -63,3 +63,5 @@ notes.txt
 *__pycache__/
 *.mypy_cache/
 *.ruff_cache/
+
+venv/
