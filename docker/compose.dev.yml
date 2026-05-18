@@ -19,32 +19,12 @@ services:
     networks:
       - x11
 
-  sim:
-    depends_on:
-      - novnc
-    image:  ualbertaformula/f1tenth-sim
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.sim
-    environment:
-      - DISPLAY=novnc:0.0
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-      - ROS_DOMAIN_ID=42
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-    tty: true
-    stdin_open: true
-    networks:
-      - x11
-
   novnc:
-    image: theasp/novnc:latest
+    image: ifrstr/novnc:latest
     environment:
-      - DISPLAY_WIDTH=1600
-      - DISPLAY_HEIGHT=900
-      - RUN_XTERM=no
-      - RUN_FLUXBOX=yes
+      - RESOLUTION=1600x900
     ports:
-      - "8080:8080"
+      - "6080:6080"
     networks:
       - x11
 

@@ -24,7 +24,9 @@ This is the instructions manual to get started and has solutions to some common 
     └── f1tenth_gym_ros         # Vehicle simulator
 ```
 
-## Getting Started
+## Advanced Setup
+**Note the following is for users who have difficulty setting up with docker or quick start, otherwise follow the docker setup in Onboarding or run the setup.sh script in the scripts folder to install everything locally (for Linux uers only)**
+
 Clone the repository into f1tenth/src
 
 ```bash

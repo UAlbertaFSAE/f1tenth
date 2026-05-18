@@ -42,5 +42,37 @@ RUN git config --global --add safe.directory /f1tenth
 
 ENV IS_JETSON=FALSE
 
+# Install tools for simulator
+RUN apt-get update --fix-missing && \
+    apt-get install -y git \
+    vim \
+    tmux \
+    python3-pip \
+    libeigen3-dev \
+    ros-humble-rviz2 \
+    ros-humble-rmw-cyclonedds-cpp
+RUN apt-get -y dist-upgrade
+RUN pip3 install transforms3d
+
+# install CDT (Constrained Delaunay Triangulation)
+RUN git clone https://github.com/artem-ogre/CDT.git && \
+    cmake -S CDT/CDT -B CDT/build -DCDT_USE_AS_COMPILED_LIBRARY=ON && \
+    cmake --build CDT/build && \
+    cmake --install CDT/build && \
+    rm -rf CDT
+
+RUN apt-get update && \
+    apt-get install -y \
+        qt6-base-dev \
+        qt6-base-dev-tools \
+        qt6-tools-dev \
+        qmake6 \
+        build-essential \
+        python3-dev
+
+COPY . /workspace
+RUN cd /workspace/src/simulation/f1tenth_gym && \
+    pip3 install -e .
+
 USER ${USERNAME}
 ENTRYPOINT [ "/bin/bash" ]

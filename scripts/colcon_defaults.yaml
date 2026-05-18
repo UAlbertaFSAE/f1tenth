@@ -1,8 +1,0 @@
-# Workspace-local colcon defaults.
-#
-# Intentionally minimal: this file exists so we can override any user-level
-# defaults (e.g. ~/.colcon/defaults.yaml) that might inject extra CMake args
-# like -DPYTHON_EXECUTABLE or -DCMAKE_EXPORT_COMPILE_COMMANDS and cause
-# warnings / non-reproducible builds.
-
-build: {}

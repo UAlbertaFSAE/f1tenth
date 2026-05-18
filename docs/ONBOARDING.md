@@ -45,7 +45,6 @@ Now that you have WSL2 and Ubuntu setup, it's time for docker setup. This part s
 ### Mac
 For mac, all you really need to do is install docker desktop following the guide below:
 - Installation Guide: https://docs.docker.com/desktop/install/ubuntu/#install-docker-desktop
-- If you have a M1/M2 mac, then you will need the ARM installation of docker, which currently does not support the docker desktop gui, so you will be stuck with just the docker engine, which will still work fine. Please follow [this](https://www.docker.com/blog/getting-started-with-docker-for-arm-on-linux/) tutorial to download and install the ARM version if needed
 
 ### Linux
 

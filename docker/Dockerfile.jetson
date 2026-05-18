@@ -8,7 +8,15 @@ COPY docker/deps/packages-jetson.txt deps/packages-jetson.txt
 RUN apt update && apt install -q -y --no-install-recommends \
     $(cat deps/packages.txt) \
     $(cat deps/packages-jetson.txt) \
+    libeigen3-dev \
     && rm -rf /var/lib/apt/lists/* && apt-get clean
+
+# install CDT (Constrained Delaunay Triangulation)
+RUN git clone https://github.com/artem-ogre/CDT.git && \
+    cmake -S CDT/CDT -B CDT/build -DCDT_USE_AS_COMPILED_LIBRARY=ON && \
+    cmake --build CDT/build && \
+    cmake --install CDT/build && \
+    rm -rf CDT
 
 # install clang tooling (version 18)
 RUN wget https://apt.llvm.org/llvm.sh \
@@ -29,7 +37,7 @@ RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
 
 # install ZED SDK
 RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-release wget less udev sudo apt-transport-https zstd && \
-    wget -q --no-check-certificate -O ZED_SDK_Linux.run https://download.stereolabs.com/zedsdk/4.1/l4t35.3/jetsons && \
+    wget -q --no-check-certificate -O ZED_SDK_Linux.run https://download.stereolabs.com/zedsdk/5.3/l4t36.4/jetsons && \
     chmod +x ZED_SDK_Linux.run ; ./ZED_SDK_Linux.run silent skip_tools && \
     rm -rf /usr/local/zed/resources/* \
     rm -rf ZED_SDK_Linux.run && \

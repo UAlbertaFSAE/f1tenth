@@ -65,3 +65,5 @@ notes.txt
 *.ruff_cache/
 
 venv/
+.claude/
+*-lock*
