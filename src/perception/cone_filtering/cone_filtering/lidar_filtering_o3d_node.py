@@ -4,10 +4,10 @@ from typing import cast
 import numpy as np
 import open3d as o3d
 import rclpy
+import sensor_msgs_py.point_cloud2 as pc2
 from rclpy.node import Node
 from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import PointCloud2
-from sensor_msgs_py import point_cloud2
 from std_msgs.msg import Header
 from visualization_msgs.msg import Marker, MarkerArray
 
@@ -86,15 +86,16 @@ class LidarFilteringOpen3D(Node):
 
     def pc2_to_xyz(self, msg: PointCloud2) -> np.ndarray:
         """Convert ``msg`` to an ``(N, 3)`` float32 XYZ array."""
-        pts = np.array(
-            list(point_cloud2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)),
-            dtype=np.float32,
-        )
-        return cast(np.ndarray, pts)
+        gen = pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)
+        points = list(gen)
+        if not points:
+            return np.empty((0, 3), dtype=np.float32)
+        points_np = np.array(points).view(np.float32).reshape(-1, 3)
+        return cast(np.ndarray, points_np)
 
     def xyz_to_pc2(self, xyz: np.ndarray, header: Header) -> PointCloud2:
         """Build a ``PointCloud2`` from XYZ rows using ``header``."""
-        return point_cloud2.create_cloud_xyz32(header, xyz.astype(np.float32).tolist())
+        return pc2.create_cloud_xyz32(header, xyz.astype(np.float32).tolist())
 
     def roi_crop(self, xyz: np.ndarray) -> np.ndarray:
         """Keep points inside the configured ROI box."""
