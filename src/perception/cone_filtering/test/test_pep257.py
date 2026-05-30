@@ -16,8 +16,8 @@ import pytest
 from ament_pep257.main import main
 
 
-@pytest.mark.linter  # type: ignore[untyped-decorator]
-@pytest.mark.pep257  # type: ignore[untyped-decorator]
+@pytest.mark.linter  # type: ignore
+@pytest.mark.pep257  # type: ignore
 def test_pep257() -> None:
     """Run ament_pep257 on package sources."""
     rc = main(argv=[".", "test"])

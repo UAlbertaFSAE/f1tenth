@@ -16,8 +16,8 @@ import pytest
 from ament_flake8.main import main_with_errors
 
 
-@pytest.mark.flake8  # type: ignore[untyped-decorator]
-@pytest.mark.linter  # type: ignore[untyped-decorator]
+@pytest.mark.flake8  # type: ignore
+@pytest.mark.linter  # type: ignore
 def test_flake8() -> None:
     """Run ament_flake8 on package sources."""
     rc, errors = main_with_errors(argv=[])
