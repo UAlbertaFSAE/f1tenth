@@ -92,7 +92,7 @@
     },
     "editor.tabSize": 4,
   },
-  "python.languageServer": "Pylance",
+  "python.languageServer": "None",
   "python.autoComplete.extraPaths": [
     "/opt/ros/humble/lib/python3.10/site-packages",
     "/opt/ros/humble/local/lib/python3.10/dist-packages",
@@ -140,4 +140,5 @@
   },
   "ros.distro": "humble",
   "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
+  "ROS2.distro": "humble",
 }
