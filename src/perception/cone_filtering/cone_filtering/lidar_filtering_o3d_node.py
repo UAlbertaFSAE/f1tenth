@@ -24,7 +24,7 @@ class LidarFilteringOpen3D(Node):
         self.declare_parameter("no_ground_topic", "/lidar/no_ground")
         self.declare_parameter("centroids_topic", "/lidar/cone_cluster_centroids")
 
-        #limiting roi
+        # limiting roi
         self.declare_parameter("roi_x_min", 0.0)
         self.declare_parameter("roi_x_max", 30.0)
         self.declare_parameter("roi_y_min", -10.0)
@@ -32,17 +32,31 @@ class LidarFilteringOpen3D(Node):
         self.declare_parameter("roi_z_min", -2.0)
         self.declare_parameter("roi_z_max", 2.0)
 
-        self.declare_parameter("voxel", 0.05) #voxel downsampling size, each cube will be 5cm^3, all points in each cube get turned into a centroid
-        self.declare_parameter("sor_nb_neighbors", 20) #look at 20 neighbors for each point
-        self.declare_parameter("sor_std_ratio", 2.0) #remove points 2 SD from typical neighbor distance
+        self.declare_parameter(
+            "voxel", 0.05
+        )  # voxel downsampling size, each cube will be 5cm^3, all points in each cube get turned into a centroid
+        self.declare_parameter(
+            "sor_nb_neighbors", 20
+        )  # look at 20 neighbors for each point
+        self.declare_parameter(
+            "sor_std_ratio", 2.0
+        )  # remove points 2 SD from typical neighbor distance
 
-        self.declare_parameter("ransac_dist", 0.05) #Points within 0.05m of the plane are counted as inliers
-        self.declare_parameter("ransac_iters", 1000) #Do 1000 iterations to find best plane
+        self.declare_parameter(
+            "ransac_dist", 0.05
+        )  # Points within 0.05m of the plane are counted as inliers
+        self.declare_parameter(
+            "ransac_iters", 1000
+        )  # Do 1000 iterations to find best plane
 
         # Open3D DBSCAN. With min_points=1
-        self.declare_parameter("cluster_eps", 0.25) #points are considered part of same cluster  if they are within 0.25m of eachother
-        self.declare_parameter("cluster_min_points", 1) #min # of points for a group of points to be considered a cluster
-        self.declare_parameter("min_cluster_size", 10) 
+        self.declare_parameter(
+            "cluster_eps", 0.25
+        )  # points are considered part of same cluster  if they are within 0.25m of eachother
+        self.declare_parameter(
+            "cluster_min_points", 1
+        )  # min # of points for a group of points to be considered a cluster
+        self.declare_parameter("min_cluster_size", 10)
         self.declare_parameter("max_cluster_size", 2000)
 
         self.declare_parameter("marker_scale", 0.25)
@@ -58,7 +72,9 @@ class LidarFilteringOpen3D(Node):
             depth=5,
         )
 
-        self.sub = self.create_subscription(PointCloud2, input_topic, self.callback, qos)
+        self.sub = self.create_subscription(
+            PointCloud2, input_topic, self.callback, qos
+        )
         self.pub_noground = self.create_publisher(PointCloud2, no_ground_topic, 5)
         self.pub_centroids = self.create_publisher(MarkerArray, centroids_topic, 5)
 
@@ -107,17 +123,26 @@ class LidarFilteringOpen3D(Node):
         z_max = float(self.get_parameter("roi_z_max").value)
 
         m = (
-            (xyz[:, 0] >= x_min) & (xyz[:, 0] <= x_max) &
-            (xyz[:, 1] >= y_min) & (xyz[:, 1] <= y_max) &
-            (xyz[:, 2] >= z_min) & (xyz[:, 2] <= z_max)
+            (xyz[:, 0] >= x_min)
+            & (xyz[:, 0] <= x_max)
+            & (xyz[:, 1] >= y_min)
+            & (xyz[:, 1] <= y_max)
+            & (xyz[:, 2] >= z_min)
+            & (xyz[:, 2] <= z_max)
         )
         return cast(np.ndarray, xyz[m])
 
-    def process_with_open3d(self, xyz: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
+    def process_with_open3d(
+        self, xyz: np.ndarray
+    ) -> tuple[np.ndarray, list[np.ndarray]]:
         """Downsample, remove outliers and ground, then cluster and compute centroids."""
         voxel = float(self.get_parameter("voxel").value)
-        sor_nb = int(self.get_parameter("sor_nb_neighbors").value) #number of neighbors used for outlier detection
-        sor_std = float(self.get_parameter("sor_std_ratio").value) #threshold for how far a point can be before getting removed
+        sor_nb = int(
+            self.get_parameter("sor_nb_neighbors").value
+        )  # number of neighbors used for outlier detection
+        sor_std = float(
+            self.get_parameter("sor_std_ratio").value
+        )  # threshold for how far a point can be before getting removed
 
         ransac_dist = float(self.get_parameter("ransac_dist").value)
         ransac_iters = int(self.get_parameter("ransac_iters").value)
@@ -127,34 +152,47 @@ class LidarFilteringOpen3D(Node):
         min_cluster = int(self.get_parameter("min_cluster_size").value)
         max_cluster = int(self.get_parameter("max_cluster_size").value)
 
-        pcd = o3d.geometry.PointCloud() #creating open3d point cloud object
-        pcd.points = o3d.utility.Vector3dVector(xyz.astype(np.float64)) #populating pcd.points with the xyz pc data
+        pcd = o3d.geometry.PointCloud()  # creating open3d point cloud object
+        pcd.points = o3d.utility.Vector3dVector(
+            xyz.astype(np.float64)
+        )  # populating pcd.points with the xyz pc data
 
         if voxel > 0.0:
-            pcd = pcd.voxel_down_sample(voxel_size=voxel) #thins out data points, one point per voxel^3 cube
+            pcd = pcd.voxel_down_sample(
+                voxel_size=voxel
+            )  # thins out data points, one point per voxel^3 cube
 
         if len(pcd.points) > sor_nb:
-            pcd, _ = pcd.remove_statistical_outlier(nb_neighbors=sor_nb, std_ratio=sor_std) #remove points that are sor_nb away from normal
+            pcd, _ = pcd.remove_statistical_outlier(
+                nb_neighbors=sor_nb, std_ratio=sor_std
+            )  # remove points that are sor_nb away from normal
 
         if len(pcd.points) >= 50:
-            _, inliers = pcd.segment_plane( #running ransac plane filtering
-                distance_threshold=ransac_dist, #how far away a point can be from plane
-                ransac_n=3, #each plane hypothesis is 3 sampled points
+            _, inliers = pcd.segment_plane(  # running ransac plane filtering
+                distance_threshold=ransac_dist,  # how far away a point can be from plane
+                ransac_n=3,  # each plane hypothesis is 3 sampled points
                 num_iterations=ransac_iters,
             )
-            objects = pcd.select_by_index(inliers, invert=True) #Select all points except for the plane
-        else: #not enough points to make a plane
+            objects = pcd.select_by_index(
+                inliers, invert=True
+            )  # Select all points except for the plane
+        else:  # not enough points to make a plane
             objects = pcd
 
-        objects_xyz = np.asarray(objects.points, dtype=np.float32) #convert o3d object back to numpy
+        objects_xyz = np.asarray(
+            objects.points, dtype=np.float32
+        )  # convert o3d object back to numpy
 
-        centroids: list[np.ndarray] = [] #holds one [x, y, z] centroid per accepted cluster
+        centroids: list[
+            np.ndarray
+        ] = []  # holds one [x, y, z] centroid per accepted cluster
         if len(objects.points) > 0:
-            labels = np.array(objects.cluster_dbscan(
-                eps=cluster_eps,
-                min_points=cluster_min_pts,
-                print_progress=False
-            ), dtype=np.int32)
+            labels = np.array(
+                objects.cluster_dbscan(
+                    eps=cluster_eps, min_points=cluster_min_pts, print_progress=False
+                ),
+                dtype=np.int32,
+            )
 
             if labels.size > 0 and labels.max() >= 0:
                 for k in range(labels.max() + 1):
@@ -165,7 +203,9 @@ class LidarFilteringOpen3D(Node):
 
         return objects_xyz, centroids
 
-    def centroids_to_markers(self, centroids: list[np.ndarray], header: Header) -> MarkerArray:
+    def centroids_to_markers(
+        self, centroids: list[np.ndarray], header: Header
+    ) -> MarkerArray:
         """Publish RViz markers for cluster centroids."""
         marker_scale = float(self.get_parameter("marker_scale").value)
 

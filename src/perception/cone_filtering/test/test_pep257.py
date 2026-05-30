@@ -20,5 +20,5 @@ from ament_pep257.main import main
 @pytest.mark.pep257  # type: ignore[untyped-decorator]
 def test_pep257() -> None:
     """Run ament_pep257 on package sources."""
-    rc = main(argv=['.', 'test'])
-    assert rc == 0, 'Found code style errors / warnings'
+    rc = main(argv=[".", "test"])
+    assert rc == 0, "Found code style errors / warnings"

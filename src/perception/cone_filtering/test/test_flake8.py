@@ -21,6 +21,6 @@ from ament_flake8.main import main_with_errors
 def test_flake8() -> None:
     """Run ament_flake8 on package sources."""
     rc, errors = main_with_errors(argv=[])
-    assert rc == 0, (
-        f'Found {len(errors)} code style errors / warnings:\n' + '\n'.join(errors)
+    assert rc == 0, f"Found {len(errors)} code style errors / warnings:\n" + "\n".join(
+        errors
     )
