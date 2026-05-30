@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import math
+from typing import List, Optional, Tuple
 
 import rclpy
 from rclpy.node import Node
@@ -32,6 +33,15 @@ class Triangulator(Node):
         self.declare_parameter("num_waypoints", 5)
         self.declare_parameter("min_track_width", 0.01)
         self.declare_parameter("max_track_width", 6.0)
+        self.declare_parameter("use_spline", True)
+        self.declare_parameter("spline_samples_per_segment", 6)
+        self.declare_parameter("spline_min_points", 4)
+        self.declare_parameter("track_point_min_spacing", 0.5)
+        self.declare_parameter("track_max_points", 2000)
+        self.declare_parameter("track_closure_distance", 1.0)
+        self.declare_parameter("track_min_points_for_loop", 30)
+        self.declare_parameter("publish_point_count", 20)
+        self.declare_parameter("publish_spacing", 0.5)
 
         # Start gate parameters (string colors, since Cone.msg says `string color`)
         self.declare_parameter("use_start_gate", False)
@@ -50,6 +60,23 @@ class Triangulator(Node):
         self.lookahead_distance = float(
             self.get_parameter("lookahead_distance").value)
         self.num_waypoints = int(self.get_parameter("num_waypoints").value)
+        self.use_spline = bool(self.get_parameter("use_spline").value)
+        self.spline_samples_per_segment = int(
+            self.get_parameter("spline_samples_per_segment").value)
+        self.spline_min_points = int(
+            self.get_parameter("spline_min_points").value)
+        self.track_point_min_spacing = float(
+            self.get_parameter("track_point_min_spacing").value)
+        self.track_max_points = int(
+            self.get_parameter("track_max_points").value)
+        self.track_closure_distance = float(
+            self.get_parameter("track_closure_distance").value)
+        self.track_min_points_for_loop = int(
+            self.get_parameter("track_min_points_for_loop").value)
+        self.publish_point_count = int(
+            self.get_parameter("publish_point_count").value)
+        self.publish_spacing = float(
+            self.get_parameter("publish_spacing").value)
 
         self.use_start_gate = bool(self.get_parameter("use_start_gate").value)
         self.start_colors = list(self.get_parameter("start_colors").value)
@@ -67,6 +94,8 @@ class Triangulator(Node):
         self.path_pub = self.create_publisher(Path, path_topic, 10)
 
         self.latest_odom = None
+        self.track_points: List[Point] = []
+        self.track_closed = False
 
         self.get_logger().info("Triangulator node started")
         self.get_logger().info(f"Cones topic: {cones_topic}")
@@ -74,6 +103,12 @@ class Triangulator(Node):
         self.get_logger().info(
             f"Lookahead={self.lookahead_distance}m num_waypoints={self.num_waypoints} "
             f"min_width={self.min_track_width} max_width={self.max_track_width}"
+        )
+        self.get_logger().info(
+            f"Spline enabled={self.use_spline} samples_per_segment={self.spline_samples_per_segment} "
+            f"min_points={self.spline_min_points} min_spacing={self.track_point_min_spacing} "
+            f"publish_count={self.publish_point_count} publish_spacing={self.publish_spacing} "
+            f"loop_close_dist={self.track_closure_distance} loop_min_points={self.track_min_points_for_loop}"
         )
         self.get_logger().info(
             f"Start gate enabled={self.use_start_gate} start_colors={self.start_colors} "
@@ -150,75 +185,72 @@ class Triangulator(Node):
             f"blue_obj={left_cone} yellow_obj={right_cone}"
         )
 
+        midpoints: List[Point] = []
         if not left_cones or not right_cones:
             if left_cone and right_cone:
                 self.get_logger().warn("No lists for pairing; using fallback closest blue/yellow")
-                waypoint = self.calculate_midpoint(left_cone, right_cone)
-                self.waypoint_pub.publish(waypoint)
-                self.get_logger().info(
-                    f"Published fallback waypoint: ({waypoint.x:.2f}, {waypoint.y:.2f})"
-                )
+                midpoints = [self.calculate_midpoint(left_cone, right_cone)]
             else:
                 self.get_logger().warn("No cones available for fallback waypoint")
-            return
+        else:
+            sorted_left = self.filter_and_sort_cones(
+                left_cones, vehicle_pos, vehicle_heading)
+            sorted_right = self.filter_and_sort_cones(
+                right_cones, vehicle_pos, vehicle_heading)
 
-        sorted_left = self.filter_and_sort_cones(
-            left_cones, vehicle_pos, vehicle_heading)
-        sorted_right = self.filter_and_sort_cones(
-            right_cones, vehicle_pos, vehicle_heading)
-
-        self.get_logger().info(
-            f"Filtered: blue={len(sorted_left)} yellow={len(sorted_right)}")
-        if sorted_left:
-            c = sorted_left[0]
             self.get_logger().info(
-                f"Closest FILTERED blue: ({c.cone.x:.3f},{c.cone.y:.3f}) dist={c.distance:.3f} angle_deg={math.degrees(c.angle):.1f}"
-            )
-        if sorted_right:
-            c = sorted_right[0]
-            self.get_logger().info(
-                f"Closest FILTERED yellow: ({c.cone.x:.3f},{c.cone.y:.3f}) dist={c.distance:.3f} angle_deg={math.degrees(c.angle):.1f}"
-            )
+                f"Filtered: blue={len(sorted_left)} yellow={len(sorted_right)}")
+            if sorted_left:
+                c = sorted_left[0]
+                self.get_logger().info(
+                    f"Closest FILTERED blue: ({c.cone.x:.3f},{c.cone.y:.3f}) dist={c.distance:.3f} angle_deg={math.degrees(c.angle):.1f}"
+                )
+            if sorted_right:
+                c = sorted_right[0]
+                self.get_logger().info(
+                    f"Closest FILTERED yellow: ({c.cone.x:.3f},{c.cone.y:.3f}) dist={c.distance:.3f} angle_deg={math.degrees(c.angle):.1f}"
+                )
 
-        cone_pairs = self.match_cone_pairs(sorted_left, sorted_right)
-        self.get_logger().info(f"Matched cone pairs: {cone_pairs}")
+            cone_pairs = self.match_cone_pairs(sorted_left, sorted_right)
+            self.get_logger().info(f"Matched cone pairs: {cone_pairs}")
 
-        if not cone_pairs:
-            self.get_logger().warn("Could not match any valid cone pairs")
-            return
+            if cone_pairs:
+                self.get_logger().info(
+                    f"Matched {len(cone_pairs)} cone pairs (gates)")
+                midpoints = [self.calculate_midpoint(
+                    left, right) for (left, right) in cone_pairs]
+            else:
+                self.get_logger().warn("Could not match any valid cone pairs")
 
-        self.get_logger().info(f"Matched {len(cone_pairs)} cone pairs (gates)")
+        if midpoints:
+            self.update_track_points(midpoints, vehicle_pos, vehicle_heading)
+            self.update_track_closure()
 
-        waypoints = [self.calculate_midpoint(
-            left, right) for (left, right) in cone_pairs]
-        if not waypoints:
+        if self.use_spline:
+            spline_points = self.build_spline_points()
+            if spline_points:
+                publish_points = self.sample_spline_points_ahead(
+                    spline_points, vehicle_pos, vehicle_heading)
+                if publish_points:
+                    self.publish_waypoints(publish_points)
+                    self.publish_path(spline_points)
+                    return
+
+        if not midpoints:
             self.get_logger().warn("No waypoints generated")
             return
 
         # NOTE: Previously this published waypoints[0] (closest gate).
         # On curves / end-of-visibility, that tends to straighten the car.
         # Publishing the farthest gate encourages committing to the turn.
-        target_wp = waypoints[-1]
+        target_wp = midpoints[-1]
 
         self.waypoint_pub.publish(target_wp)
         self.get_logger().info(
             f"Published waypoint: ({target_wp.x:.2f}, {target_wp.y:.2f}, {target_wp.z:.2f})"
         )
 
-        path_msg = Path()
-        path_msg.header.stamp = self.get_clock().now().to_msg()
-        path_msg.header.frame_id = "odom"
-
-        for waypoint in waypoints:
-            pose = PoseStamped()
-            pose.header = path_msg.header
-            pose.pose.position = waypoint
-            pose.pose.orientation.w = 1.0
-            path_msg.poses.append(pose)
-
-        self.path_pub.publish(path_msg)
-        self.get_logger().info(
-            f"Published path with {len(waypoints)} waypoints")
+        self.publish_path(midpoints)
 
     # START gate logic (orange)
     def try_start_gate(self, msg: Cones, vehicle_pos, vehicle_heading):
@@ -428,6 +460,212 @@ class Triangulator(Node):
         while angle < -math.pi:
             angle += 2.0 * math.pi
         return angle
+
+    def update_track_points(self, new_points: List[Point], vehicle_pos, vehicle_heading):
+        if not new_points:
+            return
+
+        heading_vec = (math.cos(vehicle_heading), math.sin(vehicle_heading))
+        candidates = [
+            point for point in new_points
+            if self.is_point_ahead(vehicle_pos, heading_vec, point)
+        ]
+
+        if not candidates:
+            return
+
+        target = max(candidates, key=lambda p: self.point_distance(p, vehicle_pos))
+        if not self.track_points:
+            self.track_points.append(target)
+        else:
+            if self.point_distance(target, self.track_points[-1]) >= self.track_point_min_spacing:
+                self.track_points.append(target)
+                if len(self.track_points) > self.track_max_points:
+                    self.track_points.pop(0)
+
+    def update_track_closure(self):
+        if self.track_closed:
+            return
+        if len(self.track_points) < self.track_min_points_for_loop:
+            return
+        if self.point_distance(self.track_points[0], self.track_points[-1]) <= self.track_closure_distance:
+            self.track_closed = True
+            self.get_logger().info("Track closure detected; spline will wrap.")
+
+    def build_spline_points(self) -> List[Point]:
+        if len(self.track_points) < self.spline_min_points:
+            return []
+
+        samples = max(1, self.spline_samples_per_segment)
+        points = self.track_points
+        spline_points: List[Point] = []
+
+        if self.track_closed:
+            count = len(points)
+            for i in range(count):
+                p0 = points[(i - 1) % count]
+                p1 = points[i % count]
+                p2 = points[(i + 1) % count]
+                p3 = points[(i + 2) % count]
+                for step in range(samples):
+                    t = step / float(samples)
+                    spline_points.append(self.catmull_rom_point(p0, p1, p2, p3, t))
+        else:
+            padded = [points[0]] + points + [points[-1]]
+            for i in range(1, len(padded) - 2):
+                p0, p1, p2, p3 = padded[i - 1], padded[i], padded[i + 1], padded[i + 2]
+                for step in range(samples):
+                    t = step / float(samples)
+                    spline_points.append(self.catmull_rom_point(p0, p1, p2, p3, t))
+            spline_points.append(points[-1])
+
+        return spline_points
+
+    def sample_spline_points_ahead(
+        self,
+        spline_points: List[Point],
+        vehicle_pos,
+        vehicle_heading,
+    ) -> List[Point]:
+        if not spline_points:
+            return []
+
+        heading_vec = (math.cos(vehicle_heading), math.sin(vehicle_heading))
+        start_idx = self.find_nearest_point_index(spline_points, vehicle_pos)
+        if start_idx is None:
+            return []
+
+        start_idx = self.find_ahead_index(
+            spline_points, start_idx, vehicle_pos, heading_vec)
+        if start_idx is None:
+            return []
+
+        result = [spline_points[start_idx]]
+        if self.publish_point_count <= 1:
+            return result
+
+        n = len(spline_points)
+        current_idx = start_idx
+        spacing_target = max(0.0, self.publish_spacing)
+        dist_since = 0.0
+        steps = 0
+        max_steps = n + 1 if self.track_closed else n
+
+        while len(result) < self.publish_point_count and steps < max_steps:
+            next_idx = current_idx + 1
+            if next_idx >= n:
+                if self.track_closed:
+                    next_idx = 0
+                else:
+                    break
+
+            segment = self.point_distance(spline_points[current_idx], spline_points[next_idx])
+            dist_since += segment
+            current_idx = next_idx
+            steps += 1
+
+            if spacing_target == 0.0 or dist_since >= spacing_target:
+                result.append(spline_points[current_idx])
+                dist_since = 0.0
+
+        return result
+
+    def find_nearest_point_index(self, points: List[Point], vehicle_pos) -> Optional[int]:
+        if not points:
+            return None
+
+        best_idx = None
+        best_dist = float("inf")
+        for i, point in enumerate(points):
+            dist = self.point_distance(point, vehicle_pos)
+            if dist < best_dist:
+                best_dist = dist
+                best_idx = i
+
+        return best_idx
+
+    def find_ahead_index(
+        self,
+        points: List[Point],
+        start_idx: int,
+        vehicle_pos,
+        heading_vec: Tuple[float, float],
+    ) -> Optional[int]:
+        n = len(points)
+        if n == 0:
+            return None
+
+        idx = start_idx
+        for _ in range(n):
+            if self.is_point_ahead(vehicle_pos, heading_vec, points[idx]):
+                return idx
+            idx += 1
+            if idx >= n:
+                if self.track_closed:
+                    idx = 0
+                else:
+                    break
+
+        return None
+
+    def is_point_ahead(self, vehicle_pos, heading_vec, point: Point) -> bool:
+        dx = point.x - vehicle_pos.x
+        dy = point.y - vehicle_pos.y
+        return (dx * heading_vec[0] + dy * heading_vec[1]) > 0.0
+
+    def point_distance(self, a: Point, b) -> float:
+        dx = a.x - b.x
+        dy = a.y - b.y
+        return math.sqrt((dx * dx) + (dy * dy))
+
+    def catmull_rom_point(self, p0: Point, p1: Point, p2: Point, p3: Point, t: float) -> Point:
+        t2 = t * t
+        t3 = t2 * t
+
+        x = 0.5 * (
+            (2.0 * p1.x)
+            + (-p0.x + p2.x) * t
+            + (2.0 * p0.x - 5.0 * p1.x + 4.0 * p2.x - p3.x) * t2
+            + (-p0.x + 3.0 * p1.x - 3.0 * p2.x + p3.x) * t3
+        )
+        y = 0.5 * (
+            (2.0 * p1.y)
+            + (-p0.y + p2.y) * t
+            + (2.0 * p0.y - 5.0 * p1.y + 4.0 * p2.y - p3.y) * t2
+            + (-p0.y + 3.0 * p1.y - 3.0 * p2.y + p3.y) * t3
+        )
+
+        point = Point()
+        point.x = x
+        point.y = y
+        point.z = 0.0
+        return point
+
+    def publish_waypoints(self, points: List[Point]):
+        for point in points:
+            self.waypoint_pub.publish(point)
+
+        if points:
+            last = points[-1]
+            self.get_logger().info(
+                f"Published {len(points)} spline waypoints, last=({last.x:.2f}, {last.y:.2f})"
+            )
+
+    def publish_path(self, points: List[Point]):
+        path_msg = Path()
+        path_msg.header.stamp = self.get_clock().now().to_msg()
+        path_msg.header.frame_id = "odom"
+
+        for point in points:
+            pose = PoseStamped()
+            pose.header = path_msg.header
+            pose.pose.position = point
+            pose.pose.orientation.w = 1.0
+            path_msg.poses.append(pose)
+
+        self.path_pub.publish(path_msg)
+        self.get_logger().info(
+            f"Published path with {len(points)} waypoints")
 
 
 def main(args=None):

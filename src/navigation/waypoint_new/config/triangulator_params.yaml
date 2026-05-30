@@ -11,6 +11,15 @@ triangulator:
     num_waypoints: 5
     min_track_width: 0.0
     max_track_width: 6.0
+    use_spline: true
+    spline_samples_per_segment: 6
+    spline_min_points: 4
+    track_point_min_spacing: 0.5
+    track_max_points: 2000
+    track_closure_distance: 1.0
+    track_min_points_for_loop: 30
+    publish_point_count: 20
+    publish_spacing: 0.5
 
     # --- Start gate (orange cones) ---
     use_start_gate: false
