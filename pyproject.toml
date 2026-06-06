@@ -60,7 +60,6 @@ exclude = [
     ".*/log/",
     ".*/test/",
     ".*/setup\\.py$",
-    "(^|.*/)setup\\.py$",
     "^src/navigation/(pure_pursuit|particle_filter)/",
     "^src/perception/(livox_ros_driver2|zed_wrapper)/",
 ]
