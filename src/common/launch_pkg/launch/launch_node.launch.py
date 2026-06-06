@@ -3,13 +3,10 @@ from pathlib import Path
 
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess, SetLaunchConfiguration
-from launch.substitutions import PathJoinSubstitution
-from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 
 
-def generate_launch_description():
-    # Create a timestamped run folder (so logs/bags don't overwrite)
+def generate_launch_description() -> LaunchDescription:
+    """Create a timestamped run folder (so logs/bags don't overwrite)."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_log_dir = Path.cwd() / "recordings" / timestamp
     run_log_dir.mkdir(parents=True, exist_ok=True)

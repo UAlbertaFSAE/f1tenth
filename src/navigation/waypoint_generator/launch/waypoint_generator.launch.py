@@ -5,8 +5,8 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
-
+def generate_launch_description() -> LaunchDescription:
+    """Generate launch description for waypoint generator node."""
     config = os.path.join(
         get_package_share_directory("waypoint_generator"),
         "config",
