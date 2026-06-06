@@ -23,6 +23,3 @@ ENABLE_LINTERS:
 # use central config file
 PYTHON_MYPY_CONFIG_FILE: ./pyproject.toml
 PYTHON_RUFF_CONFIG_FILE: ./pyproject.toml
-
-# IMPORTANT: prevent mypy from receiving multiple setup.py files → fixes "Duplicate module setup"
-PYTHON_MYPY_ARGUMENTS: "src"
