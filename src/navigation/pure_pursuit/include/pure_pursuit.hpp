@@ -116,7 +116,7 @@ class PurePursuit : public rclcpp::Node {
 
   void quat_to_rot(double q0, double q1, double q2, double q3);
 
-  void transformandinterp_waypoint();
+  bool transformandinterp_waypoint();
 
   double p_controller();
 
