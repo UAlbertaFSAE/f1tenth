@@ -142,4 +142,5 @@
     "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
     "ROS2.distro": "humble",
     "cmake.sourceDirectory": "/Users/finco/Desktop/f1tenth/build/rc_interfaces/rc_interfaces__py",
+    "python-envs.defaultEnvManager": "ms-python.python:system",
 }

@@ -1,14 +1,28 @@
+"""Launch description for running node processes and recording outputs.
+
+Creates timestamped run folders for logs and rosbag outputs and starts
+several ExecuteProcess entries for camera, detection, TF publishers, and
+other utilities.
+"""
+
 from datetime import datetime
 from pathlib import Path
 
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess, SetLaunchConfiguration
-from launch.substitutions import PathJoinSubstitution
-from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
+    """Generate and return the launch description.
+
+    The launch description includes processes to run the ZED camera stack,
+    detection camera, cone transformer, waypoint generator, pure pursuit,
+    and a ros2 bag recorder. Log directories are created per-run so
+    recorded artifacts don't overwrite previous runs.
+
+    Returns:
+        LaunchDescription: configured launch description to be executed.
+    """
     # Create a timestamped run folder (so logs/bags don't overwrite)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_log_dir = Path.cwd() / "recordings" / timestamp
