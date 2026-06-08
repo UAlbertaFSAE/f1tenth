@@ -39,6 +39,7 @@ build/*.obj
 **/install
 **/build
 **/log
+**/recordings
 
 # macOS
 .DS_Store
@@ -57,3 +58,8 @@ __pycache__
 # clangd cache
 .cache/
 notes.txt
+
+*.vscode/
+*__pycache__/
+*.mypy_cache/
+*.ruff_cache/
