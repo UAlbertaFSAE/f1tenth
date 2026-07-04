@@ -18,7 +18,7 @@
 #include "visualization_msgs/msg/marker_array.hpp"
 
 WaypointVisualizer::WaypointVisualizer() : Node("waypoint_visualizer_node") {
-  this->declare_parameter("waypoints_path",
+  this->declare_parameter("waypoint_topic",
                           "/f1tenth/src/navigation/waypoint_generator/src/waypoints_odom.csv");
   this->declare_parameter("rviz_waypoints_topic", "/waypoints");
 

@@ -1,8 +1,16 @@
-# analyze any source files except for packages we did not write ourselves
+# analyze only our workspace source code
 FILTER_REGEX_INCLUDE: .*src/.*
-FILTER_REGEX_EXCLUDE: .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
 
-# don't really want to re-validate files that we already checked
+# exclude third-party / generated ROS packages we do not own
+FILTER_REGEX_EXCLUDE: >-
+  .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
+  |.*src/perception/(livox_ros_driver2|zed_wrapper)(/.*)?
+  |.*/build/.*
+  |.*/install/.*
+  |.*/log/.*
+  |.*/setup\.py$
+
+# don't re-validate everything on every run
 VALIDATE_ALL_CODEBASE: false
 
 DEFAULT_WORKSPACE: .
@@ -12,5 +20,6 @@ ENABLE_LINTERS:
   - PYTHON_MYPY
   - PYTHON_RUFF
 
+# use central config file
 PYTHON_MYPY_CONFIG_FILE: ./pyproject.toml
 PYTHON_RUFF_CONFIG_FILE: ./pyproject.toml

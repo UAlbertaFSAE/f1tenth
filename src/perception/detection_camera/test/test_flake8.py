@@ -21,6 +21,6 @@ from ament_flake8.main import main_with_errors
 def test_flake8() -> None:
     """Test that all source files pass flake8 checks."""
     rc, errors = main_with_errors(argv=[])
-    assert rc == 0, "Found %d code style errors / warnings:\n" % len(
+    assert rc == 0, f"Found {len(errors)} code style errors / warnings:\n" + "\n".join(
         errors
-    ) + "\n".join(errors)
+    )

@@ -9,3 +9,6 @@ The `navigation/` folder should contain any ROS packages that are related to mot
 
 ### Waypoint Generator
 - A node to generate waypoints for pure pursuit
+
+### Particle Filter
+- A node used for car localization and positioning
