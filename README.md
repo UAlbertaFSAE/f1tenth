@@ -5,3 +5,18 @@ Welcome to our autonomous remote control car repository. We are developing an au
 **Important**: In general, the `docs/` folder contains lots of info pertaining to our stack, and this will be where many sources of information get put in the future. If ever you are lost, check there first!
 
 **Note**: As of right now, we are only accepting contributions from UofA students.
+
+## Quick Start
+
+Clone this repo into the `src/` directory of a ROS 2 workspace (e.g. `f1tenth_ws`), then run the Makefile from either the workspace root or `src/`:
+
+```bash
+mkdir -p f1tenth_ws/src
+git clone git@github.com:UAlbertaFSAE/f1tenth.git f1tenth_ws/src
+
+cd f1tenth_ws        # or: cd f1tenth_ws/src -- both work
+make deps            # runs src/scripts/setup.sh: installs ROS 2, system/rosdep deps, Python venv
+make build           # colcon build
+```
+
+Run `make help` for the full list of targets (`build_all`, `package <name>`, `clean`, `rebuild`, `test`, `run_auto`, `run_sim`).
