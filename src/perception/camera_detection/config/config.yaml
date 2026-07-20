@@ -13,3 +13,10 @@ detection_camera:
     publish_rate_hz: 30
     apply_tf: false
     target_frame: odom
+
+    # model_file should point at the .pt (yolo26) weights. When use_tensorrt
+    # is true and TensorRT + CUDA are available, a .engine is exported next
+    # to it (once, cached, reused after) at tensorrt_imgsz and used instead;
+    # otherwise this falls back to running the .pt directly.
+    use_tensorrt: true
+    tensorrt_imgsz: 832

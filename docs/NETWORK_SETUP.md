@@ -12,9 +12,36 @@ below are some must-haves for our stack to allow for proper development/testing 
 
 ## Remote Development From Anywhere
 
-As of right now, remotely ssh-ing into the jetson is possible through a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) being hosted on a [digital ocean cloud droplet](https://docs.digitalocean.com/products/droplets/). We have [rathole](https://github.com/rapiz1/rathole/tree/main) acting as the reverse proxy, forwarding ssh requests from your laptop to the jetson. For this to work, both the jetson and your laptop have to be connected to the internet. The droplet setup was done following [this tutorial](https://noway.moe/unix/reverse-proxy/).
+As of right now, because of university network restrictions remotely ssh-ing into the jetson is possible through a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) being hosted on a [digital ocean cloud droplet](https://docs.digitalocean.com/products/droplets/). We have [rathole](https://github.com/rapiz1/rathole/tree/main) acting as the reverse proxy, forwarding ssh requests from your laptop to the jetson. For this to work, both the jetson and your laptop have to be connected to the internet. The droplet setup was done following [this tutorial](https://noway.moe/unix/reverse-proxy/).
 
 In order to get ssh access to the jetson, you must ask a lead for permission and help. The process requires adding your public ssh key to the authorized hosts on the digital ocean droplet and on the jetson. Once done, you can ssh into the jetson via the command `ssh -p 5202 nvidia@143.198.37.17`.
+
+### Remote Displays
+
+If you need access to graphics windows or simulators like rviz, there are a couple methods.
+
+#### Windows
+If your computer supports x11 forwarding you can add the `-Y` flag to enable it. This will forward graphical interfaces allowing you to see simulators or other necessary windows.
+
+`ssh -Y -p 5202 nvidia@143.198.37.17`
+
+You may need to have [xQuarts](https://www.xquartz.org/) installed depending on your system
+
+#### Mac
+If you're running a Mac they *can* support x11 forwarding, however it doesn't support GLX/OpenGL features required by Rviz.
+
+To get around this, we use [NoMachine](https://www.nomachine.com/) a remote desktop viewer. Because we use a rathole you need to first ssh into the Jetson then connect locally with NoMachine afterwards. Here is the workflow:
+
+Run `ssh -L 4001:127.0.0.1:4000 -p 5202 nvidia@143.198.43.67`, this will establish a connection with the Jetson and forward it to your machine's localhost.
+
+Next create a new connection in NoMachine with these properties:
+- Host: localhost
+- Port: 4001
+- Protocol: NX
+
+From there you can connect via a remote desktop.
+
+(If none of this works check that the nxserver on the Jetson is running `systemctl status nxserver`)
 
 **Note:** expect a lot of latency when developing remotely, as the digital ocean server is currently in san francisco (was the cheapest option).
 

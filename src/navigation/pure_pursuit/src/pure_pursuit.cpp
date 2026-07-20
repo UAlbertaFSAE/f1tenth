@@ -34,6 +34,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("K_p", 0.30);
   this->declare_parameter("steering_limit", 25.0);
   this->declare_parameter("velocity_percentage", 1.0);  // 0.6 default
+  this->declare_parameter("waypoint_velocity", 6.0);  // m/s target speed along cone-derived waypoints
 
   // Default Values
   odom_topic = this->get_parameter("odom_topic").as_string();
@@ -47,11 +48,12 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   K_p = this->get_parameter("K_p").as_double();
   steering_limit = this->get_parameter("steering_limit").as_double();
   velocity_percentage = this->get_parameter("velocity_percentage").as_double();
+  waypoint_velocity = this->get_parameter("waypoint_velocity").as_double();
 
   subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
 
-  waypoint_subscriber = this->create_subscription<geometry_msgs::msg::Point>(
+  waypoint_subscriber = this->create_subscription<nav_msgs::msg::Path>(
       waypoint_topic, rclcpp::QoS(10), std::bind(&PurePursuit::waypoint_callback, this, _1));
 
   timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
@@ -283,34 +285,40 @@ void PurePursuit::publish_message(double steering_angle) {
   publisher_drive->publish(drive_msgObj);
 }
 
-void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint) {
-  constexpr int kWaypointHistoryLimit = 20;
+void PurePursuit::waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path) {
+  // The triangulator recomputes and republishes its whole local path every
+  // cycle -- treat each message as the current path, atomically replacing the
+  // old one. Streaming/appending individual points into a small FIFO let a
+  // single noisy frame partially evict a good path and blend in stale points
+  // from an unrelated frame, which is what caused the car to run off track.
+  if (path->poses.empty()) {
+    return;
+  }
 
-  // don't push the same point on multiple times
-  if (num_waypoints > 0) {
-    double last_x = waypoints.X[waypoints.X.size() - 1];
-    double last_y = waypoints.Y[waypoints.Y.size() - 1];
+  waypoints.X.clear();
+  waypoints.Y.clear();
+  waypoints.V.clear();
 
-    if (waypoint->x == last_x && waypoint->y == last_y) {
-      return;
+  for (const auto& pose : path->poses) {
+    waypoints.X.push_back(pose.pose.position.x);
+    waypoints.Y.push_back(pose.pose.position.y);
+    waypoints.V.push_back(waypoint_velocity);
+  }
+  num_waypoints = static_cast<int>(waypoints.X.size());
+
+  // Re-anchor the search index to whichever new point is closest to the car,
+  // instead of resetting to 0, so get_waypoint continues from the right spot.
+  int nearest_i = 0;
+  double nearest_dist = p2pdist(waypoints.X[0], x_car_world, waypoints.Y[0], y_car_world);
+  for (int i = 1; i < num_waypoints; i++) {
+    double dist = p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world);
+    if (dist < nearest_dist) {
+      nearest_dist = dist;
+      nearest_i = i;
     }
   }
-
-  // Keep only the most recent waypoints so stale cone positions do not dominate control.
-  while (num_waypoints >= kWaypointHistoryLimit) {
-    waypoints.X.erase(waypoints.X.begin());
-    waypoints.Y.erase(waypoints.Y.begin());
-    waypoints.V.erase(waypoints.V.begin());
-    num_waypoints--;
-
-    waypoints.index = std::max(0, waypoints.index - 1);
-    waypoints.velocity_index = std::max(0, waypoints.velocity_index - 1);
-  }
-
-  waypoints.X.push_back(waypoint->x);
-  waypoints.Y.push_back(waypoint->y);
-  waypoints.V.push_back(1);
-  num_waypoints++;
+  waypoints.index = nearest_i;
+  waypoints.velocity_index = nearest_i;
 }
 
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
@@ -345,6 +353,7 @@ void PurePursuit::timer_callback() {
   // Periodically check parameters and update
   K_p = this->get_parameter("K_p").as_double();
   velocity_percentage = this->get_parameter("velocity_percentage").as_double();
+  waypoint_velocity = this->get_parameter("waypoint_velocity").as_double();
   min_lookahead = this->get_parameter("min_lookahead").as_double();
   max_lookahead = this->get_parameter("max_lookahead").as_double();
   lookahead_ratio = this->get_parameter("lookahead_ratio").as_double();

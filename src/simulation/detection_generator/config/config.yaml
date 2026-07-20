@@ -3,6 +3,12 @@ detection_generator_node:
     track_type: curved
     csv_path: ""
     cone_topic: /cone_positions
-    loop_track: true
-    frame_rate_hz: 2.0
+    odom_topic: /ego_racecar/odom # gym_bridge's ego odom topic (detection_generator is sim-only)
+    loop_track: true # whether the track is a closed loop (wraps station lookup around)
     qos_depth: 10
+    min_visible_dist: 0.3 # m, nothing closer than this to the car is "seen"
+    max_visible_dist: 10.0 # m, forward visibility depth
+    fov_half_deg: 55.0 # deg, forward visibility half-angle
+    arc_window_behind_m: 1.0 # m of track already passed still eligible to show
+    arc_window_ahead_m: 12.0 # m of track ahead considered for visibility
+    min_publish_period_s: 0.1 # throttle: minimum seconds between published frames

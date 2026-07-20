@@ -21,11 +21,13 @@
 // SOFTWARE.
 
 #include <array>
+#include <deque>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "geometry_msgs/msg/point.hpp"
+#include "nav_msgs/msg/path.hpp"
 #include "rc_interfaces/msg/cone.hpp"
 #include "rc_interfaces/msg/cones.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -69,13 +71,25 @@ class Triangulator : public rclcpp::Node {
   bool publish_markers_when_idle_ = true;
 
   rc_interfaces::msg::Cones accumulated_cones_;
+  // Rolling window of the most recent filtered cone frames. The working set is
+  // the deduped union of these, keeping path planning local instead of holding
+  // the whole (self-intersecting) track -- global memory is the SLAM nodes' job.
+  std::deque<rc_interfaces::msg::Cones> frame_window_;
+  int window_frames_ = 6;
+  bool boundary_constraint_enabled_ = true;
   std::vector<geometry_msgs::msg::Point> last_published_waypoints_;
   rclcpp::Subscription<rc_interfaces::msg::Cones>::SharedPtr cone_subscriber;
-  rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr waypoint_publisher;
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr waypoint_publisher;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher;
   std::string frame_id_;
   bool has_active_cluster_center_ = false;
   geometry_msgs::msg::Point active_cluster_center_;
+  bool has_active_path_direction_ = false;
+  double active_dir_x_ = 1.0;
+  double active_dir_y_ = 0.0;
+  double direction_gate_behind_m_ = 1.0;
+  double direction_gate_half_width_m_ = 4.0;
+  double turn_penalty_weight_ = 5.0;
 
   // call backs
   void read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones_msg);
@@ -86,6 +100,9 @@ class Triangulator : public rclcpp::Node {
   rc_interfaces::msg::Cones filter_frame_cones(const rc_interfaces::msg::Cones& frame_cones);
   std::vector<geometry_msgs::msg::Point> build_waypoints_from_pairs(const LR& pair) const;
   bool has_cone(const rc_interfaces::msg::Cone& cone) const;
+  rc_interfaces::msg::Cones build_working_set() const;
+  std::vector<geometry_msgs::msg::Point> constrain_to_corridor(
+      const std::vector<geometry_msgs::msg::Point>& waypoints, const LR& pair) const;
   bool detect_gate(const rc_interfaces::msg::Cones& frame_cones) const;
   std::vector<geometry_msgs::msg::Point> append_stop_extrapolation(
       const std::vector<geometry_msgs::msg::Point>& waypoints) const;

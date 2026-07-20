@@ -21,6 +21,7 @@ waypoint interpolation yet.
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+#include "nav_msgs/msg/path.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 #define _USE_MATH_DEFINES
@@ -70,6 +71,7 @@ class PurePursuit : public rclcpp::Node {
   double lookahead_ratio;
   double steering_limit;
   double velocity_percentage;
+  double waypoint_velocity;
   double curr_velocity = 0.0;
 
   bool emergency_breaking = false;
@@ -87,7 +89,7 @@ class PurePursuit : public rclcpp::Node {
 
   // declare subscriber sharedpointer obj
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_odom;
-  rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr waypoint_subscriber;
+  rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr waypoint_subscriber;
 
   // declare publisher sharedpointer obj
   rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr publisher_drive;
@@ -115,7 +117,7 @@ class PurePursuit : public rclcpp::Node {
   void publish_message(double steering_angle);
 
   void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj);
-  void waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint);
+  void waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path);
 
   void timer_callback();
 };

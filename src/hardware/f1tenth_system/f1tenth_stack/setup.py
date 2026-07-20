@@ -22,7 +22,6 @@ setup(
     maintainer_email='billyzheng.bz@gmail.com',
     description='Onboard drivers for vesc and sensors for F1TENTH vehicles.',
     license='MIT',
-    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'throttle_interpolator = f1tenth_stack.throttle_interpolator:main',

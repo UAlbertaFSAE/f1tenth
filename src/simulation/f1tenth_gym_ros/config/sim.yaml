@@ -48,12 +48,16 @@ bridge:
     scan_angle_max: 135.0 # 135°
 
     # map parameters
-    map_path: "maps/levine"
+    # "levine" is a real indoor floorplan -- its walls are unrelated to the
+    # synthetic cone-track CSVs (detection_generator) and were causing the
+    # car to physically collide with real hallway walls mid-track ("gets
+    # stuck"). "blank" is an open, wall-free canvas suited to cone tracks.
+    map_path: "maps/blank"
     map_img_ext: ".png"
 
     # car parameters and scale
     # Supported vehicle parameters are 'f1tenth', 'fullscale', and 'f1fifth'
-    vehicle_params: "f1tenth"
+    vehicle_params: "f1fifth"
     scale: 1.0
 
     # number of agents, currently only supports 1 or 2

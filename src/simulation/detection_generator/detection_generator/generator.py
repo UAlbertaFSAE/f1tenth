@@ -21,38 +21,54 @@
 # SOFTWARE.
 
 import csv
+import math
 from dataclasses import dataclass
 from pathlib import Path
 
 import rclpy
 from ament_index_python.packages import get_package_share_directory
+from nav_msgs.msg import Odometry
 from rc_interfaces.msg import Cone, Cones
 from rclpy.node import Node
 
 
 @dataclass
-class ConeFrame:
-    """Container for one published frame and its cone detections."""
+class Station:
+    """One cone pair (a left/blue and right/yellow cone) along the track."""
 
-    frame_id: int
-    cones: Cones
+    station_id: int
+    blue: tuple
+    yellow: tuple
+    center: tuple
 
 
 class DetectionGenerator(Node):
-    """Publish cone detections frame-by-frame from a CSV file."""
+    """Publish the cones currently visible ahead of the car, driven by odometry.
+
+    Each odometry update recomputes the visible cone set fresh from the car's
+    real position and heading (nearest station lookup + forward distance/FOV
+    window) - there is no pre-baked per-frame timeline, so publishing tracks
+    however fast or slow the car is actually moving.
+    """
 
     CSV_FIELD_COUNT = 4
 
     def __init__(self) -> None:
-        """Initialize parameters, publisher, timer, and CSV-backed frame cache."""
+        """Initialize parameters, publisher, odometry subscription, and station list."""
         super().__init__("detection_generator_node")
 
         self.declare_parameter("track_type", "straight")
         self.declare_parameter("csv_path", "")
         self.declare_parameter("cone_topic", "/cone_data")
+        self.declare_parameter("odom_topic", "/odom")
         self.declare_parameter("loop_track", True)
-        self.declare_parameter("frame_rate_hz", 5.0)
         self.declare_parameter("qos_depth", 10)
+        self.declare_parameter("min_visible_dist", 0.3)
+        self.declare_parameter("max_visible_dist", 10.0)
+        self.declare_parameter("fov_half_deg", 55.0)
+        self.declare_parameter("arc_window_behind_m", 1.0)
+        self.declare_parameter("arc_window_ahead_m", 12.0)
+        self.declare_parameter("min_publish_period_s", 0.1)
 
         track_type = self.get_parameter(
             "track_type").get_parameter_value().string_value
@@ -60,55 +76,149 @@ class DetectionGenerator(Node):
             "csv_path").get_parameter_value().string_value
         cone_topic = self.get_parameter(
             "cone_topic").get_parameter_value().string_value
-        self.loop_track = self.get_parameter(
+        odom_topic = self.get_parameter(
+            "odom_topic").get_parameter_value().string_value
+        self.track_closed = self.get_parameter(
             "loop_track").get_parameter_value().bool_value
-        frame_rate_hz = self.get_parameter(
-            "frame_rate_hz").get_parameter_value().double_value
         qos_depth = self.get_parameter(
             "qos_depth").get_parameter_value().integer_value
+        self.min_visible_dist = self.get_parameter(
+            "min_visible_dist").get_parameter_value().double_value
+        self.max_visible_dist = self.get_parameter(
+            "max_visible_dist").get_parameter_value().double_value
+        self.fov_half_rad = math.radians(
+            self.get_parameter("fov_half_deg").get_parameter_value().double_value)
+        self.arc_window_behind_m = self.get_parameter(
+            "arc_window_behind_m").get_parameter_value().double_value
+        self.arc_window_ahead_m = self.get_parameter(
+            "arc_window_ahead_m").get_parameter_value().double_value
+        self.min_publish_period_s = self.get_parameter(
+            "min_publish_period_s").get_parameter_value().double_value
 
-        if frame_rate_hz <= 0.0:
-            self.get_logger().warn("frame_rate_hz must be > 0. Falling back to 5.0")
-            frame_rate_hz = 5.0
         if qos_depth < 1:
             self.get_logger().warn("qos_depth must be >= 1. Falling back to 10")
             qos_depth = 10
 
         csv_path = self.resolve_csv_path(configured_csv_path, track_type)
-        self.frames = self.read_csv(csv_path)
-        self.next_frame_index = 0
+        self.stations = self.read_csv(csv_path)
 
         self.cone_publisher = self.create_publisher(
             Cones, cone_topic, int(qos_depth))
-        self.publish_timer = self.create_timer(
-            1.0 / frame_rate_hz, self.publish_next_frame
+        self.last_publish_time = None
+        self.odom_subscription = self.create_subscription(
+            Odometry, odom_topic, self.on_odometry, int(qos_depth))
+
+        self.get_logger().info(
+            f"Loaded {len(self.stations)} cone stations from {csv_path}"
+        )
+        self.get_logger().info(
+            f"Publishing visible cones on {cone_topic}, driven by odometry on {odom_topic}"
         )
 
-        total_cones = sum(len(frame.cones.cones) for frame in self.frames)
-        self.get_logger().info(
-            f"Loaded {len(self.frames)} frames ({total_cones} cones) from {csv_path}"
-        )
-        self.get_logger().info(
-            f"Publishing one cone frame at {frame_rate_hz:.2f} Hz on {cone_topic}"
-        )
-
-    def publish_next_frame(self) -> None:
-        """Publish the next frame and handle looping or one-shot mode."""
-        if not self.frames:
+    def on_odometry(self, msg: Odometry) -> None:
+        """Recompute and publish the cones currently visible from the car's pose."""
+        if not self.stations:
             return
 
-        if self.next_frame_index >= len(self.frames):
-            if not self.loop_track:
-                self.get_logger().info("Finished publishing all cone frames once")
+        now = self.get_clock().now()
+        if self.last_publish_time is not None:
+            elapsed = (now - self.last_publish_time).nanoseconds / 1e9
+            if elapsed < self.min_publish_period_s:
                 return
-            self.next_frame_index = 0
+        self.last_publish_time = now
 
-        frame = self.frames[self.next_frame_index]
-        self.cone_publisher.publish(frame.cones)
+        car_x = msg.pose.pose.position.x
+        car_y = msg.pose.pose.position.y
+        car_heading = self.yaw_from_quaternion(msg.pose.pose.orientation)
+
+        cones = Cones()
+        for station in self.visible_stations((car_x, car_y), car_heading):
+            for point, color in ((station.blue, "blue"), (station.yellow, "yellow")):
+                cone = Cone()
+                cone.x = point[0]
+                cone.y = point[1]
+                cone.color = color
+                cones.cones.append(cone)
+
+        self.cone_publisher.publish(cones)
         self.get_logger().debug(
-            f"Published frame_id={frame.frame_id} with {len(frame.cones.cones)} cones"
+            f"Published {len(cones.cones)} cones from pose ({car_x:.2f}, {car_y:.2f})"
         )
-        self.next_frame_index += 1
+
+    def visible_stations(self, car_pos: tuple, car_heading: float) -> list:
+        """Nearest-station lookup + arc-length window + forward/FOV filter."""
+        nearest_index = min(
+            range(len(self.stations)),
+            key=lambda i: self.distance(self.stations[i].center, car_pos),
+        )
+
+        window_indices = self.arc_length_window(nearest_index)
+
+        forward = (math.cos(car_heading), math.sin(car_heading))
+        left = (-math.sin(car_heading), math.cos(car_heading))
+
+        visible = []
+        for index in window_indices:
+            station = self.stations[index]
+            rel = (station.center[0] - car_pos[0], station.center[1] - car_pos[1])
+            fwd = rel[0] * forward[0] + rel[1] * forward[1]
+            lat = rel[0] * left[0] + rel[1] * left[1]
+            if fwd < self.min_visible_dist or fwd > self.max_visible_dist:
+                continue
+            if abs(math.atan2(lat, fwd)) > self.fov_half_rad:
+                continue
+            visible.append((fwd, station))
+
+        visible.sort(key=lambda item: item[0])
+        return [station for _, station in visible]
+
+    def arc_length_window(self, nearest_index: int) -> list:
+        """Station indices within arc_window_behind_m/arc_window_ahead_m of nearest_index."""
+        count = len(self.stations)
+        indices = [nearest_index]
+
+        accumulated = 0.0
+        prev_index = nearest_index
+        index = nearest_index
+        while accumulated < self.arc_window_ahead_m:
+            next_index = index + 1
+            if next_index >= count:
+                if not self.track_closed:
+                    break
+                next_index = 0
+            if next_index == nearest_index:
+                break
+            accumulated += self.distance(
+                self.stations[index].center, self.stations[next_index].center)
+            indices.append(next_index)
+            index = next_index
+
+        accumulated = 0.0
+        index = nearest_index
+        while accumulated < self.arc_window_behind_m:
+            prev_index = index - 1
+            if prev_index < 0:
+                if not self.track_closed:
+                    break
+                prev_index = count - 1
+            if prev_index == nearest_index:
+                break
+            accumulated += self.distance(
+                self.stations[index].center, self.stations[prev_index].center)
+            indices.append(prev_index)
+            index = prev_index
+
+        return indices
+
+    @staticmethod
+    def distance(a: tuple, b: tuple) -> float:
+        return math.hypot(a[0] - b[0], a[1] - b[1])
+
+    @staticmethod
+    def yaw_from_quaternion(orientation) -> float:
+        siny_cosp = 2.0 * (orientation.w * orientation.z + orientation.x * orientation.y)
+        cosy_cosp = 1.0 - 2.0 * (orientation.y * orientation.y + orientation.z * orientation.z)
+        return math.atan2(siny_cosp, cosy_cosp)
 
     def resolve_csv_path(self, configured_path: str, track_type: str) -> str:
         """Resolve configured or default track CSV path from package share."""
@@ -131,8 +241,8 @@ class DetectionGenerator(Node):
 
         return str(share_dir / "data" / f"{normalized_track}.csv")
 
-    def read_csv(self, path: str) -> list[ConeFrame]:
-        """Read track CSV rows and group cones by frame id."""
+    def read_csv(self, path: str) -> list:
+        """Read track CSV rows and group cones into ordered stations by id."""
         csv_path = Path(path)
         if not csv_path.exists() or not csv_path.is_file():
             self.get_logger().error(f"Failed to open track csv: {path}")
@@ -140,8 +250,8 @@ class DetectionGenerator(Node):
 
         self.get_logger().info(f"Opened track csv: {path}")
 
-        frames: list[ConeFrame] = []
-        frame_index_by_id: dict[int, int] = {}
+        cones_by_id: dict[int, dict[str, tuple]] = {}
+        order: list[int] = []
 
         with csv_path.open("r", encoding="utf-8", newline="") as csv_file:
             reader = csv.reader(csv_file)
@@ -159,22 +269,21 @@ class DetectionGenerator(Node):
                     )
                     continue
 
-                frame_text = row[0].strip()
-                if not frame_text:
+                station_text = row[0].strip()
+                if not station_text:
                     continue
 
-                if not (frame_text[0].isdigit() or frame_text[0] == "-"):
+                if not (station_text[0].isdigit() or station_text[0] == "-"):
                     continue
 
                 try:
-                    frame_id = int(frame_text)
+                    station_id = int(station_text)
                     x = float(row[1].strip())
                     y = float(row[2].strip())
                     color = row[3].strip()
                 except ValueError:
                     self.get_logger().warn(
-                        "Skipping non-numeric row in %s: %s", path, ",".join(
-                            row)
+                        "Skipping non-numeric row in %s: %s", path, ",".join(row)
                     )
                     continue
 
@@ -186,19 +295,26 @@ class DetectionGenerator(Node):
                     )
                     continue
 
-                cone = Cone()
-                cone.x = x
-                cone.y = y
-                cone.color = color
+                if station_id not in cones_by_id:
+                    cones_by_id[station_id] = {}
+                    order.append(station_id)
+                cones_by_id[station_id][color] = (x, y)
 
-                if frame_id not in frame_index_by_id:
-                    frame = ConeFrame(frame_id=frame_id, cones=Cones())
-                    frames.append(frame)
-                    frame_index_by_id[frame_id] = len(frames) - 1
+        stations = []
+        for station_id in order:
+            colors = cones_by_id[station_id]
+            blue = colors.get("blue")
+            yellow = colors.get("yellow")
+            if blue is None or yellow is None:
+                self.get_logger().warn(
+                    "Skipping incomplete station id=%d in %s (missing blue or yellow cone)",
+                    station_id, path,
+                )
+                continue
+            center = ((blue[0] + yellow[0]) / 2.0, (blue[1] + yellow[1]) / 2.0)
+            stations.append(Station(station_id=station_id, blue=blue, yellow=yellow, center=center))
 
-                frames[frame_index_by_id[frame_id]].cones.cones.append(cone)
-
-        return frames
+        return stations
 
 
 def main(args=None) -> None:

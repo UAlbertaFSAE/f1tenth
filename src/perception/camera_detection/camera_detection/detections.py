@@ -59,6 +59,12 @@ class ConePublisher(Node):
         self.declare_parameter("publish_rate_hz", 30)
         self.declare_parameter("apply_tf", False)
         self.declare_parameter("target_frame", "odom")
+        # TensorRT: model_file is expected to be the .pt (yolo26) weights. If
+        # use_tensorrt is set and TensorRT + CUDA are available, a .engine is
+        # exported alongside it (once, cached) and used instead; otherwise
+        # this falls back to running the .pt directly.
+        self.declare_parameter("use_tensorrt", True)
+        self.declare_parameter("tensorrt_imgsz", 832)
 
         # Get parameters
         self.depth_node = self.get_parameter("depth_node").value
@@ -73,6 +79,8 @@ class ConePublisher(Node):
         self.publish_rate_hz = self.get_parameter("publish_rate_hz").value
         self.apply_tf = self.get_parameter("apply_tf").value
         self.target_frame = self.get_parameter("target_frame").value
+        self.use_tensorrt = self.get_parameter("use_tensorrt").value
+        self.tensorrt_imgsz = self.get_parameter("tensorrt_imgsz").value
 
         self.get_logger().info("Starting detection camera node")
         self.get_logger().info(f"  Model file: {self.model_file}")
@@ -162,6 +170,7 @@ class ConePublisher(Node):
 
         # State
         self.bridge = CvBridge()
+        self.using_tensorrt = False
         self.model = self.load_model()
         self.classes = self.load_classes(self.classes_file)
         self.latest_depth: np.ndarray | None = None  # numpy array (meters)
@@ -221,14 +230,14 @@ class ConePublisher(Node):
             )
             return
 
-        # Run YOLO (pass device to offload to GPU if available)
+        # Run YOLO (pass device to offload to GPU if available). A TensorRT
+        # engine is already bound to a specific device at export time, so the
+        # device kwarg is only meaningful for .pt/.onnx models.
         try:
-            results = self.model(
-                cv_image,
-                conf=self.detection_confidence,
-                device=self.device,
-                verbose=False,
-            )
+            predict_kwargs = {"conf": self.detection_confidence, "verbose": False}
+            if not self.using_tensorrt:
+                predict_kwargs["device"] = self.device
+            results = self.model(cv_image, **predict_kwargs)
         except Exception:
             self.get_logger().error("YOLO model run failed:\n" + traceback.format_exc())
             return
@@ -610,35 +619,107 @@ class ConePublisher(Node):
     # -------------------------
     # Model loading
     # -------------------------
+    def tensorrt_available(self) -> bool:
+        """Check whether TensorRT can actually be used on this device."""
+        if not self.cuda_available:
+            return False
+        try:
+            import tensorrt  # noqa: F401
+
+            return True
+        except ImportError:
+            return False
+
+    def export_tensorrt_engine(self) -> str:
+        """Export self.model_file (.pt) to a TensorRT .engine, caching it alongside.
+
+        Returns:
+            str: Path to the exported (or already cached) .engine file.
+        """
+        engine_path = os.path.splitext(self.model_file)[0] + ".engine"
+
+        engine_is_current = os.path.exists(engine_path) and os.path.getmtime(
+            engine_path
+        ) >= os.path.getmtime(self.model_file)
+        if engine_is_current:
+            return engine_path
+
+        self.get_logger().info(
+            f"Exporting TensorRT engine from {self.model_file} "
+            f"(imgsz={self.tensorrt_imgsz}); this can take a few minutes on first run."
+        )
+        pt_model = YOLO(self.model_file)
+        exported_path = pt_model.export(
+            format="engine", imgsz=self.tensorrt_imgsz, device=0
+        )
+        return str(exported_path) if exported_path else engine_path
+
     def load_model(self) -> YOLO:
-        """Load YOLO model from the configured model file.
+        """Load a YOLO model, preferring a TensorRT engine when available.
+
+        model_file is expected to be the .pt (yolo26) weights. If use_tensorrt
+        is set and TensorRT + CUDA are usable, a .engine is exported next to
+        the .pt file (once, then cached and reused) and loaded instead. On
+        any failure (no CUDA, no TensorRT, export error, incompatible engine)
+        this falls back to loading the .pt directly. model_file may also
+        point straight at an existing .engine or .onnx file.
 
         Returns:
             YOLO: Loaded YOLO model instance.
         """
-        try:
-            # Check if model file exists
-            if not os.path.exists(self.model_file):
-                self.get_logger().error(
-                    f"Model file not found: {self.model_file}")
-                raise FileNotFoundError(
-                    f"Model file not found: {self.model_file}")
+        if not os.path.exists(self.model_file):
+            self.get_logger().error(f"Model file not found: {self.model_file}")
+            raise FileNotFoundError(f"Model file not found: {self.model_file}")
 
-            # Load model based on file extension
-            if self.model_file.endswith(".onnx"):
+        ext = os.path.splitext(self.model_file)[1].lower()
+
+        try:
+            if ext == ".engine":
                 self.get_logger().info(
-                    f"Loading ONNX model from: {self.model_file}")
+                    f"Loading TensorRT engine from: {self.model_file}"
+                )
                 model = YOLO(self.model_file, task="detect")
-            elif self.model_file.endswith(".pt"):
-                self.get_logger().info(
-                    f"Loading PyTorch model from: {self.model_file}")
-                model = YOLO(self.model_file)
-            else:
+                self.using_tensorrt = True
+                self.get_logger().info("YOLO model loaded successfully.")
+                return model
+
+            if ext == ".onnx":
+                self.get_logger().info(f"Loading ONNX model from: {self.model_file}")
+                model = YOLO(self.model_file, task="detect")
+                self.get_logger().info("YOLO model loaded successfully.")
+                return model
+
+            if ext != ".pt":
                 self.get_logger().warn(
                     f"Unknown model format, attempting to load: {self.model_file}"
                 )
                 model = YOLO(self.model_file)
+                self.get_logger().info("YOLO model loaded successfully.")
+                return model
 
+            if self.use_tensorrt:
+                try:
+                    if not self.tensorrt_available():
+                        raise RuntimeError(
+                            "TensorRT and/or CUDA not available on this device"
+                        )
+                    engine_path = self.export_tensorrt_engine()
+                    self.get_logger().info(
+                        f"Loading TensorRT engine from: {engine_path}"
+                    )
+                    model = YOLO(engine_path, task="detect")
+                    self.using_tensorrt = True
+                    self.get_logger().info("YOLO model loaded successfully.")
+                    return model
+                except Exception as e:
+                    self.get_logger().warn(
+                        f"TensorRT unavailable/export failed ({e}); "
+                        "falling back to PyTorch (.pt) model."
+                    )
+                    self.using_tensorrt = False
+
+            self.get_logger().info(f"Loading PyTorch model from: {self.model_file}")
+            model = YOLO(self.model_file)
             self.get_logger().info("YOLO model loaded successfully.")
             return model
         except Exception as e:

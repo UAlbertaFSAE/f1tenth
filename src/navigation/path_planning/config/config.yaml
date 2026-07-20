@@ -23,3 +23,17 @@ triangulator_node:
     stop_distance: 20.0
     extrapolation_step: 1.0
     publish_markers_when_idle: true
+
+    # Disambiguate self-crossing tracks (e.g. figure-eight) by travel direction
+    # instead of proximity alone -- see filter_frame_cones() in triangulator.cpp.
+    direction_gate_behind_m: 1.0
+    direction_gate_half_width_m: 4.0
+    # At a fork, weight this heavily against picking a cluster that needs a
+    # sharp turn, even if it is closer/bigger than the straight continuation.
+    turn_penalty_weight: 5.0
+
+    # Rolling local window: only the last N cone frames form the working set,
+    # so a self-crossing track never lands both branches in one triangulation.
+    window_frames: 6
+    # Drop waypoints outside the cone corridor (hard boundary from the cones).
+    boundary_constraint_enabled: true

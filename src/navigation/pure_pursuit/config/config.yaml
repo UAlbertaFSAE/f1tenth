@@ -13,3 +13,4 @@ pure_pursuit:
     K_p: 0.30 # proportional gain for steering control, 0.05 for square track, 0.3 for larger track
     steering_limit: 25.0
     velocity_percentage: 1.0 # the limit, can only do 1 lap with clean tires
+    waypoint_velocity: 6.0 # m/s target speed along cone-derived waypoints (was hardcoded to 1.0)

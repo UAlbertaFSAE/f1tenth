@@ -61,12 +61,12 @@ source install/setup.bash
 ```
 To run the autonomous code:
 ```bash
-ros2 launch launch_pkg fsae.launch.py config:=src/src/common/launch_pkg/config/config.yaml
+ros2 launch launch_pkg fsae.launch.py config:=config.yaml
 ```
 
 To run the simulator:
 ```bash
-ros2 launch launch_pkg fsae.launch.py config:=src/src/common/launch_pkg/config/sim_config.yaml
+ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml
 ```
 
 ## Common problems

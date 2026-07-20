@@ -12,6 +12,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rc_interfaces REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(CDT REQUIRED CONFIG)
 
@@ -23,6 +24,7 @@ ament_target_dependencies(triangulator
   rclcpp
   rc_interfaces
   geometry_msgs
+  nav_msgs
   visualization_msgs
 )
 
