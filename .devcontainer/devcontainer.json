@@ -2,7 +2,7 @@
   "name": "f1tenth",
   "service": "dev",
   "dockerComposeFile": "../docker/compose.dev.yml",
-  "workspaceFolder": "/f1tenth",
+  "workspaceFolder": "/f1tenth/src",
   "initializeCommand": "docker pull ualbertaformula/f1tenth:latest && docker pull ualbertaformula/f1tenth-sim:latest",
   "shutdownAction": "stopCompose",
   "features": {

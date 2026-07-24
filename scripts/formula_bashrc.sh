@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export FORMULA_HOME=$(
-	cd "$(dirname "${BASH_SOURCE[0]}")/.."
+	cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 	pwd -P
 )
 alias rc_home="cd $FORMULA_HOME"
@@ -97,7 +97,7 @@ rc_build() {
 # ----------------- all aliases go here ---------------------------------------
 alias rc_all='rc_clean && rc_build && rc_source'
 alias rc_run_auto='rc_source && ros2 launch launch_pkg fsae.launch.py config:=config.yaml'
-alias rc_run_sim='source $FORMULA_HOME/scripts/simulator_setup.sh && run_sim'
+alias rc_run_sim='source $FORMULA_HOME/src/scripts/simulator_setup.sh && run_sim'
 alias launch_zed_wrapper='ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i'
 
 source_ros_humble() {

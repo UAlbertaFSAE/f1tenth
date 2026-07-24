@@ -12,7 +12,8 @@ PACKAGES_IGNORE ?= livox_ros_driver2 livox_sdk2 zed_wrapper zed_components
 # workspace root and never inside this (git-tracked) src/ directory.
 WS_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 
-VENV_ACTIVATE := src/venv/bin/activate
+VENV_ACTIVATE := venv/bin/activate
+ROS_SETUP := /opt/ros/humble/setup.bash
 
 help:
 	@echo "Usage:"
@@ -30,10 +31,10 @@ deps:
 	cd $(WS_ROOT) && bash src/scripts/setup.sh
 
 build:
-	cd $(WS_ROOT) && colcon build --packages-ignore $(PACKAGES_IGNORE)
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build --packages-ignore $(PACKAGES_IGNORE)"
 
 build_all:
-	cd $(WS_ROOT) && colcon build
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build"
 
 package:
 	@if [ "$(words $(MAKECMDGOALS))" -lt 2 ]; then \
@@ -41,7 +42,7 @@ package:
 		echo "Usage: make package <package_name> [package_name ...]"; \
 		exit 1; \
 	fi
-	cd $(WS_ROOT) && colcon build --packages-select $(filter-out package,$(MAKECMDGOALS))
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build --packages-select $(filter-out package,$(MAKECMDGOALS))"
 
 clean:
 	cd $(WS_ROOT) && rm -rf build install log
@@ -49,14 +50,14 @@ clean:
 rebuild: clean build
 
 test:
-	cd $(WS_ROOT) && colcon test
-	cd $(WS_ROOT) && colcon test-result --verbose
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon test"
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && colcon test-result --verbose"
 
 run_auto:
-	cd $(WS_ROOT) && bash -c "source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=config.yaml"
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=config.yaml"
 
 run_sim:
-	cd $(WS_ROOT) && bash -c "source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml"
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml"
 
 # Allow package names to be passed as command-line arguments
 %:

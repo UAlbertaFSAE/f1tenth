@@ -1,22 +1,27 @@
 FROM ros:humble
 
+ARG USERNAME=autonomous
+ARG USER_UID=1000
+ARG USER_GID=${USER_UID}
+
 SHELL ["/bin/bash", "-c"]
 
+# Create the user
+RUN groupadd --gid ${USER_GID} ${USERNAME} \
+    && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
+    && apt update \
+    && apt install -y sudo \
+    && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME}
+
 # install apt packages
-COPY docker/deps/packages.txt deps/packages.txt
-COPY docker/deps/packages-jetson.txt deps/packages-jetson.txt
+RUN mkdir -p /tmp/deps
+COPY docker/deps/packages.txt docker/deps/packages-jetson.txt /tmp/deps/
 RUN apt update && apt install -q -y --no-install-recommends \
-    $(cat deps/packages.txt) \
-    $(cat deps/packages-jetson.txt) \
+    $(cat /tmp/deps/packages.txt) \
+    $(cat /tmp/deps/packages-jetson.txt) \
     libeigen3-dev \
     && rm -rf /var/lib/apt/lists/* && apt-get clean
-
-# install CDT (Constrained Delaunay Triangulation)
-RUN git clone https://github.com/artem-ogre/CDT.git && \
-    cmake -S CDT/CDT -B CDT/build -DCDT_USE_AS_COMPILED_LIBRARY=ON && \
-    cmake --build CDT/build && \
-    cmake --install CDT/build && \
-    rm -rf CDT
 
 # install clang tooling (version 18)
 RUN wget https://apt.llvm.org/llvm.sh \
@@ -25,15 +30,8 @@ RUN wget https://apt.llvm.org/llvm.sh \
     && apt update && apt install -y \
     clang-tools-18 \
     clang-tidy-18 \
-    clang-format-18
-
-# install python packages
-COPY docker/deps/requirements.txt deps/requirements.txt
-COPY docker/deps/requirements-jetson.txt deps/requirements-jetson.txt
-
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements-jetson.txt
-RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
+    clang-format-18 \
+    && rm -f llvm.sh
 
 # install ZED SDK
 RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-release wget less udev sudo apt-transport-https zstd && \
@@ -43,14 +41,27 @@ RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-re
     rm -rf ZED_SDK_Linux.run && \
     rm -rf /var/lib/apt/lists/* && apt-get clean
 
-# setup bashrc
-RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /root/.bashrc
-
-RUN git config --global --add safe.directory /f1tenth
-RUN git config --global user.email "formula@ualberta.ca"
-RUN git config --global user.name "formula"
+RUN git config --global user.email "formula@ualberta.ca" \
+    && git config --global user.name "formula"
 
 ENV IS_JETSON=TRUE
 
+# The workspace root (WS_ROOT/FORMULA_HOME) is /f1tenth; the git repo lives at
+# /f1tenth/src, one level below -- matching the bare-metal layout so
+# `make deps`/`make build` behave identically in and out of the container. At
+# runtime the devcontainer bind-mounts a live checkout over /f1tenth/src only,
+# so the venv/build/install baked in here are never touched or wiped by that
+# mount.
+COPY --chown=${USER_UID}:${USER_GID} . /f1tenth/src
+RUN git config --system --add safe.directory /f1tenth/src
+
 USER ${USERNAME}
+WORKDIR /f1tenth/src
+
+# Full environment setup (system/rosdep/venv deps) then a full colcon build,
+# including the ZED packages this image needs (only livox is skipped -- no
+# Livox hardware on this platform).
+RUN make deps
+RUN make build PACKAGES_IGNORE="livox_ros_driver2 livox_sdk2"
+
 ENTRYPOINT [ "/bin/bash" ]

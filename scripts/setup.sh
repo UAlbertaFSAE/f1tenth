@@ -208,7 +208,7 @@ install_cdt_if_needed() {
 
   rm -rf "$workdir/CDT/build"
   mkdir -p "$workdir/CDT/build"
-  (cd "$workdir/CDT/build" && cmake -DCDT_USE_AS_COMPILED_LIBRARY=ON -DCDT_ENABLE_CALLBACK_HANDLER=ON -DCDT_USE_64_BIT_INDEX_TYPE=ON ..)
+  (cd "$workdir/CDT/build" && cmake -DCDT_USE_AS_COMPILED_LIBRARY=ON -DCDT_ENABLE_CALLBACK_HANDLER=ON -DCDT_USE_64_BIT_INDEX_TYPE=ON ../CDT)
   (cd "$workdir/CDT/build" && cmake --build . -j"$(nproc)")
   (cd "$workdir/CDT/build" && sudo cmake --install .)
 }
@@ -230,11 +230,16 @@ setup_python_venv() {
   log "Setting up Python venv and installing Python dependencies…"
 
   activate_python_venv
+  
+  local requirements_path="${FORMULA_HOME}/src/docker/deps/requirements.txt"
 
-  if [[ -f "$FORMULA_HOME/requirements.txt" ]]; then
-    python -m pip install -r "$FORMULA_HOME/requirements.txt"
+  if [[ -f "$requirements_path" ]]; then
+      python3 -m pip install -r "$requirements_path" || {
+          error "Failed to install Python dependencies from $requirements_path"
+          return 1
+      }
   else
-    warn "No requirements.txt found at $FORMULA_HOME/requirements.txt; skipping."
+      warn "No requirements.txt found at $requirements_path; skipping."
   fi
 
   # Install f1tenth_gym (and its dependencies) in editable mode.

@@ -12,7 +12,7 @@ services:
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - IS_JETSON=FALSE
     volumes:
-      - ..:/f1tenth:cached
+      - ..:/f1tenth/src:cached
       - /dev:/dev
     tty: true
     stdin_open: true
