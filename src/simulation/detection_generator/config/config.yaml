@@ -1,6 +1,6 @@
 detection_generator_node:
   ros__parameters:
-    track_type: curved
+    track_type: curved # straight, curved, levine, eight
     csv_path: ""
     cone_topic: /cone_positions
     odom_topic: /ego_racecar/odom # gym_bridge's ego odom topic (detection_generator is sim-only)

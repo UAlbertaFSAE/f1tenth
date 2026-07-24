@@ -23,11 +23,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Check out one level below $GITHUB_WORKSPACE so the layout matches
+          # the bare-metal/devcontainer convention formula_bashrc.sh assumes:
+          # FORMULA_HOME (= $GITHUB_WORKSPACE here) is the parent of the repo
+          # (checked out as "src"), with build/install/log as its siblings.
+          path: src
 
       - name: Build Packages
         run: |
-          echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
-          source ~/.bashrc
+          # Source formula_bashrc.sh directly rather than routing through
+          # ~/.bashrc: Ubuntu's default ~/.bashrc starts with a guard that
+          # returns immediately for non-interactive shells (checks `$-` for
+          # the `i` flag), so sourcing it from a CI run step is a silent
+          # no-op and rc_build is never defined.
+          source ./src/scripts/formula_bashrc.sh
           rc_build
 
       # NOTE: don't want to waste action minutes and rebuild everything for

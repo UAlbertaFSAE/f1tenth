@@ -29,6 +29,16 @@ need_cmd() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# Already root (e.g. during a Docker image build) -> skip sudo entirely.
+# Under QEMU-emulated builds (e.g. linux/arm64 via buildx), sudo can fail
+# with "effective uid is not 0" (nosuid) even when the calling user is root,
+# so avoid invoking it at all rather than relying on it to be a no-op.
+if [[ "$(id -u)" -eq 0 ]]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
 ensure_colcon_ignores_venv() {
   # If a venv exists under the ROS source tree (<ws>/src/venv), colcon may try to
   # treat Python packages inside site-packages as ROS packages, causing cryptic
@@ -60,6 +70,9 @@ source_ros_humble() {
 }
 
 require_sudo() {
+  if [[ -z "$SUDO" ]]; then
+    return 0
+  fi
   if ! need_cmd sudo; then
     err "sudo not found; cannot install system packages."
     exit 1
@@ -105,25 +118,25 @@ install_ros2_humble_ubuntu() {
   log "Installing ROS 2 Humble (Ubuntu 22.04/jammy)…"
   require_sudo
 
-  sudo apt-get update -y
-  sudo apt-get install -y --no-install-recommends \
+  $SUDO apt-get update -y
+  $SUDO apt-get install -y --no-install-recommends \
     locales \
     curl \
     gnupg \
     lsb-release
 
-  sudo locale-gen en_US en_US.UTF-8
-  sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+  $SUDO locale-gen en_US en_US.UTF-8
+  $SUDO update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
   export LANG=en_US.UTF-8
 
-  sudo mkdir -p /etc/apt/keyrings
-  curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | sudo gpg --dearmor -o /etc/apt/keyrings/ros-archive-keyring.gpg
+  $SUDO mkdir -p /etc/apt/keyrings
+  curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | $SUDO gpg --dearmor -o /etc/apt/keyrings/ros-archive-keyring.gpg
 
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) main" \
-    | sudo tee /etc/apt/sources.list.d/ros2.list >/dev/null
+    | $SUDO tee /etc/apt/sources.list.d/ros2.list >/dev/null
 
-  sudo apt-get update -y
-  sudo apt-get install -y \
+  $SUDO apt-get update -y
+  $SUDO apt-get install -y \
     ros-humble-desktop \
     python3-rosdep \
     python3-colcon-common-extensions
@@ -132,8 +145,8 @@ install_ros2_humble_ubuntu() {
 install_apt_prereqs() {
   log "Installing apt prerequisites (build tools, Eigen3, rosdep helpers)…"
   require_sudo
-  sudo apt-get update -y --fix-missing
-  sudo apt-get install -y \
+  $SUDO apt-get update -y --fix-missing
+  $SUDO apt-get install -y \
     build-essential \
     cmake \
     git \
@@ -158,13 +171,13 @@ init_rosdep_if_needed() {
     && [[ ! -f /usr/share/python3-rosdep2/debian.yaml ]]; then
     warn "Removing stale rosdep source /etc/ros/rosdep/sources.list.d/10-debian.list (references missing python3-rosdep2/debian.yaml)…"
     require_sudo
-    sudo rm -f /etc/ros/rosdep/sources.list.d/10-debian.list
+    $SUDO rm -f /etc/ros/rosdep/sources.list.d/10-debian.list
   fi
 
   if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
     log "Initializing rosdep…"
     require_sudo
-    sudo rosdep init
+    $SUDO rosdep init
   fi
   log "Updating rosdep…"
   # Clear user's cache index so sources list changes take effect immediately.
@@ -210,7 +223,7 @@ install_cdt_if_needed() {
   mkdir -p "$workdir/CDT/build"
   (cd "$workdir/CDT/build" && cmake -DCDT_USE_AS_COMPILED_LIBRARY=ON -DCDT_ENABLE_CALLBACK_HANDLER=ON -DCDT_USE_64_BIT_INDEX_TYPE=ON ../CDT)
   (cd "$workdir/CDT/build" && cmake --build . -j"$(nproc)")
-  (cd "$workdir/CDT/build" && sudo cmake --install .)
+  (cd "$workdir/CDT/build" && $SUDO cmake --install .)
 }
 
 activate_python_venv() {

@@ -628,6 +628,26 @@ LR Triangulator::split(const rc_interfaces::msg::Cones& cones) {
     }
   }
 
+  // build_working_set() accumulates cones across a rolling window of frames
+  // in first-seen order, not arc order -- once the car has moved between
+  // frames, a newly-visible cone gets appended to the end of the array even
+  // though it belongs somewhere in the middle along the track. Consecutive
+  // entries in pair.left/right are later treated as track-adjacent (both in
+  // the CDT boundary edges and in the pair-based fallback), so a first-seen
+  // order break makes the two boundary-closing edges cross at corners --
+  // exactly the "Boundary intersections detected" case. Sorting by
+  // projection onto the last-known travel direction restores arc order.
+  if (has_active_path_direction_) {
+    const double dir_x = active_dir_x_;
+    const double dir_y = active_dir_y_;
+    auto by_arc_position = [dir_x, dir_y](const rc_interfaces::msg::Cone& a,
+                                          const rc_interfaces::msg::Cone& b) {
+      return (a.x * dir_x + a.y * dir_y) < (b.x * dir_x + b.y * dir_y);
+    };
+    std::sort(pair.left.begin(), pair.left.end(), by_arc_position);
+    std::sort(pair.right.begin(), pair.right.end(), by_arc_position);
+  }
+
   return pair;
 }
 

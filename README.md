@@ -20,3 +20,18 @@ make build           # colcon build
 ```
 
 Run `make help` for the full list of targets (`build_all`, `package <name>`, `clean`, `rebuild`, `test`, `run_auto`, `run_sim`).
+
+### Linux / WSL
+
+`make deps` and `make build` above run directly on your machine — no container needed.
+
+### macOS / Docker
+
+Build/run the dev container and bring up noVNC for a display, then run the sim inside the container:
+
+```bash
+docker compose -f docker/compose.dev.yml up -d dev novnc
+docker compose -f docker/compose.dev.yml exec dev bash -c "cd /f1tenth/src && make run_sim"
+```
+
+Open `http://localhost:8080/vnc.html` in your browser to view it.

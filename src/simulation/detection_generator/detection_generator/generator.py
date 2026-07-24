@@ -231,10 +231,10 @@ class DetectionGenerator(Node):
             return str(share_dir / configured)
 
         normalized_track = track_type.strip().lower()
-        if normalized_track not in {"straight", "eight", "curved"}:
+        if normalized_track not in {"straight", "eight", "curved", "levine"}:
             self.get_logger().warn(
                 "Unsupported track_type '%s'. Falling back to 'straight'. "
-                "Valid values are: straight, eight, curved.",
+                "Valid values are: straight, eight, curved, levine.",
                 track_type,
             )
             normalized_track = "straight"

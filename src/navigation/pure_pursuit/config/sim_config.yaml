@@ -7,10 +7,12 @@ pure_pursuit:
 
     # Pure Pursuit Parameters
     # Lookahead is computed using the following: lookahead = min(max(min_lookahead, max_lookahead * curr_velocity / lookahead_ratio), max_lookahead);
-    min_lookahead: 0.5 # for larger track
-    max_lookahead: 4.0 # lookahead when the car is going around max velocity
+    # Shorter lookahead + higher K_p: react to lateral error sooner and turn harder to close it,
+    # needed for the narrow (3m-wide) levine cone track with tight corners.
+    min_lookahead: 0.3 # for larger track
+    max_lookahead: 2.0 # lookahead when the car is going around max velocity
     lookahead_ratio: 4.0 # approximately the max velocity
-    K_p: 0.30 # proportional gain for steering control, 0.05 for square track, 0.3 for larger track
+    K_p: 0.6 # proportional gain for steering control, 0.05 for square track, 0.3 for larger track
     steering_limit: 25.0
     velocity_percentage: 1.0 # the limit, can only do 1 lap with clean tires
     waypoint_velocity: 6.0 # m/s target speed along cone-derived waypoints (was hardcoded to 1.0)

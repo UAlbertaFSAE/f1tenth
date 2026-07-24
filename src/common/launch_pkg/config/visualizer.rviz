@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Grid1
+        - /Map1
         - /TF1
         - /RobotModel1
         - /Odometry1
@@ -48,6 +49,28 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 60
       Reference Frame: <Fixed Frame>
+      Value: true
+
+    # ── Occupancy grid map (the whole track, not just what's currently visible) ─
+    - Alpha: 0.7
+      Class: rviz_default_plugins/Map
+      Color Scheme: map
+      Draw Behind: true
+      Enabled: true
+      Name: Map
+      Topic:
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map
+      Update Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map_updates
+      Use Timestamp: false
       Value: true
 
     # ── TF axes ────────────────────────────────────────────────────────────────

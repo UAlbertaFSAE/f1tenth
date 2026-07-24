@@ -48,10 +48,14 @@ bridge:
     scan_angle_max: 135.0 # 135°
 
     # map parameters
-    # "levine" is a real indoor floorplan -- its walls are unrelated to the
-    # synthetic cone-track CSVs (detection_generator) and were causing the
-    # car to physically collide with real hallway walls mid-track ("gets
-    # stuck"). "blank" is an open, wall-free canvas suited to cone tracks.
+    # map_path and the ego spawn pose below must both match whichever
+    # track_type detection_generator is using (config/config.yaml in the
+    # detection_generator package) -- don't hand-edit these, run
+    # `make run_sim TRACK=<straight|eight|curved|levine>` (or
+    # `scripts/set_track.py <track>` directly), which sets all of track_type,
+    # map_path, and sx/sy/stheta together from the track's own cone CSV. See
+    # scripts/set_track.py for the map-name lookup and spawn-station choice
+    # per track (levine spawns at station 6, not 0 -- see its comment there).
     map_path: "maps/blank"
     map_img_ext: ".png"
 
@@ -63,10 +67,12 @@ bridge:
     # number of agents, currently only supports 1 or 2
     num_agent: 1
 
-    # ego starting pose on map
-    sx: 0.0
-    sy: 0.0
-    stheta: 0.0
+    # ego starting pose on map -- set together with map_path by
+    # `make run_sim TRACK=<track>` / scripts/set_track.py; see the map
+    # parameters comment above.
+    sx: 0.0000
+    sy: 0.0000
+    stheta: 0.0000
 
     # opp starting pose on map
     sx1: 2.0

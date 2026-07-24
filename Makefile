@@ -26,6 +26,11 @@ help:
 	@echo "  make test                         Run tests"
 	@echo "  make run_auto                     Run autonomous launch"
 	@echo "  make run_sim                      Run simulation launch"
+	@echo "  make run_sim TRACK=<name>         Run simulation on a specific track"
+	@echo "                                    (straight|eight|curved|levine) -- sets"
+	@echo "                                    detection_generator's track_type,"
+	@echo "                                    f1tenth_gym_ros's map_path, and the ego"
+	@echo "                                    spawn pose together, then builds and runs"
 
 deps:
 	cd $(WS_ROOT) && bash src/scripts/setup.sh
@@ -57,6 +62,10 @@ run_auto:
 	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=config.yaml"
 
 run_sim:
+ifdef TRACK
+	cd $(WS_ROOT) && bash -c "source $(VENV_ACTIVATE) && python3 src/scripts/set_track.py $(TRACK)"
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build --packages-select f1tenth_gym_ros detection_generator"
+endif
 	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml"
 
 # Allow package names to be passed as command-line arguments

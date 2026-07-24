@@ -72,7 +72,30 @@ class PurePursuit : public rclcpp::Node {
   double steering_limit;
   double velocity_percentage;
   double waypoint_velocity;
-  double curr_velocity = 0.0;
+  // Starting at 0 pins the very first lookahead computation to min_lookahead
+  // (lookahead = max_lookahead * curr_velocity / lookahead_ratio, clamped
+  // to at least min_lookahead), which is often shorter than the gap between
+  // consecutive waypoints -- nothing passes the in-range test, so
+  // has_valid_waypoint stays false, publish_stop() fires instead of
+  // publish_message(), and curr_velocity (only ever set inside
+  // publish_message()) never leaves 0: a permanent cold-start deadlock.
+  // Starting at waypoint_velocity's default instead gives a real lookahead
+  // distance immediately.
+  double curr_velocity = 6.0;
+
+  // Safety guards: without these, a stale or wildly-wrong waypoint stream
+  // (e.g. triangulator going silent, or a degraded fallback path at a sharp
+  // corner) leaves get_waypoint() driving full speed toward whatever it last
+  // resolved to -- including index 0 if nothing in range was ever found --
+  // with no way to detect that anything is wrong.
+  double waypoint_staleness_timeout;
+  double max_target_distance;
+  rclcpp::Time last_waypoint_time;
+  bool have_waypoint_time = false;
+  // Set by get_waypoint(): false when every waypoint failed the in-range/
+  // not-behind-car test, meaning there is no legitimate target this cycle
+  // (as opposed to defaulting to index 0 regardless of how stale/far it is).
+  bool has_valid_waypoint = false;
 
   bool emergency_breaking = false;
   std::string lane_number = "left";  // left or right lane
@@ -115,6 +138,7 @@ class PurePursuit : public rclcpp::Node {
   double get_velocity(double steering_angle);
 
   void publish_message(double steering_angle);
+  void publish_stop();
 
   void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj);
   void waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path);

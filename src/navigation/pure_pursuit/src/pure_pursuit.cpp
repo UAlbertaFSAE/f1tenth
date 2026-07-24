@@ -35,6 +35,10 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("steering_limit", 25.0);
   this->declare_parameter("velocity_percentage", 1.0);  // 0.6 default
   this->declare_parameter("waypoint_velocity", 6.0);  // m/s target speed along cone-derived waypoints
+  // Safety guards (see pure_pursuit.hpp): stop instead of driving toward a
+  // stale or absurdly-far-away target.
+  this->declare_parameter("waypoint_staleness_timeout", 0.5);
+  this->declare_parameter("max_target_distance", 15.0);
 
   // Default Values
   odom_topic = this->get_parameter("odom_topic").as_string();
@@ -49,6 +53,8 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   steering_limit = this->get_parameter("steering_limit").as_double();
   velocity_percentage = this->get_parameter("velocity_percentage").as_double();
   waypoint_velocity = this->get_parameter("waypoint_velocity").as_double();
+  waypoint_staleness_timeout = this->get_parameter("waypoint_staleness_timeout").as_double();
+  max_target_distance = this->get_parameter("max_target_distance").as_double();
 
   subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
@@ -137,7 +143,6 @@ void PurePursuit::get_waypoint() {
   }
 
   if (final_i == -1) {  // if we haven't found anything, search from the beginning
-    final_i = 0;
     for (int i = 0; i < num_waypoints; i++) {
       if (point_is_behind_car(waypoints.X[i], waypoints.Y[i])) continue;
 
@@ -147,6 +152,15 @@ void PurePursuit::get_waypoint() {
         final_i = i;
       }
     }
+  }
+
+  // If nothing passed the not-behind-car/in-range test anywhere in the whole
+  // array, there is no legitimate target this cycle -- leave waypoints.index
+  // untouched (stale-but-not-wrong) and let the caller treat this as unsafe,
+  // instead of silently defaulting to index 0 regardless of where that is.
+  if (final_i == -1) {
+    has_valid_waypoint = false;
+    return;
   }
 
   // Find the closest point to the car, and use the velocity index for that
@@ -161,9 +175,9 @@ void PurePursuit::get_waypoint() {
     }
   }
 
-  // If a waypoint is not found within our radius, then waypoints.index = 0
   waypoints.index = final_i;
   waypoints.velocity_index = velocity_i;
+  has_valid_waypoint = true;
 }
 
 bool PurePursuit::point_is_behind_car(double x, double y) {
@@ -285,6 +299,15 @@ void PurePursuit::publish_message(double steering_angle) {
   publisher_drive->publish(drive_msgObj);
 }
 
+void PurePursuit::publish_stop() {
+  auto drive_msgObj = ackermann_msgs::msg::AckermannDriveStamped();
+  drive_msgObj.header.stamp = this->now();
+  drive_msgObj.drive.steering_angle = 0.0;
+  drive_msgObj.drive.speed = 0.0;
+  curr_velocity = 0.0;
+  publisher_drive->publish(drive_msgObj);
+}
+
 void PurePursuit::waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path) {
   // The triangulator recomputes and republishes its whole local path every
   // cycle -- treat each message as the current path, atomically replacing the
@@ -319,10 +342,23 @@ void PurePursuit::waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr pa
   }
   waypoints.index = nearest_i;
   waypoints.velocity_index = nearest_i;
+
+  last_waypoint_time = this->now();
+  have_waypoint_time = true;
 }
 
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
   if (num_waypoints == 0) {
+    return;
+  }
+
+  // Waypoints go stale if the triangulator stops publishing (e.g. the car
+  // has drifted far enough off-track that detection_generator can no longer
+  // see any cones) -- without this, we'd keep driving full-speed toward
+  // whatever get_waypoint() last resolved to, forever.
+  if (have_waypoint_time &&
+      (this->now() - last_waypoint_time).seconds() > waypoint_staleness_timeout) {
+    publish_stop();
     return;
   }
 
@@ -336,6 +372,23 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
 
   // interpolate between different way-points
   get_waypoint();
+
+  // Nothing passed the not-behind-car/in-range test anywhere in the array --
+  // there is no legitimate target this cycle. Stop rather than coast toward
+  // whatever waypoints.index was left at.
+  if (!has_valid_waypoint) {
+    publish_stop();
+    return;
+  }
+
+  // Sanity cap: a second, independent guard in case a valid-looking target
+  // is still absurdly far away (e.g. a stale-but-technically-in-range point).
+  double target_distance = p2pdist(waypoints.X[waypoints.index], x_car_world,
+                                    waypoints.Y[waypoints.index], y_car_world);
+  if (target_distance > max_target_distance) {
+    publish_stop();
+    return;
+  }
 
   // use tf2 transform the goal point
   if (!transformandinterp_waypoint()) {
@@ -358,6 +411,8 @@ void PurePursuit::timer_callback() {
   max_lookahead = this->get_parameter("max_lookahead").as_double();
   lookahead_ratio = this->get_parameter("lookahead_ratio").as_double();
   steering_limit = this->get_parameter("steering_limit").as_double();
+  waypoint_staleness_timeout = this->get_parameter("waypoint_staleness_timeout").as_double();
+  max_target_distance = this->get_parameter("max_target_distance").as_double();
 }
 
 int main(int argc, char **argv) {
