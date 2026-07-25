@@ -28,11 +28,11 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    """Launch detections generator with parameter file support."""
+    """Launch the simulated cone detector with parameter file support."""
     config_file = LaunchConfiguration("config_file")
 
     default_config = PathJoinSubstitution(
-        [FindPackageShare("detection_generator"), "config", "config.yaml"]
+        [FindPackageShare("cone_detector_sim"), "config", "config.yaml"]
     )
 
     return LaunchDescription(
@@ -40,12 +40,12 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "config_file",
                 default_value=default_config,
-                description="Path to detections generator parameter YAML file",
+                description="Path to cone_detector_sim parameter YAML file",
             ),
             Node(
-                package="detection_generator",
-                executable="generator",
-                name="detection_generator_node",
+                package="cone_detector_sim",
+                executable="cone_detector_sim",
+                name="cone_detector_sim_node",
                 output="screen",
                 parameters=[config_file],
             ),

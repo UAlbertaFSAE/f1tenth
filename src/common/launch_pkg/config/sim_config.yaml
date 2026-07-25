@@ -9,6 +9,10 @@ packages:
     args:
       - open_foxglove:=false
 
+  - name: track_map
+    package: map_generator
+    launch_file: track_map_publisher.launch.py
+
   - name: pure_pursuit
     package: pure_pursuit
     launch_file: pure_pursuit.launch.py
@@ -20,8 +24,8 @@ packages:
     launch_file: triangulator.launch.py
 
   - name: generator
-    package: detection_generator
-    launch_file: generator.launch.py
+    package: cone_detector_sim
+    launch_file: cone_detector_sim.launch.py
 
 rviz:
   config_file: visualizer.rviz

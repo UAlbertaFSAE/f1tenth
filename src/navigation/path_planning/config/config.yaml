@@ -37,3 +37,8 @@ triangulator_node:
     window_frames: 6
     # Drop waypoints outside the cone corridor (hard boundary from the cones).
     boundary_constraint_enabled: true
+
+    # false: each publish overwrites the previous frame's markers (cones/
+    # triangulation/waypoints). true: keep every frame's markers on screen
+    # (visual trail) instead of replacing them.
+    view_persist: false

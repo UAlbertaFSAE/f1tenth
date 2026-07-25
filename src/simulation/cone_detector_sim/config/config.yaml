@@ -1,9 +1,8 @@
-detection_generator_node:
+cone_detector_sim_node:
   ros__parameters:
-    track_type: curved # straight, curved, levine, eight
-    csv_path: ""
+    csv_path: "/home/krupal/Documents/f1/f1tenth_ws/src/src/simulation/cone_detector_sim/data/eight.csv" # ground-truth cone CSV (id,x,y,color) -- set by scripts/set_track.py
     cone_topic: /cone_positions
-    odom_topic: /ego_racecar/odom # gym_bridge's ego odom topic (detection_generator is sim-only)
+    odom_topic: /ego_racecar/odom # gym_bridge's ego odom topic (cone_detector_sim is sim-only)
     loop_track: true # whether the track is a closed loop (wraps station lookup around)
     qos_depth: 10
     min_visible_dist: 0.3 # m, nothing closer than this to the car is "seen"
@@ -12,3 +11,5 @@ detection_generator_node:
     arc_window_behind_m: 1.0 # m of track already passed still eligible to show
     arc_window_ahead_m: 12.0 # m of track ahead considered for visibility
     min_publish_period_s: 0.1 # throttle: minimum seconds between published frames
+    cone_marker_topic: /cone_view_markers # currently-visible cones, as MarkerArray, for RViz
+    view_persist: false # false: clear previous frame's cone markers each publish. true: keep them (visual trail)

@@ -3,6 +3,7 @@
 .DEFAULT_GOAL := help
 
 PACKAGES_IGNORE ?= livox_ros_driver2 livox_sdk2 zed_wrapper zed_components
+PARALLEL_WORKERS ?= 0
 
 # Resolve the workspace root (parent of this file's directory) from this
 # Makefile's own location, not the caller's cwd -- so `make` works the same
@@ -26,17 +27,27 @@ help:
 	@echo "  make test                         Run tests"
 	@echo "  make run_auto                     Run autonomous launch"
 	@echo "  make run_sim                      Run simulation launch"
-	@echo "  make run_sim TRACK=<name>         Run simulation on a specific track"
-	@echo "                                    (straight|eight|curved|levine) -- sets"
-	@echo "                                    detection_generator's track_type,"
-	@echo "                                    f1tenth_gym_ros's map_path, and the ego"
-	@echo "                                    spawn pose together, then builds and runs"
+	@echo "  make run_sim CSV=<path>           Run simulation on a specific track CSV"
+	@echo "                                    (id,x,y,color, e.g. from map_generator) --"
+	@echo "                                    sets cone_detector_sim's csv_path,"
+	@echo "                                    map_generator's track_map_publisher csv_path,"
+	@echo "                                    f1tenth_gym_ros's map_path (always"
+	@echo "                                    maps/blank), and the ego spawn pose"
+	@echo "                                    together, then builds and runs"
 
 deps:
 	cd $(WS_ROOT) && bash src/scripts/setup.sh
 
 build:
-	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build --packages-ignore $(PACKAGES_IGNORE)"
+	cd $(WS_ROOT) && bash -c '\
+		source $(ROS_SETUP) && \
+		source $(VENV_ACTIVATE) && \
+		CMD="colcon build --packages-ignore $(PACKAGES_IGNORE)"; \
+		if [ "$(PARALLEL_WORKERS)" != "0" ]; then \
+			CMD="$$CMD --parallel-workers $(PARALLEL_WORKERS)"; \
+		fi; \
+		echo "$$CMD"; \
+		eval "$$CMD"'
 
 build_all:
 	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build"
@@ -62,9 +73,9 @@ run_auto:
 	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=config.yaml"
 
 run_sim:
-ifdef TRACK
-	cd $(WS_ROOT) && bash -c "source $(VENV_ACTIVATE) && python3 src/scripts/set_track.py $(TRACK)"
-	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build --packages-select f1tenth_gym_ros detection_generator"
+ifdef CSV
+	cd $(WS_ROOT) && bash -c "source $(VENV_ACTIVATE) && python3 src/scripts/set_track.py $(CSV)"
+	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && colcon build --packages-select f1tenth_gym_ros cone_detector_sim map_generator"
 endif
 	cd $(WS_ROOT) && bash -c "source $(ROS_SETUP) && source $(VENV_ACTIVATE) && source install/setup.bash && ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml"
 

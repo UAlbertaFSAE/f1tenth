@@ -48,14 +48,14 @@ bridge:
     scan_angle_max: 135.0 # 135°
 
     # map parameters
-    # map_path and the ego spawn pose below must both match whichever
-    # track_type detection_generator is using (config/config.yaml in the
-    # detection_generator package) -- don't hand-edit these, run
-    # `make run_sim TRACK=<straight|eight|curved|levine>` (or
-    # `scripts/set_track.py <track>` directly), which sets all of track_type,
-    # map_path, and sx/sy/stheta together from the track's own cone CSV. See
-    # scripts/set_track.py for the map-name lookup and spawn-station choice
-    # per track (levine spawns at station 6, not 0 -- see its comment there).
+    # Always the blank map -- the track itself is never rasterized into the
+    # map image, it's published separately as ground truth by
+    # map_generator's track_map_publisher (/track_map) and driven live by
+    # cone_detector_sim. The ego spawn pose below must match whichever cone
+    # CSV cone_detector_sim/track_map_publisher are pointed at -- don't
+    # hand-edit these, run `make run_sim CSV=<path/to/track.csv>` (or
+    # `scripts/set_track.py <csv>` directly), which computes sx/sy/stheta
+    # from that CSV's first station and keeps csv_path in sync everywhere.
     map_path: "maps/blank"
     map_img_ext: ".png"
 
@@ -67,12 +67,12 @@ bridge:
     # number of agents, currently only supports 1 or 2
     num_agent: 1
 
-    # ego starting pose on map -- set together with map_path by
-    # `make run_sim TRACK=<track>` / scripts/set_track.py; see the map
+    # ego starting pose on map -- set together with csv_path by
+    # `make run_sim CSV=<path>` / scripts/set_track.py; see the map
     # parameters comment above.
-    sx: 0.0000
-    sy: 0.0000
-    stheta: 0.0000
+    sx: 21.1106
+    sy: -0.0818
+    stheta: -0.8263
 
     # opp starting pose on map
     sx1: 2.0

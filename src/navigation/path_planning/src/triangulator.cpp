@@ -110,6 +110,7 @@ Triangulator::Triangulator() : Node("triangulator_node") {
   this->declare_parameter("turn_penalty_weight", 5.0);
   this->declare_parameter("window_frames", 6);
   this->declare_parameter("boundary_constraint_enabled", true);
+  this->declare_parameter("view_persist", false);
 
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
   std::string waypoint_topic = this->get_parameter("waypoint_topic").as_string();
@@ -135,6 +136,7 @@ Triangulator::Triangulator() : Node("triangulator_node") {
   turn_penalty_weight_ = this->get_parameter("turn_penalty_weight").as_double();
   window_frames_ = static_cast<int>(this->get_parameter("window_frames").as_int());
   boundary_constraint_enabled_ = this->get_parameter("boundary_constraint_enabled").as_bool();
+  view_persist_ = this->get_parameter("view_persist").as_bool();
   if (window_frames_ < 1) {
     window_frames_ = 1;
   }
@@ -878,10 +880,21 @@ void Triangulator::publish_markers(
   visualization_msgs::msg::MarkerArray marker_array;
   const rclcpp::Time now = this->now();
 
+  std::string ns_suffix;
+  if (!view_persist_) {
+    visualization_msgs::msg::Marker clear_marker;
+    clear_marker.header.frame_id = frame_id_;
+    clear_marker.header.stamp = now;
+    clear_marker.action = visualization_msgs::msg::Marker::DELETEALL;
+    marker_array.markers.push_back(clear_marker);
+  } else {
+    ns_suffix = "_" + std::to_string(marker_frame_counter_++);
+  }
+
   visualization_msgs::msg::Marker left_cones_marker;
   left_cones_marker.header.frame_id = frame_id_;
   left_cones_marker.header.stamp = now;
-  left_cones_marker.ns = "cones_left";
+  left_cones_marker.ns = "cones_left" + ns_suffix;
   left_cones_marker.id = 0;
   left_cones_marker.type = visualization_msgs::msg::Marker::SPHERE_LIST;
   left_cones_marker.action = visualization_msgs::msg::Marker::ADD;
@@ -895,7 +908,7 @@ void Triangulator::publish_markers(
   left_cones_marker.color.a = 1.0f;
 
   visualization_msgs::msg::Marker right_cones_marker = left_cones_marker;
-  right_cones_marker.ns = "cones_right";
+  right_cones_marker.ns = "cones_right" + ns_suffix;
   right_cones_marker.id = 1;
   right_cones_marker.color.r = 1.0f;
   right_cones_marker.color.g = 1.0f;
@@ -918,7 +931,7 @@ void Triangulator::publish_markers(
   visualization_msgs::msg::Marker tri_marker;
   tri_marker.header.frame_id = frame_id_;
   tri_marker.header.stamp = now;
-  tri_marker.ns = "triangles";
+  tri_marker.ns = "triangles" + ns_suffix;
   tri_marker.id = 2;
   tri_marker.type = visualization_msgs::msg::Marker::LINE_LIST;
   tri_marker.action = visualization_msgs::msg::Marker::ADD;
@@ -941,7 +954,7 @@ void Triangulator::publish_markers(
   visualization_msgs::msg::Marker waypoint_marker;
   waypoint_marker.header.frame_id = frame_id_;
   waypoint_marker.header.stamp = now;
-  waypoint_marker.ns = "triangulation_waypoints";
+  waypoint_marker.ns = "triangulation_waypoints" + ns_suffix;
   waypoint_marker.id = 3;
   waypoint_marker.type = visualization_msgs::msg::Marker::SPHERE_LIST;
   waypoint_marker.action = visualization_msgs::msg::Marker::ADD;
@@ -960,7 +973,7 @@ void Triangulator::publish_markers(
   visualization_msgs::msg::Marker left_boundary_marker;
   left_boundary_marker.header.frame_id = frame_id_;
   left_boundary_marker.header.stamp = now;
-  left_boundary_marker.ns = "boundary_left";
+  left_boundary_marker.ns = "boundary_left" + ns_suffix;
   left_boundary_marker.id = 4;
   left_boundary_marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
   left_boundary_marker.action = visualization_msgs::msg::Marker::ADD;
@@ -973,7 +986,7 @@ void Triangulator::publish_markers(
   left_boundary_marker.points = left_cones_marker.points;
 
   visualization_msgs::msg::Marker right_boundary_marker = left_boundary_marker;
-  right_boundary_marker.ns = "boundary_right";
+  right_boundary_marker.ns = "boundary_right" + ns_suffix;
   right_boundary_marker.id = 5;
   right_boundary_marker.color.r = 1.0f;
   right_boundary_marker.color.g = 1.0f;

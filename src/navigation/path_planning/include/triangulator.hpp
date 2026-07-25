@@ -77,6 +77,8 @@ class Triangulator : public rclcpp::Node {
   std::deque<rc_interfaces::msg::Cones> frame_window_;
   int window_frames_ = 6;
   bool boundary_constraint_enabled_ = true;
+  bool view_persist_ = false;
+  int marker_frame_counter_ = 0;
   std::vector<geometry_msgs::msg::Point> last_published_waypoints_;
   rclcpp::Subscription<rc_interfaces::msg::Cones>::SharedPtr cone_subscriber;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr waypoint_publisher;

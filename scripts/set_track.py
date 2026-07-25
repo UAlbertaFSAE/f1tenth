@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""Sync track_type, map_path, and ego spawn pose for one named track.
+"""Point the sim at one cone CSV: compute the ego spawn pose from it and wire
+that same CSV into cone_detector_sim and map_generator's track_map_publisher.
 
-detection_generator's track_type and f1tenth_gym_ros's map_path/spawn pose
-are independent parameters in two separate config files with no automatic
-coupling -- get them out of sync (e.g. track_type: levine but map_path still
-pointing at "maps/straight") and cones/map/car all disagree with each other.
-This script is the single place that knows the correct pairing for each
-track, computed the same way they were worked out by hand: the map file that
-matches the track's cone-CSV coordinate frame, and a spawn pose taken
-directly from that CSV (so the car starts already aligned with the track).
+Map is always maps/blank (a real empty occupancy grid) -- the track itself
+is never rasterized into the map image, it's published separately as ground
+truth by map_generator's track_map_publisher (/track_map) and driven live by
+cone_detector_sim (/cone_data, /cone_view_markers). set_track.py's only job
+now is keeping the CSV path and spawn pose in sync across those two configs.
 
-Usage: scripts/set_track.py <straight|eight|curved|levine>
+Usage: scripts/set_track.py <path/to/track.csv> [station_index]
 """
 import csv
 import math
@@ -21,21 +19,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 SIM_YAML = REPO_ROOT / "src/simulation/f1tenth_gym_ros/config/sim.yaml"
-DETECTION_CONFIG = REPO_ROOT / "src/simulation/detection_generator/config/config.yaml"
-DATA_DIR = REPO_ROOT / "src/simulation/detection_generator/data"
-
-# track_type -> (map name under f1tenth_gym_ros/config/maps, cone CSV,
-# station index to spawn at). Station 0 works for the synthetic tracks
-# (straight/eight/curved all start at the origin heading 0); levine's
-# station 0 sits right at a corner/narrow join near the loop's leftmost
-# edge (the contour-tracing start point) and caused an immediate collision,
-# so it spawns at station 6 instead (mid-straightaway).
-TRACKS = {
-    "straight": ("straight", "straight.csv", 0),
-    "eight": ("eight", "eight.csv", 0),
-    "curved": ("blank", "curved.csv", 0),
-    "levine": ("levine", "levine.csv", 6),
-}
+CONE_DETECTOR_CONFIG = REPO_ROOT / "src/simulation/cone_detector_sim/config/config.yaml"
+TRACK_MAP_CONFIG = REPO_ROOT / "src/simulation/map_generator/config/config.yaml"
 
 
 def station_center(stations, sid):
@@ -61,9 +46,9 @@ def compute_spawn_pose(csv_path, station_index):
     return c0[0], c0[1], heading
 
 
-def patch_sim_yaml(map_name, sx, sy, stheta):
+def patch_sim_yaml(sx, sy, stheta):
     text = SIM_YAML.read_text(encoding="utf-8")
-    text = re.sub(r'map_path:\s*"[^"]*"', f'map_path: "maps/{map_name}"', text, count=1)
+    text = re.sub(r'map_path:\s*"[^"]*"', 'map_path: "maps/blank"', text, count=1)
     text = re.sub(r"^(\s*sx:)\s*[-0-9.]+", rf"\g<1> {sx:.4f}", text, count=1, flags=re.MULTILINE)
     text = re.sub(r"^(\s*sy:)\s*[-0-9.]+", rf"\g<1> {sy:.4f}", text, count=1, flags=re.MULTILINE)
     text = re.sub(
@@ -72,25 +57,31 @@ def patch_sim_yaml(map_name, sx, sy, stheta):
     SIM_YAML.write_text(text, encoding="utf-8")
 
 
-def patch_detection_config(track_type):
-    text = DETECTION_CONFIG.read_text(encoding="utf-8")
-    text = re.sub(r"^(\s*track_type:)\s*\S+", rf"\g<1> {track_type}", text, count=1, flags=re.MULTILINE)
-    DETECTION_CONFIG.write_text(text, encoding="utf-8")
+def patch_csv_path(config_path, csv_path):
+    text = config_path.read_text(encoding="utf-8")
+    text = re.sub(r'^(\s*csv_path:)\s*".*"', rf'\g<1> "{csv_path}"', text, count=1, flags=re.MULTILINE)
+    config_path.write_text(text, encoding="utf-8")
 
 
 def main():
-    if len(sys.argv) != 2 or sys.argv[1] not in TRACKS:
-        print(f"Usage: {sys.argv[0]} <{'|'.join(TRACKS)}>", file=sys.stderr)
+    if len(sys.argv) not in (2, 3):
+        print(f"Usage: {sys.argv[0]} <path/to/track.csv> [station_index]", file=sys.stderr)
         return 1
 
-    track_type = sys.argv[1]
-    map_name, csv_name, station_index = TRACKS[track_type]
-    sx, sy, stheta = compute_spawn_pose(DATA_DIR / csv_name, station_index)
+    csv_path = Path(sys.argv[1]).resolve()
+    station_index = int(sys.argv[2]) if len(sys.argv) == 3 else 0
 
-    patch_sim_yaml(map_name, sx, sy, stheta)
-    patch_detection_config(track_type)
+    if not csv_path.is_file():
+        print(f"csv not found: {csv_path}", file=sys.stderr)
+        return 1
 
-    print(f"track_type={track_type} map_path=maps/{map_name} "
+    sx, sy, stheta = compute_spawn_pose(csv_path, station_index)
+
+    patch_sim_yaml(sx, sy, stheta)
+    patch_csv_path(CONE_DETECTOR_CONFIG, str(csv_path))
+    patch_csv_path(TRACK_MAP_CONFIG, str(csv_path))
+
+    print(f"csv={csv_path} map_path=maps/blank "
           f"spawn=({sx:.3f}, {sy:.3f}, {stheta:.4f})")
     return 0
 

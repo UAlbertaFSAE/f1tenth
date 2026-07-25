@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Generate straight/eight/curved track cone station CSVs for detection_generator.
+"""Generate straight/eight/curved track cone station CSVs for cone_detector_sim.
 
 Builds each track's centerline out of line/arc segments and places cone
 stations along it at curvature-adaptive arc-length spacing. The CSV is just
 the ordered station list (id = station index along the track, increasing
-with arc length) - the detection_generator node computes which stations are
+with arc length) - the cone_detector_sim node computes which stations are
 currently visible live, from the car's actual odometry, so no per-frame
 simulation or duplication needs to happen here.
 """

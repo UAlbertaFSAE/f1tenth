@@ -353,7 +353,7 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
   }
 
   // Waypoints go stale if the triangulator stops publishing (e.g. the car
-  // has drifted far enough off-track that detection_generator can no longer
+  // has drifted far enough off-track that cone_detector_sim can no longer
   // see any cones) -- without this, we'd keep driving full-speed toward
   // whatever get_waypoint() last resolved to, forever.
   if (have_waypoint_time &&

@@ -20,7 +20,8 @@ This is the instructions manual to get started and has solutions to some common 
 │   ├── livox_SDK2              # Livox Mid-360 3rd party SDK
 │   └── zed_wrapper             # ZED camera 3rd party SDK
 └── simulation              # Simulation
-    ├── detection_generator     # Simulates camera_detection from cone positions
+    ├── cone_detector_sim       # Simulates camera_detection: limited-FOV cone view from a ground-truth CSV
+    ├── map_generator           # Standalone track editor GUI + ground-truth /track_map publisher
     └── f1tenth_gym_ros         # Vehicle simulator
 ```
 
