@@ -182,7 +182,22 @@ init_rosdep_if_needed() {
   log "Updating rosdep…"
   # Clear user's cache index so sources list changes take effect immediately.
   rm -f "$HOME/.ros/rosdep/sources.cache/index" 2>/dev/null || true
-  rosdep update
+  # rosdep update fetches each distro's index over the network (github raw
+  # content); inside a `docker build` sandbox this flakes intermittently
+  # (DNS hiccup, rate limit) even though the same command succeeds a moment
+  # later -- retry a few times before giving up for real.
+  local attempt
+  for attempt in 1 2 3; do
+    if rosdep update; then
+      return 0
+    fi
+    warn "rosdep update failed (attempt $attempt/3)"
+    if [[ $attempt -lt 3 ]]; then
+      sleep 5
+    fi
+  done
+  err "rosdep update failed after 3 attempts"
+  return 1
 }
 
 install_rosdeps_for_workspace() {

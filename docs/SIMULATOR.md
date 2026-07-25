@@ -4,15 +4,7 @@ We use the [F1Tenth ROS-Gym bridge](https://github.com/f1tenth/f1tenth_gym_ros) 
 
 ### Simulator Start Up
 
-1. open a new terminal (outside of the devcontainer, so in WSL if on windows or a regular new terminal on linux/mac)
-2. run `docker exec -it docker-sim-1 /bin/bash` to enter into the simulator container
-   - you'll know your in if it now says your the root user and your in the `/sim_ws` folder
-3. run `start_sim` to start a tmux session that will spin up the simulator ROS node
-4. go to http://localhost:8080/vnc.html in your browser to see the NoVNC client,press connect
-
-you should see the rviz window with the little rc car in it. If you don't, let a lead know that something is up.
-
-**Note**: to operate the simulated vehicle from the terminal, open up a new tmux pane with `ctrl+b c` and run `ros2 run teleop_twist_keyboard teleop_twist_keyboard`. The terminal will provide instructions on how to move the vehicle, and you must have the terminal as the active window in order for the keyboard inputs to be read.
+1. go to http://localhost:8080/vnc.html in your browser to see the NoVNC client,press connect
 
 ## Local Workflow (map_generator + cone_detector_sim)
 
@@ -39,10 +31,10 @@ python3 main.py
 
 ### 2. Point the sim at that CSV and run
 
-From the workspace root (`f1tenth_ws`):
+From the folder (`f1tenth_ws/src`):
 
 ```bash
-make -C src run_sim CSV=/path/to/your_track.csv
+make run_sim CSV=/path/to/your_track.csv
 ```
 
 This runs `scripts/set_track.py` under the hood, which:
@@ -52,7 +44,7 @@ This runs `scripts/set_track.py` under the hood, which:
 
 then rebuilds `f1tenth_gym_ros`, `cone_detector_sim`, `map_generator`, and launches the full stack (gym bridge, pure_pursuit, triangulator, cone_detector_sim, RViz).
 
-Run `make -C src run_sim` with no `CSV=` to relaunch with whatever CSV/spawn pose is already set in the configs (skips the rebuild-and-resync step).
+Run `make src run_sim` with no `CSV=` to relaunch with whatever CSV/spawn pose is already set in the configs (skips the rebuild-and-resync step).
 
 ### What you'll see in RViz
 
