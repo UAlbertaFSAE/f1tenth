@@ -19,7 +19,8 @@ foreach(PACKAGE
   nav_msgs
   ackermann_msgs
   sensor_msgs
-  std_msgs)
+  std_msgs
+  rc_interfaces)
 #   depthimage_to_laserscan)
 
   find_package(${PACKAGE} REQUIRED)
@@ -32,7 +33,7 @@ include_directories(include)
 # Create Cpp executable
 add_executable(safety_node src/safety_node.cpp)
 ament_target_dependencies(safety_node
-  rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs
+  rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs rc_interfaces
 )
 
 # Install Cpp executables

@@ -256,14 +256,19 @@ double PurePursuit::get_velocity(double steering_angle) {
 
   if (waypoints.V[waypoints.velocity_index]) {
     velocity = waypoints.V[waypoints.velocity_index] * velocity_percentage;
-  } else {  // For waypoints loaded without velocity profiles
+  } else {
+    // No real per-point velocity profile (e.g. the live triangulated path) --
+    // use the steering angle this cycle's lookahead point requires as a
+    // curvature proxy: sharper required steering means a tighter local turn,
+    // so slow down. Ratios (1.0 / 0.42 / 0.33) match what this used to be
+    // hardcoded to (6.0 / 2.5 / 2.0) before waypoint_velocity was tunable.
     if (abs(steering_angle) >= to_radians(0.0) && abs(steering_angle) < to_radians(10.0)) {
-      velocity = 6.0 * velocity_percentage;
+      velocity = waypoint_velocity * velocity_percentage;
     } else if (abs(steering_angle) >= to_radians(10.0) &&
                abs(steering_angle) <= to_radians(20.0)) {
-      velocity = 2.5 * velocity_percentage;
+      velocity = 0.42 * waypoint_velocity * velocity_percentage;
     } else {
-      velocity = 2.0 * velocity_percentage;
+      velocity = 0.33 * waypoint_velocity * velocity_percentage;
     }
   }
 
@@ -325,7 +330,7 @@ void PurePursuit::waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr pa
   for (const auto& pose : path->poses) {
     waypoints.X.push_back(pose.pose.position.x);
     waypoints.Y.push_back(pose.pose.position.y);
-    waypoints.V.push_back(waypoint_velocity);
+    waypoints.V.push_back(0.0);
   }
   num_waypoints = static_cast<int>(waypoints.X.size());
 

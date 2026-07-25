@@ -70,9 +70,9 @@ bridge:
     # ego starting pose on map -- set together with csv_path by
     # `make run_sim CSV=<path>` / scripts/set_track.py; see the map
     # parameters comment above.
-    sx: 21.1106
-    sy: -0.0818
-    stheta: -0.8263
+    sx: 0.0225
+    sy: 1.2134
+    stheta: 0.5898
 
     # opp starting pose on map
     sx1: 2.0

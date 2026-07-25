@@ -19,6 +19,7 @@
   <depend>ackermann_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>depthimage_to_laserscan</depend>
+  <depend>rc_interfaces</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -31,7 +31,9 @@
 #include <utility>
 #include <vector>
 
-#include "CDT.h"
+#include "bspline.hpp"
+#include "delaunay_filters.hpp"
+#include "graph_search.hpp"
 
 namespace {
 double sqr_distance(const rc_interfaces::msg::Cone& a, const rc_interfaces::msg::Cone& b) {
@@ -40,50 +42,16 @@ double sqr_distance(const rc_interfaces::msg::Cone& a, const rc_interfaces::msg:
   return dx * dx + dy * dy;
 }
 
-double cross_2d(double ax, double ay, double bx, double by, double cx, double cy) {
-  return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
-}
-
-bool on_segment(double ax, double ay, double bx, double by, double px, double py) {
-  return px >= std::min(ax, bx) && px <= std::max(ax, bx) && py >= std::min(ay, by) &&
-         py <= std::max(ay, by);
-}
-
-bool segments_intersect(double ax, double ay, double bx, double by, double cx, double cy,
-                        double dx, double dy) {
-  constexpr double kEpsilon = 1e-9;
-
-  const double o1 = cross_2d(ax, ay, bx, by, cx, cy);
-  const double o2 = cross_2d(ax, ay, bx, by, dx, dy);
-  const double o3 = cross_2d(cx, cy, dx, dy, ax, ay);
-  const double o4 = cross_2d(cx, cy, dx, dy, bx, by);
-
-  const bool proper_intersection =
-      ((o1 > kEpsilon && o2 < -kEpsilon) || (o1 < -kEpsilon && o2 > kEpsilon)) &&
-      ((o3 > kEpsilon && o4 < -kEpsilon) || (o3 < -kEpsilon && o4 > kEpsilon));
-  if (proper_intersection) {
-    return true;
-  }
-
-  if (std::abs(o1) <= kEpsilon && on_segment(ax, ay, bx, by, cx, cy)) {
-    return true;
-  }
-  if (std::abs(o2) <= kEpsilon && on_segment(ax, ay, bx, by, dx, dy)) {
-    return true;
-  }
-  if (std::abs(o3) <= kEpsilon && on_segment(cx, cy, dx, dy, ax, ay)) {
-    return true;
-  }
-  if (std::abs(o4) <= kEpsilon && on_segment(cx, cy, dx, dy, bx, by)) {
-    return true;
-  }
-
-  return false;
+double yaw_from_quaternion(const geometry_msgs::msg::Quaternion& q) {
+  const double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
+  const double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
+  return std::atan2(siny_cosp, cosy_cosp);
 }
 }  // namespace
 
 Triangulator::Triangulator() : Node("triangulator_node") {
   this->declare_parameter("cones_topic", "/cone_positions");
+  this->declare_parameter("odom_topic", "/ego_racecar/odom");
   this->declare_parameter("waypoint_topic", "/waypoints");
   this->declare_parameter("marker_topic", "/triangulation_markers");
   this->declare_parameter("frame_id", "map");
@@ -112,7 +80,15 @@ Triangulator::Triangulator() : Node("triangulator_node") {
   this->declare_parameter("boundary_constraint_enabled", true);
   this->declare_parameter("view_persist", false);
 
+  // Delaunay-filter-pipeline / graph-search / spline parameters.
+  this->declare_parameter("delaunay_max_edge_m", 5.0);
+  this->declare_parameter("midpoint_connect_radius_m", 3.0);
+  this->declare_parameter("max_turn_deg", 60.0);
+  this->declare_parameter("waypoint_spacing_m", 0.5);
+  this->declare_parameter("heading_smoothing_alpha", 0.05);
+
   std::string cone_topic = this->get_parameter("cones_topic").as_string();
+  std::string odom_topic = this->get_parameter("odom_topic").as_string();
   std::string waypoint_topic = this->get_parameter("waypoint_topic").as_string();
   std::string marker_topic = this->get_parameter("marker_topic").as_string();
   frame_id_ = this->get_parameter("frame_id").as_string();
@@ -137,6 +113,11 @@ Triangulator::Triangulator() : Node("triangulator_node") {
   window_frames_ = static_cast<int>(this->get_parameter("window_frames").as_int());
   boundary_constraint_enabled_ = this->get_parameter("boundary_constraint_enabled").as_bool();
   view_persist_ = this->get_parameter("view_persist").as_bool();
+  delaunay_max_edge_m_ = this->get_parameter("delaunay_max_edge_m").as_double();
+  midpoint_connect_radius_m_ = this->get_parameter("midpoint_connect_radius_m").as_double();
+  max_turn_deg_ = this->get_parameter("max_turn_deg").as_double();
+  waypoint_spacing_m_ = this->get_parameter("waypoint_spacing_m").as_double();
+  heading_smoothing_alpha_ = this->get_parameter("heading_smoothing_alpha").as_double();
   if (window_frames_ < 1) {
     window_frames_ = 1;
   }
@@ -166,6 +147,8 @@ Triangulator::Triangulator() : Node("triangulator_node") {
 
   cone_subscriber = this->create_subscription<rc_interfaces::msg::Cones>(
       cone_topic, rclcpp::QoS(qos_depth), std::bind(&Triangulator::read_cones, this, _1));
+  odom_subscriber = this->create_subscription<nav_msgs::msg::Odometry>(
+      odom_topic, rclcpp::QoS(qos_depth), std::bind(&Triangulator::read_odom, this, _1));
 
   waypoint_publisher = create_publisher<nav_msgs::msg::Path>(waypoint_topic, rclcpp::QoS(qos_depth));
   marker_publisher =
@@ -173,9 +156,41 @@ Triangulator::Triangulator() : Node("triangulator_node") {
 
   RCLCPP_INFO(this->get_logger(),
               "Starting triangulator (gate_enabled=%s, publishing=%s, stop_distance=%.2fm, "
-              "cone_topic=%s, waypoint_topic=%s, marker_topic=%s)",
+              "cone_topic=%s, odom_topic=%s, waypoint_topic=%s, marker_topic=%s)",
               gate_enabled_ ? "true" : "false", publish_enabled_ ? "true" : "false",
-              stop_distance_m_, cone_topic.c_str(), waypoint_topic.c_str(), marker_topic.c_str());
+              stop_distance_m_, cone_topic.c_str(), odom_topic.c_str(), waypoint_topic.c_str(),
+              marker_topic.c_str());
+}
+
+namespace {
+double wrap_pi(double angle) {
+  while (angle > M_PI) angle -= 2.0 * M_PI;
+  while (angle < -M_PI) angle += 2.0 * M_PI;
+  return angle;
+}
+}  // namespace
+
+void Triangulator::read_odom(const nav_msgs::msg::Odometry::ConstSharedPtr odom_msg) {
+  car_pose_.x = odom_msg->pose.pose.position.x;
+  car_pose_.y = odom_msg->pose.pose.position.y;
+  const double raw_yaw = yaw_from_quaternion(odom_msg->pose.pose.orientation);
+
+  // Low-pass filter the heading used for the Delaunay heading filter/graph
+  // search: raw instantaneous yaw is noisy enough (steering oscillation,
+  // physics jitter) to flip which edges count as "ahead" frame to frame even
+  // with a static cone set -- confirmed on track-1. But it must still track
+  // the car through a REAL turn in real time, unlike freezing the reference
+  // until a path already succeeded (that version regressed corner-taking
+  // entirely: the filter can't accept a turn's edges until its reference
+  // already points into the turn). A continuously-updated low-pass filter
+  // does both: smooths the noise, keeps rotating through an actual corner.
+  if (!car_pose_.valid) {
+    smoothed_yaw_ = raw_yaw;
+  } else {
+    smoothed_yaw_ += heading_smoothing_alpha_ * wrap_pi(raw_yaw - smoothed_yaw_);
+  }
+  car_pose_.yaw = raw_yaw;
+  car_pose_.valid = true;
 }
 
 void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones_msg) {
@@ -218,11 +233,18 @@ void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr co
     return;
   }
 
-  // Keep only the last window_frames_ frames so the working set is a short
-  // local segment ahead of the car, not the whole track.
   frame_window_.push_back(filtered_frame);
   while (static_cast<int>(frame_window_.size()) > window_frames_) {
     frame_window_.pop_front();
+  }
+
+  // A brand-new, single-frame working set is the least reliable one there
+  // is -- track-1 showed this concretely: an oddly-shaped station right at
+  // the start produced a misdirected first path from frame 1 alone, and the
+  // car committed to it immediately. Wait for the window to actually fill
+  // before publishing anything.
+  if (static_cast<int>(frame_window_.size()) < window_frames_) {
+    return;
   }
 
   const rc_interfaces::msg::Cones working_set = build_working_set();
@@ -232,14 +254,21 @@ void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr co
 
   const LR pair = split(working_set);
 
-  std::vector<std::array<geometry_msgs::msg::Point, 3>> triangles;
-  std::vector<geometry_msgs::msg::Point> waypoints;
-  if (pair.left.size() >= 2 && pair.right.size() >= 2) {
-    waypoints = build_waypoints_from_triangulation(pair, &triangles);
+  std::vector<path_planning::Edge2D> filtered_edges;
+  std::vector<geometry_msgs::msg::Point> waypoints = compute_path(working_set, &filtered_edges);
+
+  if (waypoints.empty()) {
+    // No path this cycle despite having cones -- pure_pursuit will keep
+    // driving toward whatever it last resolved to until its own staleness
+    // timeout kicks in. Loud on purpose: silent here is what made a
+    // graph-search dead-end at a corner look like a mystery instead of an
+    // obvious "the filters/graph search lost the thread" signal.
+    RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+                         "No path this cycle (%zu cones in working set) -- "
+                         "graph search/filters likely lost connectivity",
+                         working_set.cones.size());
   }
 
-  // Hard boundary: drop any waypoint that falls outside the cone corridor, so
-  // the car cannot be sent across to the other branch of a self-crossing track.
   if (boundary_constraint_enabled_ && !waypoints.empty()) {
     waypoints = constrain_to_corridor(waypoints, pair);
   }
@@ -263,13 +292,13 @@ void Triangulator::read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr co
   }
 
   if (publish_markers_when_idle_ || !waypoints.empty()) {
-    publish_markers(working_set, triangles, waypoints);
+    publish_markers(working_set, filtered_edges, waypoints);
   }
 
   RCLCPP_INFO_THROTTLE(
       this->get_logger(), *this->get_clock(), 2000,
-      "Window cones: %zu (left=%zu right=%zu), triangles=%zu, waypoints=%zu, frames=%zu",
-      working_set.cones.size(), pair.left.size(), pair.right.size(), triangles.size(),
+      "Window cones: %zu (left=%zu right=%zu), filtered_edges=%zu, waypoints=%zu, frames=%zu",
+      working_set.cones.size(), pair.left.size(), pair.right.size(), filtered_edges.size(),
       waypoints.size(), frame_window_.size());
 }
 
@@ -298,12 +327,6 @@ std::vector<geometry_msgs::msg::Point> Triangulator::constrain_to_corridor(
     return waypoints;
   }
 
-  // Local corridor test: a waypoint is legitimate only if it sits close to
-  // *both* an actual left cone and an actual right cone (within max track
-  // width of each). No stitched polygon -- pair.left/pair.right are
-  // independent insertion-order arrays that aren't guaranteed to line up
-  // 1:1, so a polygon built from them can self-intersect and silently pass
-  // through garbage points far from the car ("path runs away").
   const double max_dist = max_track_width_;
   std::vector<geometry_msgs::msg::Point> kept;
   kept.reserve(waypoints.size());
@@ -328,8 +351,6 @@ std::vector<geometry_msgs::msg::Point> Triangulator::constrain_to_corridor(
     }
   }
 
-  // If everything got rejected (degenerate frame), fall back to the
-  // unconstrained set rather than starving pure_pursuit of waypoints.
   return kept.empty() ? waypoints : kept;
 }
 
@@ -414,11 +435,6 @@ std::vector<geometry_msgs::msg::Point> Triangulator::append_stop_extrapolation(
 
 void Triangulator::publish_waypoint_stream(
     const std::vector<geometry_msgs::msg::Point>& waypoints) {
-  // Publish the whole current local path as one atomic message. Streaming
-  // individual points let a single noisy triangulation frame silently evict
-  // an entire prior good path out of pure_pursuit's small FIFO buffer -- an
-  // atomic replace means the consumer always has one coherent path, never a
-  // mix of old and new points.
   nav_msgs::msg::Path path_msg;
   path_msg.header.stamp = this->now();
   path_msg.header.frame_id = frame_id_;
@@ -515,10 +531,6 @@ rc_interfaces::msg::Cones Triangulator::filter_frame_cones(
       const double dy = cy - active_cluster_center_.y;
       const double distance_score = std::sqrt(dx * dx + dy * dy);
 
-      // Maximize alignment with the established travel direction: at a
-      // self-crossing (e.g. figure-eight), the branch that continues nearly
-      // straight should always win over one that requires a sharp turn, even
-      // if that other branch is closer or bigger.
       double turn_penalty = 0.0;
       if (has_active_path_direction_ && distance_score > 1e-6) {
         const double alignment = (dx * active_dir_x_ + dy * active_dir_y_) / distance_score;
@@ -541,19 +553,6 @@ rc_interfaces::msg::Cones Triangulator::filter_frame_cones(
     cluster_cones.push_back(valid_cones[idx]);
   }
 
-  // Direction gate: a self-crossing track (e.g. a figure-eight) can put two
-  // physically distinct branches within `cluster_distance_` of each other, so
-  // proximity clustering alone can't tell them apart at the crossing. Gate on
-  // the current path's travel direction instead: keep only cones that project
-  // forward-ish and stay within track width laterally of where the path has
-  // been heading. The other branch crosses at an angle, so its cones fail
-  // this even when they're geometrically close.
-  //
-  // Only apply this when there is an actual fork this frame (more than one
-  // cluster). On an ordinary curve there is exactly one cluster, and cones
-  // further along a bend legitimately drift laterally from the established
-  // straight-line heading -- gating on heading there rejected the curving
-  // cones and left the path unable to bend at all.
   if (has_active_path_direction_ && has_active_cluster_center_ && clusters.size() > 1) {
     std::vector<rc_interfaces::msg::Cone> gated_cones;
     gated_cones.reserve(cluster_cones.size());
@@ -630,15 +629,6 @@ LR Triangulator::split(const rc_interfaces::msg::Cones& cones) {
     }
   }
 
-  // build_working_set() accumulates cones across a rolling window of frames
-  // in first-seen order, not arc order -- once the car has moved between
-  // frames, a newly-visible cone gets appended to the end of the array even
-  // though it belongs somewhere in the middle along the track. Consecutive
-  // entries in pair.left/right are later treated as track-adjacent (both in
-  // the CDT boundary edges and in the pair-based fallback), so a first-seen
-  // order break makes the two boundary-closing edges cross at corners --
-  // exactly the "Boundary intersections detected" case. Sorting by
-  // projection onto the last-known travel direction restores arc order.
   if (has_active_path_direction_) {
     const double dir_x = active_dir_x_;
     const double dir_y = active_dir_y_;
@@ -653,230 +643,84 @@ LR Triangulator::split(const rc_interfaces::msg::Cones& cones) {
   return pair;
 }
 
-std::vector<geometry_msgs::msg::Point> Triangulator::build_waypoints_from_triangulation(
-    const LR& pair, std::vector<std::array<geometry_msgs::msg::Point, 3>>* triangles_out) {
-  triangles_out->clear();
+std::vector<geometry_msgs::msg::Point> Triangulator::compute_path(
+    const rc_interfaces::msg::Cones& working_set,
+    std::vector<path_planning::Edge2D>* filtered_edges_out) {
+  filtered_edges_out->clear();
 
-  if (pair.left.size() < 2 || pair.right.size() < 2) {
+  std::vector<path_planning::ConeNode> cones;
+  cones.reserve(working_set.cones.size());
+  for (const auto& cone : working_set.cones) {
+    const std::string color = normalize_color(cone.color);
+    if (color != left_color_ && color != right_color_) {
+      continue;
+    }
+    path_planning::ConeNode node;
+    node.pos.x = cone.x;
+    node.pos.y = cone.y;
+    node.is_left = (color == left_color_);
+    cones.push_back(node);
+  }
+
+  if (cones.size() < 3) {
     return {};
   }
 
-  struct Point2D {
-    double x;
-    double y;
-  };
+  // Use the low-pass-filtered heading (see read_odom) instead of raw
+  // instantaneous odom yaw -- raw yaw is noisy enough on its own (steering
+  // oscillation, physics jitter) to flip which edges count as "ahead" frame
+  // to frame even with a completely static cone set, confirmed on track-1.
+  path_planning::CarPose filter_pose = car_pose_;
+  filter_pose.yaw = smoothed_yaw_;
 
-  struct Edge2D {
-    std::pair<std::size_t, std::size_t> vertices;
-  };
+  // Filters 1-3: color, distance, heading -- pruned directly off the raw
+  // (unconstrained) Delaunay mesh over every cone in the working set.
+  const path_planning::DelaunayResult delaunay =
+      path_planning::build_filtered_delaunay(cones, delaunay_max_edge_m_, filter_pose);
 
-  std::vector<Point2D> points;
-  points.reserve(pair.left.size() + pair.right.size());
-
-  for (const auto& cone : pair.left) {
-    points.push_back({cone.x, cone.y});
-  }
-  for (const auto& cone : pair.right) {
-    points.push_back({cone.x, cone.y});
+  if (delaunay.midpoints.empty()) {
+    return {};
   }
 
-  std::vector<Edge2D> boundary_edges;
-  boundary_edges.reserve((pair.left.size() - 1) + (pair.right.size() - 1) + 2);
-
-  const std::size_t left_offset = 0;
-  const std::size_t right_offset = pair.left.size();
-
-  for (std::size_t i = 0; i + 1 < pair.left.size(); ++i) {
-    boundary_edges.push_back({{i + left_offset, i + 1 + left_offset}});
-  }
-  for (std::size_t i = 0; i + 1 < pair.right.size(); ++i) {
-    boundary_edges.push_back({{i + right_offset, i + 1 + right_offset}});
+  // Recover the surviving (post-filter) edges from the midpoints for
+  // visualization -- the raw, unfiltered mesh never leaves delaunay_filters.
+  filtered_edges_out->reserve(delaunay.midpoints.size());
+  for (const auto& mp : delaunay.midpoints) {
+    path_planning::Edge2D edge;
+    edge[0] = cones[mp.cone_a].pos;
+    edge[1] = cones[mp.cone_b].pos;
+    filtered_edges_out->push_back(edge);
   }
 
-  boundary_edges.push_back({{left_offset, right_offset}});
-  boundary_edges.push_back(
-      {{left_offset + pair.left.size() - 1, right_offset + pair.right.size() - 1}});
+  // Graph search: greedy forward walk from the midpoint nearest the car,
+  // rejecting any next-hop that requires turning more than max_turn_deg_.
+  const std::vector<path_planning::Point2D> ordered_path = path_planning::extract_ordered_path(
+      delaunay.midpoints, filter_pose, midpoint_connect_radius_m_, max_turn_deg_);
 
-  bool has_boundary_intersections = false;
-  for (std::size_t i = 0; i < boundary_edges.size() && !has_boundary_intersections; ++i) {
-    for (std::size_t j = i + 1; j < boundary_edges.size(); ++j) {
-      const auto a0 = boundary_edges[i].vertices.first;
-      const auto a1 = boundary_edges[i].vertices.second;
-      const auto b0 = boundary_edges[j].vertices.first;
-      const auto b1 = boundary_edges[j].vertices.second;
-
-      if (a0 == b0 || a0 == b1 || a1 == b0 || a1 == b1) {
-        continue;
-      }
-
-      const auto& p0 = points[a0];
-      const auto& p1 = points[a1];
-      const auto& q0 = points[b0];
-      const auto& q1 = points[b1];
-
-      if (segments_intersect(p0.x, p0.y, p1.x, p1.y, q0.x, q0.y, q1.x, q1.y)) {
-        has_boundary_intersections = true;
-        break;
-      }
-    }
+  if (ordered_path.empty()) {
+    return {};
   }
 
-  if (has_boundary_intersections) {
-    RCLCPP_WARN_THROTTLE(
-        this->get_logger(), *this->get_clock(), 2000,
-        "Boundary intersections detected; using pair-based waypoint fallback instead of CDT");
-    return build_waypoints_from_pairs(pair);
-  }
-
-  CDT::Triangulation<double> cdt(CDT::VertexInsertionOrder::AsProvided);
-  try {
-    cdt.insertVertices(
-        points.begin(), points.end(), [](const Point2D& p) { return p.x; },
-        [](const Point2D& p) { return p.y; });
-    cdt.insertEdges(
-        boundary_edges.begin(), boundary_edges.end(),
-        [](const Edge2D& e) { return e.vertices.first; },
-        [](const Edge2D& e) { return e.vertices.second; });
-    cdt.eraseOuterTrianglesAndHoles();
-  } catch (const std::exception& ex) {
-    RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
-                         "CDT triangulation failed (%s). Using pair-based waypoint fallback.",
-                         ex.what());
-    return build_waypoints_from_pairs(pair);
-  }
-
-  for (const auto& tri : cdt.triangles) {
-    std::array<geometry_msgs::msg::Point, 3> t;
-
-    for (int i = 0; i < 3; ++i) {
-      const std::size_t idx = tri.vertices[i];
-      if (idx >= cdt.vertices.size()) {
-        continue;
-      }
-
-      t[i].x = cdt.vertices[idx].x;
-      t[i].y = cdt.vertices[idx].y;
-      t[i].z = 0.0;
-    }
-
-    triangles_out->push_back(t);
-  }
-
-  std::set<std::pair<std::size_t, std::size_t>> unique_edges;
-  for (const auto& tri : cdt.triangles) {
-    const std::array<std::size_t, 3> ids = {static_cast<std::size_t>(tri.vertices[0]),
-                                            static_cast<std::size_t>(tri.vertices[1]),
-                                            static_cast<std::size_t>(tri.vertices[2])};
-
-    for (int i = 0; i < 3; ++i) {
-      std::size_t a = ids[i];
-      std::size_t b = ids[(i + 1) % 3];
-      if (a > b) {
-        std::swap(a, b);
-      }
-
-      unique_edges.insert({a, b});
-    }
-  }
-
-  // Order along the left boundary's accumulation order (== track travel order),
-  // not lexicographic (x, y) -- an (x, y) sort scrambles path order on any
-  // curved or looping track, which is what made pure_pursuit stall/backtrack.
-  std::vector<std::pair<std::size_t, geometry_msgs::msg::Point>> indexed_waypoints;
-  std::set<std::pair<int, int>> unique_waypoints;
-
-  for (const auto& edge : unique_edges) {
-    const std::size_t a = edge.first;
-    const std::size_t b = edge.second;
-
-    if (a >= cdt.vertices.size() || b >= cdt.vertices.size()) {
-      continue;
-    }
-
-    const bool a_left = a < pair.left.size();
-    const bool b_left = b < pair.left.size();
-    if (a_left == b_left) {
-      continue;
-    }
-
-    geometry_msgs::msg::Point mp;
-    mp.x = (cdt.vertices[a].x + cdt.vertices[b].x) / 2.0;
-    mp.y = (cdt.vertices[a].y + cdt.vertices[b].y) / 2.0;
-    mp.z = 0.0;
-
-    // Deduplicate numerically similar waypoints before publishing.
-    const std::pair<int, int> key{static_cast<int>(std::round(mp.x * 1000.0)),
-                                  static_cast<int>(std::round(mp.y * 1000.0))};
-    if (unique_waypoints.insert(key).second) {
-      const std::size_t left_index = a_left ? a : b;
-      indexed_waypoints.push_back({left_index, mp});
-    }
-  }
-
-  std::sort(indexed_waypoints.begin(), indexed_waypoints.end(),
-            [](const auto& a, const auto& b) { return a.first < b.first; });
+  // Spline: smooth the discrete midpoint sequence and resample it into
+  // uniformly arc-length-spaced waypoints for pure_pursuit.
+  const std::vector<path_planning::Point2D> smoothed =
+      path_planning::smooth_and_resample(ordered_path, waypoint_spacing_m_);
 
   std::vector<geometry_msgs::msg::Point> waypoints;
-  waypoints.reserve(indexed_waypoints.size());
-  for (const auto& entry : indexed_waypoints) {
-    waypoints.push_back(entry.second);
+  waypoints.reserve(smoothed.size());
+  for (const auto& p : smoothed) {
+    geometry_msgs::msg::Point wp;
+    wp.x = p.x;
+    wp.y = p.y;
+    wp.z = 0.0;
+    waypoints.push_back(wp);
   }
-
-  if (waypoints.empty()) {
-    return build_waypoints_from_pairs(pair);
-  }
-
   return waypoints;
 }
 
-std::vector<geometry_msgs::msg::Point> Triangulator::build_waypoints_from_pairs(
-    const LR& pair) const {
-  std::vector<geometry_msgs::msg::Point> waypoints;
-  std::set<std::pair<int, int>> unique_waypoints;
-
-  for (const auto& left : pair.left) {
-    double best_dist = std::numeric_limits<double>::max();
-    const rc_interfaces::msg::Cone* best_right = nullptr;
-
-    for (const auto& right : pair.right) {
-      const double dist = std::sqrt(sqr_distance(left, right));
-      if (dist < min_track_width_ || dist > max_track_width_) {
-        continue;
-      }
-
-      if (dist < best_dist) {
-        best_dist = dist;
-        best_right = &right;
-      }
-    }
-
-    if (best_right == nullptr) {
-      continue;
-    }
-
-    geometry_msgs::msg::Point midpoint;
-    midpoint.x = (left.x + best_right->x) * 0.5;
-    midpoint.y = (left.y + best_right->y) * 0.5;
-    midpoint.z = 0.0;
-
-    const std::pair<int, int> key{static_cast<int>(std::lround(midpoint.x * 1000.0)),
-                                  static_cast<int>(std::lround(midpoint.y * 1000.0))};
-    if (unique_waypoints.insert(key).second) {
-      waypoints.push_back(midpoint);
-    }
-  }
-
-  // pair.left is already in track-travel order (cones are appended in the
-  // order the car first sees them); waypoints built by walking it in order
-  // are already path-ordered, so no re-sort here (an (x, y) sort broke path
-  // order on curved/looping tracks).
-  return waypoints;
-}
-
-void Triangulator::publish_markers(
-    const rc_interfaces::msg::Cones& cones,
-    const std::vector<std::array<geometry_msgs::msg::Point, 3>>& triangles,
-    const std::vector<geometry_msgs::msg::Point>& waypoints) {
+void Triangulator::publish_markers(const rc_interfaces::msg::Cones& cones,
+                                   const std::vector<path_planning::Edge2D>& filtered_edges,
+                                   const std::vector<geometry_msgs::msg::Point>& waypoints) {
   visualization_msgs::msg::MarkerArray marker_array;
   const rclcpp::Time now = this->now();
 
@@ -931,7 +775,7 @@ void Triangulator::publish_markers(
   visualization_msgs::msg::Marker tri_marker;
   tri_marker.header.frame_id = frame_id_;
   tri_marker.header.stamp = now;
-  tri_marker.ns = "triangles" + ns_suffix;
+  tri_marker.ns = "filtered_edges" + ns_suffix;
   tri_marker.id = 2;
   tri_marker.type = visualization_msgs::msg::Marker::LINE_LIST;
   tri_marker.action = visualization_msgs::msg::Marker::ADD;
@@ -942,13 +786,15 @@ void Triangulator::publish_markers(
   tri_marker.color.b = 0.1f;
   tri_marker.color.a = 1.0f;
 
-  for (const auto& tri : triangles) {
-    tri_marker.points.push_back(tri[0]);
-    tri_marker.points.push_back(tri[1]);
-    tri_marker.points.push_back(tri[1]);
-    tri_marker.points.push_back(tri[2]);
-    tri_marker.points.push_back(tri[2]);
-    tri_marker.points.push_back(tri[0]);
+  for (const auto& edge : filtered_edges) {
+    geometry_msgs::msg::Point a;
+    a.x = edge[0].x;
+    a.y = edge[0].y;
+    geometry_msgs::msg::Point b;
+    b.x = edge[1].x;
+    b.y = edge[1].y;
+    tri_marker.points.push_back(a);
+    tri_marker.points.push_back(b);
   }
 
   visualization_msgs::msg::Marker waypoint_marker;

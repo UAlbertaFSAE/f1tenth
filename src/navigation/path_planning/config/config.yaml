@@ -1,6 +1,7 @@
 triangulator_node:
   ros__parameters:
     cones_topic: /cone_positions
+    odom_topic: /ego_racecar/odom
     waypoint_topic: /waypoints
     marker_topic: /triangulation_markers
     frame_id: map
@@ -24,21 +25,28 @@ triangulator_node:
     extrapolation_step: 1.0
     publish_markers_when_idle: true
 
-    # Disambiguate self-crossing tracks (e.g. figure-eight) by travel direction
-    # instead of proximity alone -- see filter_frame_cones() in triangulator.cpp.
     direction_gate_behind_m: 1.0
     direction_gate_half_width_m: 4.0
-    # At a fork, weight this heavily against picking a cluster that needs a
-    # sharp turn, even if it is closer/bigger than the straight continuation.
-    turn_penalty_weight: 5.0
+    turn_penalty_weight: 4.0
 
-    # Rolling local window: only the last N cone frames form the working set,
-    # so a self-crossing track never lands both branches in one triangulation.
     window_frames: 6
-    # Drop waypoints outside the cone corridor (hard boundary from the cones).
     boundary_constraint_enabled: true
 
     # false: each publish overwrites the previous frame's markers (cones/
     # triangulation/waypoints). true: keep every frame's markers on screen
     # (visual trail) instead of replacing them.
     view_persist: false
+
+    # Delaunay edge filters (applied in order, before midpoints are computed):
+    # 1) color (Blue-Blue/Yellow-Yellow edges always dropped, not configurable)
+    # 2) distance -- drop Blue-Yellow edges longer than this
+    delaunay_max_edge_m: 5.0
+    # 3) heading/FOV -- Lower alpha = smoother/slower to track a real turn, 
+    # higher = noisier/faster.
+    heading_smoothing_alpha: 0.05
+
+    midpoint_connect_radius_m: 3.0
+    max_turn_deg: 60.0
+
+    # B-spline: uniform arc-length spacing of the final published waypoints.
+    waypoint_spacing_m: 0.5

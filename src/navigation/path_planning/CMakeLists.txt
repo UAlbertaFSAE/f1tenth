@@ -19,7 +19,12 @@ find_package(CDT REQUIRED CONFIG)
 include_directories(include)
 
 # C++ Node
-add_executable(triangulator src/triangulator.cpp)
+add_executable(triangulator
+  src/triangulator.cpp
+  src/delaunay_filters.cpp
+  src/graph_search.cpp
+  src/bspline.cpp
+)
 ament_target_dependencies(triangulator
   rclcpp
   rc_interfaces

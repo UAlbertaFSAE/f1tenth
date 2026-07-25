@@ -20,13 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <array>
+#ifndef PATH_PLANNING_TRIANGULATOR_HPP_
+#define PATH_PLANNING_TRIANGULATOR_HPP_
+
 #include <deque>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "geometry_msgs/msg/point.hpp"
+#include "geometry_types.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "nav_msgs/msg/path.hpp"
 #include "rc_interfaces/msg/cone.hpp"
 #include "rc_interfaces/msg/cones.hpp"
@@ -41,13 +44,8 @@ struct LR {
   std::vector<rc_interfaces::msg::Cone> right;
 };
 
-/**
- * Maintain two arrays, left and right of the same size which are the positions of the left and
- * right cones Use these two arrays to interpolate points between theme and publish these points
- * for pure pursuit
- */
 class Triangulator : public rclcpp::Node {
- public: 
+ public:
   Triangulator();
 
  private:
@@ -71,9 +69,6 @@ class Triangulator : public rclcpp::Node {
   bool publish_markers_when_idle_ = true;
 
   rc_interfaces::msg::Cones accumulated_cones_;
-  // Rolling window of the most recent filtered cone frames. The working set is
-  // the deduped union of these, keeping path planning local instead of holding
-  // the whole (self-intersecting) track -- global memory is the SLAM nodes' job.
   std::deque<rc_interfaces::msg::Cones> frame_window_;
   int window_frames_ = 6;
   bool boundary_constraint_enabled_ = true;
@@ -81,6 +76,7 @@ class Triangulator : public rclcpp::Node {
   int marker_frame_counter_ = 0;
   std::vector<geometry_msgs::msg::Point> last_published_waypoints_;
   rclcpp::Subscription<rc_interfaces::msg::Cones>::SharedPtr cone_subscriber;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr waypoint_publisher;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher;
   std::string frame_id_;
@@ -93,14 +89,23 @@ class Triangulator : public rclcpp::Node {
   double direction_gate_half_width_m_ = 4.0;
   double turn_penalty_weight_ = 5.0;
 
+  // Delaunay-filter-pipeline / graph-search / spline parameters.
+  path_planning::CarPose car_pose_;
+  double smoothed_yaw_ = 0.0;
+  double heading_smoothing_alpha_ = 0.05;
+  double delaunay_max_edge_m_ = 5.0;
+  double midpoint_connect_radius_m_ = 3.0;
+  double max_turn_deg_ = 60.0;
+  double waypoint_spacing_m_ = 0.5;
+
   // call backs
   void read_cones(const rc_interfaces::msg::Cones::ConstSharedPtr cones_msg);
+  void read_odom(const nav_msgs::msg::Odometry::ConstSharedPtr odom_msg);
 
   bool is_same_cone(const rc_interfaces::msg::Cone& coneA,
                     const rc_interfaces::msg::Cone& coneB) const;
   std::string normalize_color(const std::string& raw_color) const;
   rc_interfaces::msg::Cones filter_frame_cones(const rc_interfaces::msg::Cones& frame_cones);
-  std::vector<geometry_msgs::msg::Point> build_waypoints_from_pairs(const LR& pair) const;
   bool has_cone(const rc_interfaces::msg::Cone& cone) const;
   rc_interfaces::msg::Cones build_working_set() const;
   std::vector<geometry_msgs::msg::Point> constrain_to_corridor(
@@ -110,9 +115,12 @@ class Triangulator : public rclcpp::Node {
       const std::vector<geometry_msgs::msg::Point>& waypoints) const;
   void publish_waypoint_stream(const std::vector<geometry_msgs::msg::Point>& waypoints);
   LR split(const rc_interfaces::msg::Cones& cones);
-  std::vector<geometry_msgs::msg::Point> build_waypoints_from_triangulation(
-      const LR& pair, std::vector<std::array<geometry_msgs::msg::Point, 3>>* triangles_out);
+  std::vector<geometry_msgs::msg::Point> compute_path(
+      const rc_interfaces::msg::Cones& working_set,
+      std::vector<path_planning::Edge2D>* triangles_out);
   void publish_markers(const rc_interfaces::msg::Cones& cones,
-                       const std::vector<std::array<geometry_msgs::msg::Point, 3>>& triangles,
+                       const std::vector<path_planning::Edge2D>& triangles,
                        const std::vector<geometry_msgs::msg::Point>& waypoints);
 };
+
+#endif  // PATH_PLANNING_TRIANGULATOR_HPP_
