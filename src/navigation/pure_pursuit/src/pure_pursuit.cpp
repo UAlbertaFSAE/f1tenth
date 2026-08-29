@@ -19,6 +19,7 @@
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+#include "nav_msgs/msg/path.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -26,7 +27,7 @@
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   // initialise parameters
   this->declare_parameter("odom_topic", "/odom");
-  this->declare_parameter("waypoint_topic", "/waypoints");
+  this->declare_parameter("waypoint_topic", "/planned_path_smooth");
   this->declare_parameter("car_refFrame", "base_link");
   this->declare_parameter("drive_topic", "/drive");
   this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
@@ -57,7 +58,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
 
-  waypoint_subscriber = this->create_subscription<geometry_msgs::msg::Point>(
+  waypoint_subscriber = this->create_subscription<nav_msgs::msg::Path>(
       waypoint_topic, rclcpp::QoS(10), std::bind(&PurePursuit::waypoint_callback, this, _1));
 
   timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
@@ -321,34 +322,24 @@ void PurePursuit::publish_message(double steering_angle) {
   publisher_drive->publish(drive_msgObj);
 }
 
-void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint) {
-  constexpr int kWaypointHistoryLimit = 20;
-
-  // don't push the same point on multiple times
-  if (num_waypoints > 0) {
-    double last_x = waypoints.X[waypoints.X.size() - 1];
-    double last_y = waypoints.Y[waypoints.Y.size() - 1];
-
-    if (waypoint->x == last_x && waypoint->y == last_y) {
-      return;
-    }
+void PurePursuit::waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path) {
+  if (path->poses.empty()) {
+    return;
   }
 
-  // Keep only the most recent waypoints so stale cone positions do not dominate control.
-  while (num_waypoints >= kWaypointHistoryLimit) {
-    waypoints.X.erase(waypoints.X.begin());
-    waypoints.Y.erase(waypoints.Y.begin());
-    waypoints.V.erase(waypoints.V.begin());
-    num_waypoints--;
+  waypoints.X.clear();
+  waypoints.Y.clear();
+  waypoints.V.clear();
 
-    waypoints.index = std::max(0, waypoints.index - 1);
-    waypoints.velocity_index = std::max(0, waypoints.velocity_index - 1);
+  for (const auto &pose : path->poses) {
+    waypoints.X.push_back(pose.pose.position.x);
+    waypoints.Y.push_back(pose.pose.position.y);
+    waypoints.V.push_back(0);
   }
 
-  waypoints.X.push_back(waypoint->x);
-  waypoints.Y.push_back(waypoint->y);
-  waypoints.V.push_back(1);
-  num_waypoints++;
+  num_waypoints = static_cast<int>(path->poses.size());
+  waypoints.index = 0;
+  waypoints.velocity_index = 0;
 }
 
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
@@ -376,7 +367,7 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
   double steering_angle = p_controller();
 
   // publish object and message: AckermannDriveStamped on drive topic
-  publish_message(steering_angle);
+  publisher_drive == nullptr ? void() : publish_message(steering_angle);
 }
 
 void PurePursuit::timer_callback() {

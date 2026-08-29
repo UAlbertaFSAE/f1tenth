@@ -428,7 +428,7 @@ class ConePublisher(Node):
                 position_3d = det["position_3d"]
 
                 # Draw bounding box
-                color = (0, 255, 0)  # Green for cones
+                f = (0, 255, 0)  # Green for cones
                 cv2.rectangle(viz_image, (x1, y1), (x2, y2), color, 2)
 
                 # Prepare label text

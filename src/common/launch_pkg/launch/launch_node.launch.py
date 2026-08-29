@@ -23,6 +23,7 @@ def generate_launch_description():
     detection_launch_log = node_log_dir / "camera_detection_launch.txt"
     waypoint_launch_log = node_log_dir / "waypoint_generator_launch.txt"
     cone_transformer_log = node_log_dir / "cone_transformer.txt"
+    spline_log = node_log_dir / "spline.txt"
     pure_pursuit_log = node_log_dir / "pure_pursuit.txt"
 
     rosbag_topics = [
@@ -38,6 +39,7 @@ def generate_launch_description():
         "/odom",
         "/parameter_events",
         "/planned_path",
+        "/planned_path_smooth",
         "/rosout",
         "/tf",
         "/tf_static",
@@ -119,6 +121,16 @@ def generate_launch_description():
         output="screen",
     )
 
+    spline = ExecuteProcess(
+        cmd=[
+            "bash",
+            "-lc",
+            f'ros2 run spline_pkg spline 2>&1 | tee -a "{spline_log}"',
+        ],
+        name="spline",
+        output="screen",
+    )
+
     pure_pursuit = ExecuteProcess(
         cmd=[
             "bash",
@@ -129,11 +141,11 @@ def generate_launch_description():
         output="screen",
     )
 
-    rosbag_record = ExecuteProcess(
-        cmd=["ros2", "bag", "record", "-o", str(bag_output_dir), *rosbag_topics],
-        name="rosbag_record",
-        output="log",
-    )
+    # rosbag_record = ExecuteProcess(
+    #     cmd=["ros2", "bag", "record", "-o", str(bag_output_dir), *rosbag_topics],
+    #     name="rosbag_record",
+    #     output="log",
+    # )
 
     return LaunchDescription(
         [
@@ -176,7 +188,8 @@ def generate_launch_description():
             ),
             cone_transformer,
             triangulator_launch,
+            spline,
             pure_pursuit,
-            rosbag_record,
+            # rosbag_record,
         ]
     )

@@ -24,7 +24,7 @@ class Triangulator(Node):
     def __init__(self) -> None:
         """Initialize ROS parameters, subscriptions, and publishers."""
         super().__init__("triangulator")
-
+         
         # Parameters / topics
         self.declare_parameter("cones_topic", "/cone_transformed")
         self.declare_parameter("odom_topic", "/odom")
