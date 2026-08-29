@@ -1,0 +1,3 @@
+from typing import Tuple
+
+def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Tuple[float, float, float, float]: ...

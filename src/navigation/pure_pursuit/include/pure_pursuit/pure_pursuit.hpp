@@ -1,41 +1,38 @@
-/*
-Pure Pursuit Implementation in C++. Includes features such as dynamic lookahead. Does not have
-waypoint interpolation yet.
-*/
-#include <math.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
+// Pure Pursuit header
+// Copyright 2024 F1TENTH contributors
 
-#include <Eigen/Eigen>
+#pragma once
+
+#include <cmath>
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <fstream>
-#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include <Eigen/Eigen>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/point.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 
-#define _USE_MATH_DEFINES
-using std::placeholders::_1;
-using namespace std::chrono_literals;
+// Do not export using-directives from headers; use chrono literals in source files.
 
 class PurePursuit : public rclcpp::Node {
  public:
   PurePursuit();
 
  private:
-  // global static (to be shared by all objects) and dynamic variables (each instance gets its own
-  // copy -> managed on the stack)
   struct csvFileData {
     std::vector<double> X;
     std::vector<double> Y;
@@ -44,10 +41,9 @@ class PurePursuit : public rclcpp::Node {
     int index;
     int velocity_index;
 
-    Eigen::Vector3d lookahead_point_world;  // from world reference frame (usually `map`)
-    Eigen::Vector3d lookahead_point_car;    // from car reference frame
-    Eigen::Vector3d
-        current_point_world;  // Locks on to the closest waypoint, which gives a velocity profile
+    Eigen::Vector3d lookahead_point_world;
+    Eigen::Vector3d lookahead_point_car;
+    Eigen::Vector3d current_point_world;
   };
 
   Eigen::Matrix3d rotation_m;
@@ -77,33 +73,27 @@ class PurePursuit : public rclcpp::Node {
   double curr_velocity = 0.0;
 
   bool emergency_breaking = false;
-  std::string lane_number = "left";  // left or right lane
+  std::string lane_number = "left";
 
-  // file object
   std::fstream csvFile_waypoints;
 
-  // struct initialisation
   csvFileData waypoints;
   int num_waypoints;
 
-  // Timer initialisation
   rclcpp::TimerBase::SharedPtr timer_;
 
-  // declare subscriber sharedpointer obj
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_odom;
   rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr waypoint_subscriber;
 
-  // declare publisher sharedpointer obj
-  rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr publisher_drive;
+  rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr
+      publisher_drive;
 
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr vis_current_point_pub;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr vis_lookahead_point_pub;
 
-  // declare tf shared pointers
   std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
 
-  // private functions
   double to_radians(double degrees);
   double to_degrees(double radians);
   double p2pdist(double &x1, double &x2, double &y1, double &y2);
