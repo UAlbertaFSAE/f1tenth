@@ -3,15 +3,31 @@
 <package format="3">
   <name>launch_pkg</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="fsoehn@ualberta.ca">nvidia</maintainer>
-  <license>Apache-2.0</license>
+  <description>
+    Workspace-level launch entry point. Holds fsae.launch.py and the config
+    files that select which parts of the stack come up.
+  </description>
+  <maintainer email="fsoehn@ualberta.ca">UAlberta Formula SAE</maintainer>
+  <license>MIT</license>
 
-  <exec_depend>ament_index_python</exec_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+
+  <exec_depend>camera_detection</exec_depend>
+  <exec_depend>lidar_cone_filtering</exec_depend>
+  <exec_depend>path_planning</exec_depend>
+  <exec_depend>pure_pursuit</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
