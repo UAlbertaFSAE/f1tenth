@@ -1,0 +1,21 @@
+camera_detection:
+  ros__parameters:
+    depth_node: "/zed/zed_node" # example: zed depth node
+    camera_node: "/zed/zed_node" # example: zed camera node
+    publishing_topic: "/cone_positions" # example: topic to publish detections
+
+    model_file: "/home/nvidia/Desktop/fsae_f1tenth_ws/src/f1tenth/src/perception/camera_detection/models/model.pt"
+    classes_file: "/home/nvidia/Desktop/fsae_f1tenth_ws/src/f1tenth/src/perception/camera_detection/models/classes.txt"
+
+    include_depth: true
+    visualize: true
+    detection_confidence: 0.5
+    publish_rate_hz: 30
+
+    # Cone positions are published already transformed into target_frame, so
+    # /cone_positions carries positions in a fixed frame and needs no separate
+    # transformer node. Set apply_tf to false only to inspect raw camera-frame
+    # detections -- planning and safety both assume a fixed frame.
+    apply_tf: true
+    target_frame: "odom"
+    tf_timeout_sec: 0.5
