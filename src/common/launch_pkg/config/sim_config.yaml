@@ -1,0 +1,20 @@
+# Simulator profile for `ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml`.
+#
+# Same launch file as the car, with the hardware turned off: no ZED, no LiDAR
+# driver, and no static extrinsics (the simulator publishes its own TF tree).
+#
+# The simulator's own plumbing -- map_generator, cone_detector_sim and the
+# track-CSV handling -- is first-party work tracked in #111 and is deliberately
+# not wired up here.
+
+launch:
+  zed_camera: false
+  lidar_driver: false
+  camera_detection: false
+  lidar_cone_filtering: false
+  path_planning: true
+  pure_pursuit: true
+  visualizer: true
+  rosbag: false
+
+static_transforms: []
