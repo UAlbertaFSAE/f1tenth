@@ -26,7 +26,7 @@ class Triangulator(Node):
         super().__init__("triangulator")
 
         # Parameters / topics
-        self.declare_parameter("cones_topic", "/cone_transformed")
+        self.declare_parameter("cones_topic", "/cone_positions")
         self.declare_parameter("odom_topic", "/odom")
         self.declare_parameter("waypoint_topic", "/waypoints")
         self.declare_parameter("path_topic", "/planned_path")

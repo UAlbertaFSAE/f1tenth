@@ -1,7 +1,7 @@
 triangulator:
   ros__parameters:
     # --- Topics ---
-    cones_topic: "/cone_transformed"
+    cones_topic: "/cone_positions"
     odom_topic: "/odom"
     waypoint_topic: "/waypoints"
     path_topic: "/planned_path"

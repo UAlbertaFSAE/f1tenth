@@ -11,3 +11,11 @@ detection_camera:
     visualize: true
     detection_confidence: 0.5
     publish_rate_hz: 30
+
+    # Cone positions are published already transformed into target_frame, so
+    # /cone_positions carries positions in a fixed frame and needs no separate
+    # transformer node. Set apply_tf to false only to inspect raw camera-frame
+    # detections -- planning and safety both assume a fixed frame.
+    apply_tf: true
+    target_frame: "odom"
+    tf_timeout_sec: 0.5

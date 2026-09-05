@@ -19,13 +19,11 @@ def generate_launch_description() -> LaunchDescription:
     zed_launch_log = node_log_dir / "zed_camera_launch.txt"
     detection_launch_log = node_log_dir / "camera_detection_launch.txt"
     waypoint_launch_log = node_log_dir / "waypoint_generator_launch.txt"
-    cone_transformer_log = node_log_dir / "cone_transformer.txt"
     pure_pursuit_log = node_log_dir / "pure_pursuit.txt"
 
     rosbag_topics = [
         "/clicked_point",
         "/cone_positions",
-        "/cone_transformed",
         "/current_waypoint",
         "/detection_visualization/depth",
         "/detection_visualization/detections",
@@ -96,16 +94,6 @@ def generate_launch_description() -> LaunchDescription:
     #     output="screen",
     # )
 
-    cone_transformer = ExecuteProcess(
-        cmd=[
-            "bash",
-            "-lc",
-            f'ros2 run cone_transformer cone_transformer 2>&1 | tee -a "{cone_transformer_log}"',
-        ],
-        name="cone_transformer",
-        output="screen",
-    )
-
     triangulator_launch = ExecuteProcess(
         cmd=[
             "bash",
@@ -171,7 +159,6 @@ def generate_launch_description() -> LaunchDescription:
                 ],
                 output="screen",
             ),
-            cone_transformer,
             triangulator_launch,
             pure_pursuit,
             rosbag_record,
