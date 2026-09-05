@@ -11,7 +11,8 @@ A ROS 2 package for real-time cone detection using YOLO on ZED camera images wit
   - Detection bounding boxes with labels and confidence scores
   - 3D position information (X, Y, Z coordinates)
   - Side-by-side depth visualization
-- Publishes detections as `zed_msgs/ObjectsStamped` messages
+- Publishes detections as `rc_interfaces/Cones` messages, already transformed
+  into a fixed frame (`target_frame`, default `odom`)
 
 ## Dependencies
 
@@ -66,7 +67,26 @@ detection_camera:
     # Detection parameters
     detection_confidence: 0.5
     publish_rate_hz: 30
+
+    apply_tf: true           # Transform cone positions into target_frame
+    target_frame: "odom"     # Fixed frame the published positions are expressed in
+    tf_timeout_sec: 0.5      # How long to wait for a transform before giving up
 ```
+
+### Frames
+
+Cone positions are published in `target_frame`, not the camera frame. The node
+looks the transform up itself using the timestamp of the image the detection
+came from, so a cone is placed where the car was when it was seen rather than
+where the car is by the time the message is handled.
+
+A detection whose transform cannot be resolved is dropped rather than published
+in the camera frame, since a position in the wrong frame is worse than a missing
+one. If TF is failing, check that the `base_link` -> `zed_camera_link` static
+transform and the odometry source are both running.
+
+Setting `apply_tf: false` publishes raw camera-frame positions. That is for
+inspecting detections only -- planning and safety both assume a fixed frame.
 
 ## Usage
 
@@ -102,7 +122,7 @@ ros2 launch detection_camera camera_detection.launch.py \
 - `/zed/zed_node/left/camera_info` (sensor_msgs/CameraInfo) - Camera intrinsics
 
 ### Published Topics:
-- `/cone_positions` (zed_msgs/ObjectsStamped) - Detected objects with 3D positions
+- `/cone_positions` (rc_interfaces/Cones) - Detected cones as (x, y, color) in `target_frame`
 - `/detection_visualization/detections` (sensor_msgs/Image) - Image with bounding boxes (if `visualize: true`)
 - `/detection_visualization/depth` (sensor_msgs/Image) - Colorized depth map with boxes (if `visualize: true`)
 

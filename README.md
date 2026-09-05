@@ -14,7 +14,6 @@ then the detection node: ros2 launch detection_camera camera_detection.launch.py
 then run the following command:ros2
     ros2 run tf2_ros static_transform_publisher -0.05 -0.15 0.40 0.0 0.0 0.0 base_link zed_camera_link
     ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
-then run cone_transfomer: ros2 run cone_transformer cone_transformer
 then run waypoint_new: ros2 launch waypoint_generator waypoint_generator.launch.py
 finally pure-pursuit: ros2 run pure_pursuit pure_pursuit
 
