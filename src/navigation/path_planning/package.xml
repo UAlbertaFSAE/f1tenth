@@ -5,7 +5,7 @@
   <version>0.0.0</version>
   <description>Waypoint triangulation node for F1TENTH</description>
   <maintainer email="mokshdip0804@gmail.com">autonomous</maintainer>
-  <license>Apache-2.0</license>
+  <license>MIT</license>
 
 
   <exec_depend>rclpy</exec_depend>

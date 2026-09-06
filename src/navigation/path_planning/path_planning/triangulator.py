@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
+"""Delaunay-style cone triangulation into a drivable path.
+
+Subscribes to the cone list on ``/cone_positions`` (already in a fixed frame) and the
+car's odometry, pairs left and right cones into gates, and publishes the gate midpoints
+as waypoints and a nav_msgs/Path for pure_pursuit to follow.
+"""
+
 import math
 
 import rclpy

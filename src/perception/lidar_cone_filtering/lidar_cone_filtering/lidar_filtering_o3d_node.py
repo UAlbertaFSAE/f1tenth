@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
+"""LiDAR point-cloud filtering for cone candidates.
+
+Takes the raw point cloud, removes the ground plane and out-of-range returns with Open3D,
+clusters what is left, and publishes the cluster centroids that look cone-sized. This is
+the LiDAR half of perception; the camera half is ``camera_detection``.
+"""
+
 from typing import cast
 
 import numpy as np

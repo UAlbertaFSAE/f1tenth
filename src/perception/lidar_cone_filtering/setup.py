@@ -1,3 +1,8 @@
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
 from setuptools import find_packages, setup
 
 package_name = "lidar_cone_filtering"
