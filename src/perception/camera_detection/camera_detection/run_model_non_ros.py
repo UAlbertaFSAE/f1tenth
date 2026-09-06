@@ -10,6 +10,7 @@ whether the weights are any good rather than whether the node is wired up correc
 """
 
 from contextlib import suppress
+from pathlib import Path
 
 import cv2
 import pyzed.sl as sl
@@ -25,8 +26,9 @@ except Exception:
 
 def main() -> None:
     """Run YOLO inference on ZED 2i camera stream."""
-    model_path = "src/zed-ros2-wrapper/detection_camera/models/model.pt"
-    classes_path = "src/zed-ros2-wrapper/detection_camera/models/classes.txt"
+    package_dir = Path(__file__).resolve().parents[1]
+    model_path = str(package_dir / "models" / "model.pt")
+    classes_path = str(package_dir / "models" / "classes.txt")
 
     # Select device
     device = "cpu"
