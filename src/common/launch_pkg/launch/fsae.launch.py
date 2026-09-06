@@ -1,3 +1,8 @@
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
 """Workspace-level launch entry point for the F1TENTH stack.
 
 One launch file drives the whole car. What actually comes up is decided by a
