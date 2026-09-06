@@ -17,7 +17,7 @@ f1tenth_ws/          workspace root -- build/, install/, log/, venv/ land here
         ├── common/       launch_pkg, rc_interfaces
         ├── hardware/     f1tenth_system (vesc, ackermann_mux, teleop_tools, f1tenth_stack)
         ├── navigation/   particle_filter, path_planning, pure_pursuit
-        ├── perception/   camera_detection, lidar_cone_filtering, livox_SDK2,
+        ├── perception/   camera_detection, lidar_cone_filtering, livox_sdk2,
         │                 livox_ros_driver2, zed_wrapper
         └── simulation/   f1tenth_gym, f1tenth_gym_ros
 ```

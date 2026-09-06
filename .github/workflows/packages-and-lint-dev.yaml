@@ -56,7 +56,7 @@ jobs:
             install
             log
             src/hardware/f1tenth_system
-            src/perception/livox_SDK2
+            src/perception/livox_sdk2
             src/perception/livox_ros_driver2
             src/perception/zed_wrapper
             src/simulation
