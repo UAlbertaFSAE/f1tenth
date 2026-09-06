@@ -5,7 +5,7 @@ target-version = "py310"
 # third-party, they are ours.
 extend-exclude = [
   "src/hardware/f1tenth_system/**",
-  "src/perception/livox_SDK2/**",
+  "src/perception/livox_sdk2/**",
   "src/perception/livox_ros_driver2/**",
   "src/perception/zed_wrapper/**",
   "src/simulation/**",
@@ -69,7 +69,7 @@ exclude = [
     ".*/install/",
     ".*/log/",
     "^src/hardware/f1tenth_system/",
-    "^src/perception/(livox_SDK2|livox_ros_driver2|zed_wrapper)/",
+    "^src/perception/(livox_sdk2|livox_ros_driver2|zed_wrapper)/",
     "^src/simulation/",
 ]
 

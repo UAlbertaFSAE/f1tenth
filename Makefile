@@ -49,7 +49,7 @@ COLCON_BUILD_ARGS = \
 # nothing in day-to-day development touches them. `make build_all` builds them,
 # and `make package zed_wrapper` builds one on demand.
 PACKAGES_IGNORE ?= \
-	livox_SDK2 \
+	livox_sdk2 \
 	livox_ros_driver2 \
 	zed_components \
 	zed_ros2 \
@@ -58,7 +58,7 @@ PACKAGES_IGNORE ?= \
 # Vendored third-party trees. Single source of truth for what `make lint` skips.
 VENDORED_PATHS := \
 	$(SRC_DIR)/hardware/f1tenth_system \
-	$(SRC_DIR)/perception/livox_SDK2 \
+	$(SRC_DIR)/perception/livox_sdk2 \
 	$(SRC_DIR)/perception/livox_ros_driver2 \
 	$(SRC_DIR)/perception/zed_wrapper \
 	$(SRC_DIR)/simulation
