@@ -1,10 +1,14 @@
 [tool.ruff]
 target-version = "py310"
+# Vendored third-party trees only. Every first-party package is linted --
+# pure_pursuit and particle_filter used to be excluded here and are not
+# third-party, they are ours.
 extend-exclude = [
-  "src/navigation/pure_pursuit/**",
-  "src/navigation/particle_filter/**",
-  "src/perception/zed_wrapper/**",
+  "src/hardware/f1tenth_system/**",
+  "src/perception/livox_SDK2/**",
   "src/perception/livox_ros_driver2/**",
+  "src/perception/zed_wrapper/**",
+  "src/simulation/**",
 ]
 
 [tool.ruff.lint]
@@ -51,6 +55,7 @@ convention = "google"
 [tool.mypy]
 python_version = "3.10"
 
+# Build output and vendored third-party trees only, matching ruff above.
 exclude = [
     "^build/",
     "^install/",
@@ -58,10 +63,9 @@ exclude = [
     ".*/build/",
     ".*/install/",
     ".*/log/",
-    ".*/test/",
-    ".*/setup\\.py$",
-    "^src/navigation/(pure_pursuit|particle_filter)/",
-    "^src/perception/(livox_ros_driver2|zed_wrapper)/",
+    "^src/hardware/f1tenth_system/",
+    "^src/perception/(livox_SDK2|livox_ros_driver2|zed_wrapper)/",
+    "^src/simulation/",
 ]
 
 warn_no_return = true
