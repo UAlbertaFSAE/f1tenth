@@ -25,8 +25,6 @@ setup(
         "test": ["pytest"],
     },
     entry_points={
-        "console_scripts": [
-            "triangulator_node = path_planning.triangulator:main"
-        ],
+        "console_scripts": ["triangulator_node = path_planning.triangulator:main"],
     },
 )

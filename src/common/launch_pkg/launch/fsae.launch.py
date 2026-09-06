@@ -56,7 +56,9 @@ DEFAULT_ROSBAG_TOPICS = [
 
 def _load_config(config_name: str) -> dict[str, Any]:
     """Read ``config_name`` from this package's share/config directory."""
-    config_path = Path(get_package_share_directory(PACKAGE_NAME)) / "config" / config_name
+    config_path = (
+        Path(get_package_share_directory(PACKAGE_NAME)) / "config" / config_name
+    )
     if not config_path.is_file():
         raise FileNotFoundError(
             f"No such launch config: {config_path}. "

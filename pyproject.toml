@@ -55,11 +55,16 @@ convention = "google"
 [tool.mypy]
 python_version = "3.10"
 
-# Build output and vendored third-party trees only, matching ruff above.
+# Build output and vendored third-party trees, matching ruff above. The one
+# addition is setup.py: every ament_python package has one, they are all the
+# top-level module "setup", and mypy refuses to check a tree with duplicate
+# module names ("Duplicate module named 'setup'") rather than checking any of
+# it. Ruff still lints these files.
 exclude = [
     "^build/",
     "^install/",
     "^log/",
+    ".*/setup\\.py$",
     ".*/build/",
     ".*/install/",
     ".*/log/",
