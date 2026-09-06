@@ -194,8 +194,17 @@ class ConePublisher(Node):
             self.intrinsics = None
             return
 
-        if math.isnan(fx) or math.isnan(fy) or fx == 0.0 or fy == 0.0:
-            self.get_logger().warn(f"Unusable camera intrinsics: fx={fx}, fy={fy}")
+        if (
+            not math.isfinite(fx)
+            or not math.isfinite(fy)
+            or not math.isfinite(cx)
+            or not math.isfinite(cy)
+            or fx == 0.0
+            or fy == 0.0
+        ):
+            self.get_logger().warn(
+                f"Unusable camera intrinsics: fx={fx}, fy={fy}, cx={cx}, cy={cy}"
+            )
             self.intrinsics = None
             return
 
@@ -252,7 +261,7 @@ class ConePublisher(Node):
     def process_detections(self, results: list, source_header: Header) -> tuple:
         """Convert YOLO results into a list of rc_interfaces/Cone messages.
 
-        Uses latest_depth and latest_caminfo to compute a 3D position for each
+        Uses latest_depth and the parsed camera intrinsics to compute a 3D position for each
         detection, then transforms it into the configured target frame. A
         detection is dropped rather than published in the wrong place when its
         label is not a known cone color, when no valid depth is available, or
