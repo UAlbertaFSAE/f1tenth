@@ -3,12 +3,8 @@ name: Build ROS2 Packages and Lint Repo
 on:
   push:
     branches: [ "main" ]
-    # paths:
-    #   - 'src/**'
   pull_request:
     branches: [ "main" ]
-    # paths:
-    #   - 'src/**'
 
 defaults:
   run:
@@ -21,32 +17,54 @@ jobs:
       image: ualbertaformula/f1tenth
       options: --user root
     steps:
+      # The repo is checked out into src/ so the CI layout matches the
+      # f1tenth_ws/src convention the build tooling assumes. Without this the
+      # workspace root resolves somewhere else in CI than it does locally, and
+      # build/ lands in a different place than clang-tidy looks for it.
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          path: src
 
-      - name: Build Packages
-        run: |
-          echo -e "\nsource ./scripts/formula_bashrc.sh" >> ~/.bashrc
-          source ~/.bashrc
-          rc_build
+      # `make` sources /opt/ros/humble/setup.bash and the venv itself. The old
+      # version appended the build script to ~/.bashrc and sourced that, which
+      # never worked: Ubuntu's default ~/.bashrc returns immediately for
+      # non-interactive shells, so in a `run:` step the appended line is never
+      # reached and the build function is never defined.
+      - name: Build packages
+        run: make -C src build
 
-      # NOTE: don't want to waste action minutes and rebuild everything for
-      # compilation database in a separate job, so doing linting and build in same job
-      - name: lint cpp code using clang-tidy and clang-format
+      # NOTE: don't want to waste action minutes rebuilding everything for the
+      # compilation database in a separate job, so linting and build share one.
+      - name: Lint C++ with clang-tidy and clang-format
         uses: cpp-linter/cpp-linter-action@v2
         id: linter
-        if: ${{ success() }} # only run linting if build was successful
+        if: ${{ success() }} # only lint if the build succeeded
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          style: 'file'  # use .clang-format file
-          tidy-checks: '' # use .clang-tidy config file.
+          style: 'file'   # use .clang-format
+          tidy-checks: '' # use .clang-tidy
           database: './build/'
+          # Defaults to true, which is how main accumulated 58 clang-tidy and 3
+          # clang-format failures without anyone noticing: the linters only ever
+          # saw files a given PR touched, so nothing enforced the tree.
+          files-changed-only: false
+          # Only genuinely vendored code is out of scope.
+          ignore: |
+            build
+            install
+            log
+            src/hardware/f1tenth_system
+            src/perception/livox_SDK2
+            src/perception/livox_ros_driver2
+            src/perception/zed_wrapper
+            src/simulation
           thread-comments: 'update'
           no-lgtm: false
           version: '18'
 
-      # we need this fail check since cpp-linter always succeeds even if checks fail
+      # cpp-linter always succeeds even when checks fail, hence this step.
       - name: Check fail
         if: steps.linter.outputs.checks-failed > 0
         run: exit 1
@@ -60,21 +78,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # super-linter needs the full git history to get the
-          # list of files that changed across commits
+          path: src
+          # MegaLinter needs the full history to diff across commits.
           fetch-depth: 0
 
-      # MegaLinter step
-      - name: MegaLinter for python linting
+      # Exactly what `make lint` runs locally -- ruff check, ruff format --check
+      # and mypy, all against the repo's pyproject.toml. A green local lint is a
+      # green CI lint because it is the same command.
+      - name: Lint Python
+        run: make -C src lint-python
+
+      # MegaLinter repeats ruff and mypy, but reports them as inline PR
+      # annotations rather than a wall of job log, which is worth the minutes.
+      - name: MegaLinter
         id: ml
-        # python flavor
+        if: success() || failure()
         uses: oxsecurity/megalinter/flavors/python@v7.13.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISABLE: COPYPASTE,SPELL
-
-      # run ruff format check for python (megalinter post command seems to be
-      # erroring so I am running this as a separate step)
-      - name: ruff python format check
-        if: success() || failure()
-        run: ruff format --check --config ./pyproject.toml ./src
+          DEFAULT_WORKSPACE: ${{ github.workspace }}/src

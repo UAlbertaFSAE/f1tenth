@@ -1,17 +1,21 @@
-# analyze only our workspace source code
+# Analyze only our workspace source code.
 FILTER_REGEX_INCLUDE: .*src/.*
 
-# exclude third-party / generated ROS packages we do not own
+# Exclude only genuinely vendored code. Every first-party package under src/ is
+# linted, including pure_pursuit and particle_filter -- both are our own code
+# and were excluded here for years, which is most of the reason the lint jobs
+# looked greener than the tree actually was.
 FILTER_REGEX_EXCLUDE: >-
-  .*src/navigation/(pure_pursuit|particle_filter)(/.*)?
-  |.*src/perception/(livox_ros_driver2|zed_wrapper)(/.*)?
+  .*src/hardware/f1tenth_system(/.*)?
+  |.*src/perception/(livox_SDK2|livox_ros_driver2|zed_wrapper)(/.*)?
+  |.*src/simulation(/.*)?
   |.*/build/.*
   |.*/install/.*
   |.*/log/.*
-  |.*/setup\.py$
 
-# don't re-validate everything on every run
-VALIDATE_ALL_CODEBASE: false
+# Check the whole tree, not just what a given PR touched. Scoping to changed
+# files means nothing ever enforces the tree as a whole.
+VALIDATE_ALL_CODEBASE: true
 
 DEFAULT_WORKSPACE: .
 LINTER_RULES_PATH: .
@@ -20,6 +24,6 @@ ENABLE_LINTERS:
   - PYTHON_MYPY
   - PYTHON_RUFF
 
-# use central config file
+# Use the central config file, the same one `make lint` passes to both tools.
 PYTHON_MYPY_CONFIG_FILE: ./pyproject.toml
 PYTHON_RUFF_CONFIG_FILE: ./pyproject.toml
