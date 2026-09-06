@@ -4,8 +4,10 @@ camera_detection:
     camera_node: "/zed/zed_node" # example: zed camera node
     publishing_topic: "/cone_positions" # example: topic to publish detections
 
-    model_file: "/home/nvidia/Desktop/fsae_f1tenth_ws/src/f1tenth/src/perception/camera_detection/models/model.pt"
-    classes_file: "/home/nvidia/Desktop/fsae_f1tenth_ws/src/f1tenth/src/perception/camera_detection/models/classes.txt"
+    # Left empty on purpose: the launch file fills these in from the package
+    # share directory. Set them here only to point at a model somewhere else.
+    model_file: ""
+    classes_file: ""
 
     include_depth: true
     visualize: true

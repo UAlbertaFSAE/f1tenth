@@ -19,12 +19,20 @@ def generate_launch_description() -> LaunchDescription:
 
     rviz_config_path = PathJoinSubstitution([pkg_share, "config", "detection_viz.rviz"])
 
+    # The weights ship with the package, so the paths are resolved from the share
+    # directory rather than written into the config as an absolute path that is
+    # only correct on one machine.
+    model_overrides = {
+        "model_file": PathJoinSubstitution([pkg_share, "models", "model.pt"]),
+        "classes_file": PathJoinSubstitution([pkg_share, "models", "classes.txt"]),
+    }
+
     camera_detection_node = Node(
         package="camera_detection",
         executable="camera_detection",
         name="camera_detection",
         output="screen",
-        parameters=[config_file_path],
+        parameters=[config_file_path, model_overrides],
     )
 
     rviz_node = Node(
