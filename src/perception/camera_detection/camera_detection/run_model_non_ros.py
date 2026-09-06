@@ -1,3 +1,14 @@
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
+"""Run the cone detection model against a live ZED stream without ROS.
+
+A debugging aid for checking the model and the camera in isolation, when the question is
+whether the weights are any good rather than whether the node is wired up correctly.
+"""
+
 from contextlib import suppress
 
 import cv2

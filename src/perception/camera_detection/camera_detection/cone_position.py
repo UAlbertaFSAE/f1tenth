@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
+"""Cone detection from the ZED stream.
+
+Runs YOLO over the rectified colour image, reads each detection's depth, projects it into
+metric space with the camera intrinsics, transforms it into the configured fixed frame,
+and publishes the result as rc_interfaces/Cones on ``/cone_positions``.
+
+The transform happens here rather than in a downstream node because this is the node that
+holds the detection, its frame and its timestamp together.
+"""
+
 import math
 import os
 import traceback

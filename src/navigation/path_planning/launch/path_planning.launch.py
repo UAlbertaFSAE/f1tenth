@@ -1,3 +1,8 @@
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
 import os
 
 from ament_index_python.packages import get_package_share_directory
