@@ -186,7 +186,21 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                         get_package_share_directory("camera_detection"),
                         "config",
                         "camera_detection.yaml",
-                    )
+                    ),
+                    # The weights ship with the package; resolving them here keeps
+                    # an absolute path off one person's machine out of the config.
+                    {
+                        "model_file": os.path.join(
+                            get_package_share_directory("camera_detection"),
+                            "models",
+                            "model.pt",
+                        ),
+                        "classes_file": os.path.join(
+                            get_package_share_directory("camera_detection"),
+                            "models",
+                            "classes.txt",
+                        ),
+                    },
                 ],
             )
         )

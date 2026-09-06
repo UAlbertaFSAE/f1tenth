@@ -57,6 +57,8 @@ __pycache__
 
 # clangd cache
 .cache/
+
+# personal scratch notes, not shared
 notes.txt
 
 *__pycache__/
