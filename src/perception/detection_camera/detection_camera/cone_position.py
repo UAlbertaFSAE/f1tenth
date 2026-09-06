@@ -6,12 +6,17 @@ import traceback
 import cv2
 import numpy as np
 import rclpy
+import tf2_geometry_msgs  # noqa: F401  (registers PointStamped with tf2)
 import torch
 from cv_bridge import CvBridge, CvBridgeError
+from geometry_msgs.msg import PointStamped
+from rc_interfaces.msg import Cone, Cones
+from rclpy.duration import Duration
 from rclpy.node import Node
 from sensor_msgs.msg import CameraInfo, Image
+from std_msgs.msg import Header
+from tf2_ros import Buffer, TransformException, TransformListener
 from ultralytics import YOLO
-from zed_msgs.msg import BoundingBox2Di, Object, ObjectsStamped
 
 
 class ConePublisher(Node):
@@ -31,6 +36,9 @@ class ConePublisher(Node):
         self.declare_parameter("visualize", False)
         self.declare_parameter("detection_confidence", 0.5)
         self.declare_parameter("publish_rate_hz", 30)
+        self.declare_parameter("apply_tf", True)
+        self.declare_parameter("target_frame", "odom")
+        self.declare_parameter("tf_timeout_sec", 0.5)
 
         # Get parameters
         self.depth_node = self.get_parameter("depth_node").value
@@ -42,6 +50,9 @@ class ConePublisher(Node):
         self.visualize = self.get_parameter("visualize").value
         self.detection_confidence = self.get_parameter("detection_confidence").value
         self.publish_rate_hz = self.get_parameter("publish_rate_hz").value
+        self.apply_tf = self.get_parameter("apply_tf").value
+        self.target_frame = self.get_parameter("target_frame").value
+        self.tf_timeout_sec = self.get_parameter("tf_timeout_sec").value
 
         self.get_logger().info("Starting detection camera node")
         self.get_logger().info(f"  Model file: {self.model_file}")
@@ -50,6 +61,26 @@ class ConePublisher(Node):
         self.get_logger().info(f"  Include depth: {self.include_depth}")
         self.get_logger().info(f"  Visualize: {self.visualize}")
         self.get_logger().info(f"  Confidence threshold: {self.detection_confidence}")
+        self.get_logger().info(f"  Apply TF: {self.apply_tf}")
+        self.get_logger().info(f"  Target frame: {self.target_frame}")
+
+        # TF is only set up when it is actually going to be used; a Buffer and
+        # TransformListener that nothing queries still costs a subscription to
+        # /tf and /tf_static.
+        self.tf_buffer: Buffer | None = None
+        self.tf_listener: TransformListener | None = None
+        self.tf_timeout = Duration(seconds=float(self.tf_timeout_sec))
+        if self.apply_tf:
+            self.tf_buffer = Buffer()
+            self.tf_listener = TransformListener(self.tf_buffer, self)
+            self.get_logger().info(
+                f"TF enabled: cone positions will be published in '{self.target_frame}'"
+            )
+        else:
+            self.get_logger().warn(
+                "TF disabled: cone positions are published in the camera optical "
+                "frame, not a fixed frame. Downstream planning expects a fixed frame."
+            )
 
         # Detect available device (GPU/CPU)
         self.cuda_available = False
@@ -67,9 +98,7 @@ class ConePublisher(Node):
         )
 
         # Publishers / subscribers
-        self.publisher_ = self.create_publisher(
-            ObjectsStamped, self.publishing_topic, 10
-        )
+        self.publisher_ = self.create_publisher(Cones, self.publishing_topic, 10)
 
         # Publishers for visualization
         if self.visualize:
@@ -123,6 +152,8 @@ class ConePublisher(Node):
         self.latest_depth: np.ndarray | None = None  # numpy array (meters)
         self.latest_depth_msg = None  # original ROS message for visualization
         self.latest_caminfo: CameraInfo | None = None  # sensor_msgs/CameraInfo
+        # (fx, fy, cx, cy), parsed once per CameraInfo message
+        self.intrinsics: tuple[float, float, float, float] | None = None
         self.get_logger().info("ConePublisher node started successfully.")
 
     # -------------------------
@@ -148,11 +179,36 @@ class ConePublisher(Node):
             )
 
     def caminfo_callback(self, msg: CameraInfo) -> None:
-        """Store the latest CameraInfo (intrinsics).
+        """Store the camera intrinsics from the latest CameraInfo message.
 
-        We'll use msg.k (or msg.K).
+        Parsed once here rather than per frame in the detection path.
         """
         self.latest_caminfo = msg
+        try:
+            k = msg.k if hasattr(msg, "k") else msg.K
+            fx, fy, cx, cy = float(k[0]), float(k[4]), float(k[2]), float(k[5])
+        except Exception:
+            self.get_logger().warn(
+                "Failed to read camera intrinsics from CameraInfo message."
+            )
+            self.intrinsics = None
+            return
+
+        if (
+            not math.isfinite(fx)
+            or not math.isfinite(fy)
+            or not math.isfinite(cx)
+            or not math.isfinite(cy)
+            or fx == 0.0
+            or fy == 0.0
+        ):
+            self.get_logger().warn(
+                f"Unusable camera intrinsics: fx={fx}, fy={fy}, cx={cx}, cy={cy}"
+            )
+            self.intrinsics = None
+            return
+
+        self.intrinsics = (fx, fy, cx, cy)
 
     # -------------------------
     # Main image processing callback (YOLO runs here)
@@ -160,9 +216,9 @@ class ConePublisher(Node):
     def left_image_callback(self, msg: Image) -> None:
         """Process incoming left rectified image with YOLO detection.
 
-        Runs YOLO detection, converts detections into zed_msgs/Object entries,
-        looks up depth in the registered left depth map, projects to 3D coordinates,
-        and publishes ObjectsStamped.
+        Runs YOLO detection, looks up depth in the registered left depth map,
+        projects each detection to 3D camera coordinates, transforms it into
+        the configured target frame, and publishes rc_interfaces/Cones.
         """
         # Convert ROS Image to cv2
         try:
@@ -188,13 +244,12 @@ class ConePublisher(Node):
             self.get_logger().error("YOLO model run failed:\n" + traceback.format_exc())
             return
 
-        # Build ObjectsStamped
-        objects_list, detections_info = self.process_detections(results)
-        objects_msg = ObjectsStamped()
-        objects_msg.header = msg.header
-        objects_msg.objects = objects_list
+        # Build Cones
+        cone_list, detections_info = self.process_detections(results, msg.header)
+        cones_msg = Cones()
+        cones_msg.cones = cone_list
 
-        self.publisher_.publish(objects_msg)
+        self.publisher_.publish(cones_msg)
 
         # Visualization
         if self.visualize:
@@ -203,35 +258,36 @@ class ConePublisher(Node):
     # -------------------------
     # Detection -> Object conversion
     # -------------------------
-    def process_detections(self, results: list) -> tuple:
-        """Convert YOLO results into a list of zed_msgs/Object messages.
+    def process_detections(self, results: list, source_header: Header) -> tuple:
+        """Convert YOLO results into a list of rc_interfaces/Cone messages.
 
-        Use latest_depth and latest_caminfo (if available) to compute 3D position.
+        Uses latest_depth and the parsed camera intrinsics to compute a 3D position for each
+        detection, then transforms it into the configured target frame. A
+        detection is dropped rather than published in the wrong place when its
+        label is not a known cone color, when no valid depth is available, or
+        when the TF lookup fails.
+
+        Args:
+            results: YOLO results for one frame.
+            source_header: Header of the image the detections came from; carries
+                the frame_id and stamp the TF lookup needs.
 
         Returns:
-            tuple: (cone_objects, detections_info) where detections_info is for visualization.
+            tuple: (cones, detections_info) where detections_info is for visualization.
         """
-        cone_objects = []
+        cones = []
         detections_info = []  # Store bbox, label, confidence, position for visualization
 
-        # Get intrinsics if possible
-        fx = fy = cx = cy = None
-        if self.include_depth and self.latest_caminfo is not None:
-            try:
-                k = (
-                    self.latest_caminfo.k
-                    if hasattr(self.latest_caminfo, "k")
-                    else self.latest_caminfo.K
-                )
-                fx = float(k[0])
-                fy = float(k[4])
-                cx = float(k[2])
-                cy = float(k[5])
-            except Exception:
-                self.get_logger().warn(
-                    "Failed to read camera intrinsics from CameraInfo message."
-                )
-                fx = fy = cx = cy = None
+        # Bound to a local so it cannot be swapped out by the depth callback
+        # part-way through this frame's detections.
+        depth = self.latest_depth if self.include_depth else None
+        if depth is None or self.intrinsics is None:
+            # Throttled: this fires per frame while depth or CameraInfo is
+            # missing, which is every frame until the ZED comes up.
+            self.get_logger().warn(
+                "No depth or intrinsics available; no cone positions can be computed.",
+                throttle_duration_sec=5.0,
+            )
 
         for result in results:
             for box in result.boxes:
@@ -251,151 +307,26 @@ class ConePublisher(Node):
                         )
                         continue
 
-                obj = Object()
-
-                # Label fields
                 class_label = (
                     self.classes[class_id]
                     if class_id < len(self.classes)
                     else f"unknown_{class_id}"
                 )
-                obj.label = class_label
-                obj.label_id = class_id
-                obj.sublabel = ""
-                obj.confidence = confidence
 
-                try:
-                    bbox_2d = BoundingBox2Di()
-                    try:
-                        x1i = int(x1)
-                        y1i = int(y1)
-                        x2i = int(x2)
-                        y2i = int(y2)
-
-                        # corners layout (as documented):
-                        # 0 ------- 1
-                        # |         |
-                        # |         |
-                        # |         |
-                        # 3 ------- 2
-                        # Set all four corners using Keypoint2Di.kp (uint32[2])
-                        bbox_2d.corners[0].kp[0] = x1i
-                        bbox_2d.corners[0].kp[1] = y1i
-
-                        bbox_2d.corners[1].kp[0] = x2i
-                        bbox_2d.corners[1].kp[1] = y1i
-
-                        bbox_2d.corners[2].kp[0] = x2i
-                        bbox_2d.corners[2].kp[1] = y2i
-
-                        bbox_2d.corners[3].kp[0] = x1i
-                        bbox_2d.corners[3].kp[1] = y2i
-                    except Exception as e:
-                        self.get_logger().warn(f"Failed to set bbox corners: {e}")
-                    obj.bounding_box_2d = bbox_2d
-                except Exception:
-                    self.get_logger().warn(
-                        "Could not populate BoundingBox2Di exactly; continuing with minimal bbox."
+                # A detection whose label is not a cone color cannot be placed on
+                # a track boundary, so it is dropped here rather than published
+                # with an empty color for a downstream node to filter out.
+                color = self.normalize_color(class_label)
+                if not color:
+                    self.get_logger().debug(
+                        f"Dropping detection with unrecognized label '{class_label}'"
                     )
+                    continue
 
-                # Default values
-                obj.position = [0.0, 0.0, 0.0]
-                obj.position_covariance = [0.0] * 6
-                obj.velocity = [0.0, 0.0, 0.0]
-                obj.tracking_available = False
-                obj.tracking_state = 0
-                obj.action_state = 0
+                position_3d = self.locate_cone(x1, y1, x2, y2, depth, source_header)
 
-                position_3d = None  # for visualization
-
-                # Try to compute 3D position using depth map and intrinsics (only if depth available)
-                if (
-                    self.include_depth
-                    and self.latest_depth is not None
-                    and fx is not None
-                    and fy is not None
-                    and cx is not None
-                    and cy is not None
-                    and not math.isnan(fx)
-                    and not math.isnan(fy)
-                ):
-                    h, w = self.latest_depth.shape[:2]
-
-                    # clamp bbox to image bounds
-                    x1_i = max(0, int(math.floor(x1)))
-                    y1_i = max(0, int(math.floor(y1)))
-                    x2_i = min(w - 1, int(math.ceil(x2)))
-                    y2_i = min(h - 1, int(math.ceil(y2)))
-
-                    if x2_i <= x1_i or y2_i <= y1_i:
-                        self.get_logger().warn(
-                            "Invalid bbox size after clamping; skipping depth for this object."
-                        )
-                    else:
-                        # Extract ROI of depth; use median of valid (non-zero, non-nan) values
-                        depth_roi = self.latest_depth[y1_i : y2_i + 1, x1_i : x2_i + 1]
-                        if depth_roi.size == 0:
-                            pass
-                        else:
-                            valid_mask = np.isfinite(depth_roi) & (
-                                depth_roi > 0.001
-                            )  # ignore zeros/near-zero
-                            if np.any(valid_mask):
-                                z = float(np.median(depth_roi[valid_mask]))
-                                # Use bbox center for x,y projection
-                                u = int((x1 + x2) / 2.0)
-                                v = int((y1 + y2) / 2.0)
-                                # clamp center to image bounds
-                                u = max(0, min(w - 1, u))
-                                v = max(0, min(h - 1, v))
-
-                                # If the particular center pixel is invalid, you could fallback to roi median - we already have z
-                                # Convert pixel + z -> camera coords
-                                x = (u - cx) * z / fx
-                                y = (v - cy) * z / fy
-                                obj.position = [float(x), float(y), float(z)]
-                                position_3d = (x, y, z)
-                                # Small covariance estimate based on bbox size and depth (naive)
-                                px_width = max(1, x2_i - x1_i)
-                                px_height = max(1, y2_i - y1_i)
-                                # crude variance estimates:
-                                var_xy = (
-                                    ((px_width + px_height) / 2.0) * (z / fx) * 0.005
-                                )
-                                var_xy = max(var_xy, 1e-6)
-                                obj.position_covariance = [
-                                    var_xy,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    var_xy,
-                                    0.0,
-                                ]
-                                obj.tracking_available = True
-                                self.get_logger().debug(
-                                    f"3D position for {class_label}: x={x:.2f}, y={y:.2f}, z={z:.2f}"
-                                )
-                            else:
-                                # no valid depth in roi
-                                obj.tracking_available = False
-                else:
-                    # no depth or no intrinsics
-                    obj.tracking_available = False
-
-                # Fill minimal 3D bbox / skeleton defaults (so message fields exist)
-                try:
-                    # Many of these sub-messages exist; set basic values
-                    obj.dimensions_3d = [0.0, 0.0, 0.0]
-                    obj.skeleton_available = False
-                    obj.body_format = 0
-                    obj.head_position = [0.0, 0.0, 0.0]
-                except Exception:
-                    pass
-
-                # Append to list
-                cone_objects.append(obj)
-
-                # Store info for visualization
+                # Recorded even when no position could be computed, so the
+                # visualization still shows what the model saw.
                 detections_info.append(
                     {
                         "bbox": (int(x1), int(y1), int(x2), int(y2)),
@@ -405,7 +336,161 @@ class ConePublisher(Node):
                     }
                 )
 
-        return cone_objects, detections_info
+                if position_3d is None:
+                    continue
+
+                x, y, _z = position_3d
+                cone = Cone()
+                cone.x = float(x)
+                cone.y = float(y)
+                cone.color = color
+                cones.append(cone)
+
+                self.get_logger().debug(
+                    f"Cone '{color}' at x={x:.2f}, y={y:.2f} (conf={confidence:.2f})"
+                )
+
+        return cones, detections_info
+
+    def locate_cone(
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        depth: np.ndarray | None,
+        source_header: Header,
+    ) -> tuple[float, float, float] | None:
+        """Compute a cone position from a bounding box and the depth map.
+
+        Takes the median of the valid depth values inside the box (rather than
+        the centre pixel, which is often invalid on a thin object) and projects
+        the box centre through the camera intrinsics, then transforms the result
+        into the target frame when TF is enabled.
+
+        Args:
+            x1: Left edge of the bounding box, in pixels.
+            y1: Top edge of the bounding box, in pixels.
+            x2: Right edge of the bounding box, in pixels.
+            y2: Bottom edge of the bounding box, in pixels.
+            depth: Latest depth image in meters, or None when unavailable.
+            source_header: Header carrying the source frame_id and stamp.
+
+        Returns:
+            The (x, y, z) position, or None when it could not be determined.
+        """
+        if depth is None or self.intrinsics is None:
+            return None
+
+        fx, fy, cx, cy = self.intrinsics
+        h, w = depth.shape[:2]
+
+        # clamp bbox to image bounds
+        x1_i = max(0, int(math.floor(x1)))
+        y1_i = max(0, int(math.floor(y1)))
+        x2_i = min(w - 1, int(math.ceil(x2)))
+        y2_i = min(h - 1, int(math.ceil(y2)))
+
+        if x2_i <= x1_i or y2_i <= y1_i:
+            self.get_logger().warn(
+                "Invalid bbox size after clamping; skipping detection."
+            )
+            return None
+
+        # Median of valid (non-zero, non-nan) depth values in the box
+        depth_roi = depth[y1_i : y2_i + 1, x1_i : x2_i + 1]
+        if depth_roi.size == 0:
+            return None
+
+        valid_mask = np.isfinite(depth_roi) & (depth_roi > 0.001)  # ignore zeros
+        if not np.any(valid_mask):
+            return None
+
+        z = float(np.median(depth_roi[valid_mask]))
+
+        # Use bbox center for x,y projection, clamped to image bounds
+        u = max(0, min(w - 1, int((x1 + x2) / 2.0)))
+        v = max(0, min(h - 1, int((y1 + y2) / 2.0)))
+
+        # Convert pixel + z -> camera coords
+        x = (u - cx) * z / fx
+        y = (v - cy) * z / fy
+
+        if not self.apply_tf:
+            return (x, y, z)
+
+        # Publishing an untransformed position on a topic documented as being in
+        # target_frame would put the cone somewhere wrong, which is worse than
+        # not publishing it at all.
+        return self.transform_cone_position(x, y, z, source_header)
+
+    def normalize_color(self, raw_label: str) -> str:
+        """Map a model class label onto a canonical cone color.
+
+        Args:
+            raw_label: Class label as it appears in the classes file.
+
+        Returns:
+            str: One of "blue", "yellow", "orange", "large_orange", or an empty
+                string when the label is not a cone color.
+        """
+        label = raw_label.lower()
+
+        # Checked before plain "orange" so that "large_orange" is not swallowed
+        # by the substring match below.
+        if "large_orange" in label or "large orange" in label:
+            return "large_orange"
+        if "blue" in label:
+            return "blue"
+        if "yellow" in label:
+            return "yellow"
+        if "orange" in label:
+            return "orange"
+        return ""
+
+    def transform_cone_position(
+        self, cone_x: float, cone_y: float, cone_z: float, source_header: Header
+    ) -> tuple[float, float, float] | None:
+        """Transform a cone position from the camera frame into the target frame.
+
+        Args:
+            cone_x: X coordinate in the source frame.
+            cone_y: Y coordinate in the source frame.
+            cone_z: Z coordinate in the source frame.
+            source_header: Header carrying the source frame_id and stamp.
+
+        Returns:
+            The transformed (x, y, z), or None when the lookup fails.
+        """
+        if self.tf_buffer is None:
+            return None
+
+        input_point = PointStamped()
+        input_point.header = source_header
+        input_point.point.x = float(cone_x)
+        input_point.point.y = float(cone_y)
+        input_point.point.z = float(cone_z)
+
+        try:
+            output_point = self.tf_buffer.transform(
+                input_point,
+                self.target_frame,
+                timeout=self.tf_timeout,
+            )
+        except TransformException as ex:
+            # Throttled: a missing transform fails for every cone in every
+            # frame, and one line per cone drowns the log.
+            self.get_logger().warn(
+                f"TF transform to '{self.target_frame}' failed: {ex}",
+                throttle_duration_sec=5.0,
+            )
+            return None
+
+        return (
+            float(output_point.point.x),
+            float(output_point.point.y),
+            float(output_point.point.z),
+        )
 
     # -------------------------
     # Visualization
