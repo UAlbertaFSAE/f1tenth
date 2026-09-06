@@ -7,7 +7,7 @@ FILTER_REGEX_INCLUDE: .*src/.*
 # looked greener than the tree actually was.
 FILTER_REGEX_EXCLUDE: >-
   .*src/hardware/f1tenth_system(/.*)?
-  |.*src/perception/(livox_SDK2|livox_ros_driver2|zed_wrapper)(/.*)?
+  |.*src/perception/(livox_sdk2|livox_ros_driver2|zed_wrapper)(/.*)?
   |.*src/simulation(/.*)?
   |.*/build/.*
   |.*/install/.*
