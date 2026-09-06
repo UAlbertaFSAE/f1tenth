@@ -1,145 +1,74 @@
+// Project-scoped settings only. Anything here should be something the repo
+// needs in order to work correctly -- interpreter, formatters, lint config,
+// excludes. Personal preferences belong in your user settings, not here.
+//
+// Paths are relative to the repo, which is the workspace's src/ directory, so
+// the workspace root (build/, install/, log/, venv/) is one level up.
 {
+  // ---- Python -----------------------------------------------------------
+  // The venv `make deps` creates, at the workspace root.
+  "python.defaultInterpreterPath": "${workspaceFolder}/../venv/bin/python",
+  "python.analysis.extraPaths": [
+    "/opt/ros/humble/lib/python3.10/site-packages",
+    "/opt/ros/humble/local/lib/python3.10/dist-packages"
+  ],
+  "python.autoComplete.extraPaths": [
+    "/opt/ros/humble/lib/python3.10/site-packages",
+    "/opt/ros/humble/local/lib/python3.10/dist-packages"
+  ],
+  "[python]": {
     "editor.formatOnSave": true,
-    "editor.formatOnPaste": true,
-    "files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true,
-    "files.trimFinalNewlines": true,
-    "files.associations": {
-        ".inputrc": "shellscript",
-        "iostream": "cpp",
-        "ostream": "cpp",
-        "array": "cpp",
-        "atomic": "cpp",
-        "bit": "cpp",
-        "*.tcc": "cpp",
-        "cctype": "cpp",
-        "chrono": "cpp",
-        "clocale": "cpp",
-        "cmath": "cpp",
-        "codecvt": "cpp",
-        "compare": "cpp",
-        "concepts": "cpp",
-        "condition_variable": "cpp",
-        "csignal": "cpp",
-        "cstdarg": "cpp",
-        "cstddef": "cpp",
-        "cstdint": "cpp",
-        "cstdio": "cpp",
-        "cstdlib": "cpp",
-        "cstring": "cpp",
-        "ctime": "cpp",
-        "cwchar": "cpp",
-        "cwctype": "cpp",
-        "deque": "cpp",
-        "list": "cpp",
-        "map": "cpp",
-        "set": "cpp",
-        "string": "cpp",
-        "unordered_map": "cpp",
-        "unordered_set": "cpp",
-        "vector": "cpp",
-        "exception": "cpp",
-        "algorithm": "cpp",
-        "functional": "cpp",
-        "iterator": "cpp",
-        "memory": "cpp",
-        "memory_resource": "cpp",
-        "numeric": "cpp",
-        "optional": "cpp",
-        "random": "cpp",
-        "ratio": "cpp",
-        "string_view": "cpp",
-        "system_error": "cpp",
-        "tuple": "cpp",
-        "type_traits": "cpp",
-        "utility": "cpp",
-        "future": "cpp",
-        "initializer_list": "cpp",
-        "iomanip": "cpp",
-        "iosfwd": "cpp",
-        "istream": "cpp",
-        "limits": "cpp",
-        "mutex": "cpp",
-        "new": "cpp",
-        "numbers": "cpp",
-        "semaphore": "cpp",
-        "shared_mutex": "cpp",
-        "sstream": "cpp",
-        "stdexcept": "cpp",
-        "stop_token": "cpp",
-        "streambuf": "cpp",
-        "thread": "cpp",
-        "cinttypes": "cpp",
-        "typeindex": "cpp",
-        "typeinfo": "cpp",
-        "variant": "cpp",
-        "complex": "cpp",
-        "forward_list": "cpp",
-        "fstream": "cpp"
-    },
-    "files.exclude": {
-        "usr/include/ignition/**": true
-    },
-    "search.exclude": {
-        "usr/include/ignition/**": true
-    },
-    "terminal.integrated.defaultProfile.linux": "bash",
-    "[python]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "charliermarsh.ruff",
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
-        },
-        "editor.tabSize": 4,
-    },
-    "python.languageServer": "Pylance",
-    "python.autoComplete.extraPaths": [
-        "/opt/ros/humble/lib/python3.10/site-packages",
-        "/opt/ros/humble/local/lib/python3.10/dist-packages",
-    ],
-    "python.analysis.extraPaths": [
-        "/opt/ros/humble/lib/python3.10/site-packages",
-        "/opt/ros/humble/local/lib/python3.10/dist-packages",
-    ],
-    "ruff.configuration": "./pyproject.toml",
-    "ruff.logLevel": "debug",
-    "mypy-type-checker.args": [
-        "--config-file=pyproject.toml"
-    ],
-    "mypy-type-checker.path": [
-        "/usr/local/bin/mypy"
-    ],
-    // NOTE: the mypy extension runs on single files, so you need this for excludes
-    // to work when developing in vscode
-    "mypy-type-checker.ignorePatterns": [
-        "${workspaceFolder}/src/navigation/pure_pursuit/**",
-        "${workspaceFolder}/src/navigation/particle_filter/**"
-    ],
-    "autoDocstring.docstringFormat": "google",
-    "autoDocstring.generateDocstringOnEnter": true,
-    "autoDocstring.guessTypes": true,
-    "[cpp]": {
-        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-        "editor.detectIndentation": false,
-        "editor.tabSize": 2
-    },
-    "C_Cpp.default.cStandard": "c11",
-    "C_Cpp.default.cppStandard": "c++17",
-    "C_Cpp.loggingLevel": "Debug",
-    "C_Cpp.files.exclude": {
-        "/usr/include/ignition/**": true
-    },
-    "C_Cpp.intelliSenseEngine": "disabled",
-    "clangd.path": "/usr/bin/clangd-18",
-    "clangd.enableCodeCompletion": true,
-    "[dockerfile]": {
-        "editor.detectIndentation": false,
-    },
-    "[cmake]": {
-        "editor.detectIndentation": false,
-    },
-    "ros.distro": "humble",
-    "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
-    "ROS2.distro": "humble",
-    "cmake.sourceDirectory": "/Users/finco/Desktop/f1tenth/build/rc_interfaces/rc_interfaces__py",
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  // Same config file `make lint` and CI use, so the editor cannot disagree
+  // with either of them.
+  "ruff.configuration": "${workspaceFolder}/pyproject.toml",
+  "mypy-type-checker.args": ["--config-file=${workspaceFolder}/pyproject.toml"],
+
+  // ---- C++ --------------------------------------------------------------
+  // clangd is the only C++ language server here. The Microsoft IntelliSense
+  // engine is disabled rather than left to fight with it: two engines reading
+  // two different configs produce phantom errors nobody can explain.
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "[cpp]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2
+  },
+
+  // ---- ROS --------------------------------------------------------------
+  "ros.distro": "humble",
+  "files.associations": {
+    "*.launch.py": "python",
+    "*.launch": "xml",
+    "package.xml": "xml",
+    "*.rviz": "yaml",
+    "*.urdf": "xml",
+    "*.xacro": "xml"
+  },
+
+  // ---- Excludes ---------------------------------------------------------
+  // Without these VS Code indexes the entire build tree and becomes unusable.
+  "search.exclude": {
+    "**/build": true,
+    "**/install": true,
+    "**/log": true,
+    "**/venv": true,
+    "**/__pycache__": true
+  },
+  "files.watcherExclude": {
+    "**/build/**": true,
+    "**/install/**": true,
+    "**/log/**": true,
+    "**/venv/**": true
+  },
+
+  // ---- Editor hygiene the linters enforce anyway -------------------------
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true
 }

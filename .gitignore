@@ -59,7 +59,6 @@ __pycache__
 .cache/
 notes.txt
 
-*.vscode/
 *__pycache__/
 *.mypy_cache/
 *.ruff_cache/

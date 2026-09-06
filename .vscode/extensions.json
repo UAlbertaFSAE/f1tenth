@@ -1,0 +1,30 @@
+// Extensions this repo expects. VS Code prompts to install them on open, which
+// is why scripts/install_extensions.sh (which scraped ids out of
+// devcontainer.json and shelled out to the `code` CLI) is no longer needed.
+{
+  "recommendations": [
+    // C++: clangd is the language server and the formatter, driven by the
+    // repo's .clangd and the compile_commands.json that `make build` exports.
+    "llvm-vs-code-extensions.vscode-clangd",
+    "twxs.cmake",
+
+    // Python: same ruff and mypy configuration as `make lint` and CI.
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    "njpwerner.autodocstring",
+
+    // ROS 2.
+    "ms-iot.vscode-ros",
+
+    // Containers, for the devcontainer and the Jetson images.
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers"
+  ],
+  "unwantedRecommendations": [
+    // Conflicts with clangd: two C++ IntelliSense engines reading two configs
+    // drift apart, and the symptom is errors that exist in one and not the
+    // other. See C_Cpp.intelliSenseEngine in settings.json.
+    "ms-vscode.cpptools"
+  ]
+}
