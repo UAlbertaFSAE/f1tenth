@@ -1,7 +1,7 @@
 services:
   dev:
     container_name: f1tenth_dev
-    image:  ualbertaformula/f1tenth
+    image: ualbertaformula/f1tenth
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
@@ -10,31 +10,20 @@ services:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - IS_JETSON=FALSE
     volumes:
-      - ..:/f1tenth:cached
+      # The live checkout is mounted over the repo only, not over the workspace
+      # root, so the venv/, build/ and install/ baked into the image at
+      # /f1tenth survive the mount and the container is usable on open.
+      - ..:/f1tenth/src:cached
       - /dev:/dev
     tty: true
     stdin_open: true
     networks:
       - x11
 
-  sim:
-    depends_on:
-      - novnc
-    image:  ualbertaformula/f1tenth-sim
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.sim
-    environment:
-      - DISPLAY=novnc:0.0
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-      - ROS_DOMAIN_ID=42
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-    tty: true
-    stdin_open: true
-    networks:
-      - x11
+  # The separate `sim` service and its ualbertaformula/f1tenth-sim image are
+  # gone: f1tenth_gym is a package in this workspace now, so it builds into the
+  # dev image with everything else and `make run_sim` launches it.
 
   novnc:
     image: theasp/novnc:latest

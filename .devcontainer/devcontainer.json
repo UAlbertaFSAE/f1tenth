@@ -2,8 +2,8 @@
   "name": "f1tenth",
   "service": "dev",
   "dockerComposeFile": "../docker/compose.dev.yml",
-  "workspaceFolder": "/f1tenth",
-  "initializeCommand": "docker pull ualbertaformula/f1tenth:latest && docker pull ualbertaformula/f1tenth-sim:latest",
+  "workspaceFolder": "/f1tenth/src",
+  "initializeCommand": "docker pull ualbertaformula/f1tenth:latest",
   "shutdownAction": "stopCompose",
   "features": {
     "git": "os-provided",
@@ -12,13 +12,12 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-vscode.cpptools",
         "llvm-vs-code-extensions.vscode-clangd",
         "twxs.cmake",
         "eamodio.gitlens",
         "ms-python.python",
         "charliermarsh.ruff",
-        "ms-python.mypy-type-checker@prerelease",
+        "ms-python.mypy-type-checker",
         "njpwerner.autodocstring",
         "ms-iot.vscode-ros"
       ]
