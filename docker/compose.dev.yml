@@ -11,19 +11,12 @@ services:
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
-      # The live checkout is mounted over the repo only, not over the workspace
-      # root, so the venv/, build/ and install/ baked into the image at
-      # /f1tenth survive the mount and the container is usable on open.
       - ..:/f1tenth/src:cached
       - /dev:/dev
     tty: true
     stdin_open: true
     networks:
       - x11
-
-  # The separate `sim` service and its ualbertaformula/f1tenth-sim image are
-  # gone: f1tenth_gym is a package in this workspace now, so it builds into the
-  # dev image with everything else and `make run_sim` launches it.
 
   novnc:
     image: theasp/novnc:latest

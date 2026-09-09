@@ -9,6 +9,8 @@
 # particle_filter. Both are optional -- the packages that need them are the ones
 # PACKAGES_IGNORE skips by default.
 
+packaging>=24.0
+
 # ROS message and transform helpers
 transforms3d
 tf-transformations

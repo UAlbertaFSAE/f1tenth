@@ -1,12 +1,6 @@
-# Default (on-car) profile for `ros2 launch launch_pkg fsae.launch.py`.
-#
-# Every component is opt-in. Per-node tuning stays in that node's own package
-# config -- this file only decides what runs and how the pieces are wired
-# together at the workspace level.
-
 launch:
   zed_camera: true
-  lidar_driver: false # set true once the MID360 is on the car
+  lidar_driver: false
   camera_detection: true
   lidar_cone_filtering: false
   path_planning: true
@@ -16,8 +10,6 @@ launch:
 
 zed:
   camera_model: zed2i
-  # The wrapper must not publish odom/map TF: we own base_link -> zed_camera_link
-  # below, and two publishers on the same edge produce a fighting TF tree.
   publish_tf: false
   publish_map_tf: false
   publish_urdf: true
@@ -26,14 +18,10 @@ lidar:
   launch_file: msg_MID360_launch.py
 
 static_transforms:
-  # base_link -> zed_camera_link. y is the camera's lateral offset: more
-  # negative moves it further right relative to the left ZED lens.
   - parent: base_link
     child: zed_camera_link
     xyz: [-0.05, -0.15, 0.40]
     rpy: [0.0, 0.0, 0.0]
-  # The stack keeps everything in odom; map is pinned to base_link so that
-  # anything expecting a map frame resolves instead of blocking on TF.
   - parent: map
     child: base_link
     xyz: [0.0, 0.0, 0.0]

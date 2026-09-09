@@ -2,6 +2,7 @@ name: Build and push dockerfile to Docker Hub(dev)
 
 on:
   push:
+    branches: [ "main" ]
     paths:
       - 'docker/Dockerfile.dev'
       - 'docker/deps/packages.txt'
