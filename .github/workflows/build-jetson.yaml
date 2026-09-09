@@ -2,6 +2,7 @@ name: Build and push dockerfile to Docker Hub(jetson)
 
 on:
   push:
+    branches: [ "main" ]
     paths:
       - 'docker/Dockerfile.jetson'
       - 'docker/deps/packages.txt'

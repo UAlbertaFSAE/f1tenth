@@ -27,8 +27,6 @@ Here is a list with the documentation for each of our linters/formatters and git
 - [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
 - [ruff](https://docs.astral.sh/ruff/)
 - [mypy](https://mypy.readthedocs.io/en/stable/index.html)
-- [cpp-linter action](https://cpp-linter.github.io/cpp-linter-action/)
-- [mega-linter action](https://megalinter.io/7.13.0/)
 
 ##### C++
 We use `clang-tidy` for linting and `clang-format` for code formatting. Since the clangd language server requires build commands for processing your c++ files, you need to run the following for clang-tidy linting to work on your c++ package:
@@ -47,8 +45,7 @@ We use `ruff` for linting and formatting, and `mypy` for static type checking. W
 
 These tools will enforce the pep8 style guidelines and ensure we have safe python code, since our system is fairly safety-critical. Again, if there is ever any lint checks that you think are not useful, don't hesitate to ask a lead about removing it.
 
-Again, if you ever need to skip some linter check, use `# noqa` at the end of the line. If you need to skip linting on whole packages (say you ported someone's open source ROS package), you can add exclude paths in the `ruff.exclude` and `mypy-type-checker.ignorePatterns` settings in the `.vscode/settings.json` file to stop errors showing in vscode. Add them into the `FILTER_REGEX_EXCLUDE` regex string in the `.mega-linter.yml` file to ignore them in the CI linting check.
-- you can also add them to the exclude section for each tool in the `pyproject.toml` file if you want, for completeness sake
+Again, if you ever need to skip some linter check, use `# noqa` at the end of the line. If you need to skip linting on whole packages (say you ported someone's open source ROS package), add the path to the `extend-exclude` (ruff) and `exclude` (mypy) lists in `pyproject.toml`. Both the vscode extensions and CI read that file, so one edit covers the editor and the CI check. `make lint-python` is exactly what CI runs, so a green local lint is a green CI lint.
 
 The mypy vscode extension is [here](https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker) and the ruff vscode extension is [here](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) if you would like to learn more.
 

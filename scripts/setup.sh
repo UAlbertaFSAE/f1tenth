@@ -247,7 +247,11 @@ install_cdt_if_needed() {
 activate_python_venv() {
   local venv_dir="$FORMULA_HOME/venv"
   if [[ ! -d "$venv_dir" ]]; then
-    "$SYSTEM_PYTHON" -m venv "$venv_dir"
+    # --system-site-packages so the venv still sees the python packages ROS
+    # ships in dist-packages. colcon runs inside this venv, and ament_cmake_core
+    # imports catkin_pkg while rosidl_adapter imports em at build time; an
+    # isolated venv hides both and every interface package fails to configure.
+    "$SYSTEM_PYTHON" -m venv --system-site-packages "$venv_dir"
   fi
 
   # venv is outside <ws>/src, but marking it ignored is harmless.
