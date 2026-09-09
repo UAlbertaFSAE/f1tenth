@@ -1,14 +1,20 @@
 [tool.ruff]
 target-version = "py310"
-# Vendored third-party trees only. Every first-party package is linted --
-# pure_pursuit and particle_filter used to be excluded here and are not
-# third-party, they are ours.
+# Honour the excludes below even when a file is passed explicitly on the
+# command line. Ruff's default is to lint anything named directly, so without
+# this any tool that passes a file list (an editor, a pre-commit hook) lints
+# the vendored tree even though `ruff check src` is clean.
+force-exclude = true
+# Vendored third-party trees only. particle_filter comes back into scope: it is
+# ours. pure_pursuit stays out -- it is xLab's code, not ours.
 extend-exclude = [
   "src/hardware/f1tenth_system/**",
+  "src/navigation/pure_pursuit/**",
   "src/perception/livox_sdk2/**",
   "src/perception/livox_ros_driver2/**",
   "src/perception/zed_wrapper/**",
-  "src/simulation/**",
+  "src/simulation/f1tenth_gym/**",
+  "src/simulation/f1tenth_gym_ros/**",
 ]
 
 [tool.ruff.lint]
@@ -69,8 +75,9 @@ exclude = [
     ".*/install/",
     ".*/log/",
     "^src/hardware/f1tenth_system/",
+    "^src/navigation/pure_pursuit/",
     "^src/perception/(livox_sdk2|livox_ros_driver2|zed_wrapper)/",
-    "^src/simulation/",
+    "^src/simulation/(f1tenth_gym|f1tenth_gym_ros)/",
 ]
 
 warn_no_return = true

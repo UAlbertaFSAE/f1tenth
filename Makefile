@@ -34,10 +34,15 @@ SOURCE_ENV = set +u; \
 	if [ -f "$(VENV_DIR)/bin/activate" ]; then source "$(VENV_DIR)/bin/activate"; fi
 
 CMAKE_BUILD_TYPE ?= RelWithDebInfo
-PARALLEL_WORKERS ?= $(shell python3 -c "import math, os; print(math.ceil(os.cpu_count() ** 0.5) + 1)")
+PARALLEL_WORKERS = 4
 
+# --log-base is passed explicitly rather than relying on colcon's default of
+# ./log: the default is relative to the caller's cwd, so a colcon run from
+# inside the repo drops a log/ directory in the git tree. Everything colcon
+# writes is addressed absolutely, from the workspace root.
 COLCON_BUILD_ARGS = \
 	--base-paths $(SRC_DIR) \
+	--log-base $(WS_ROOT)/log \
 	--executor parallel \
 	--parallel-workers $(PARALLEL_WORKERS) \
 	--continue-on-error \
@@ -55,13 +60,33 @@ PACKAGES_IGNORE ?= \
 	zed_ros2 \
 	zed_wrapper
 
+# Vendored third-party colcon packages. `make test` skips these: they ship their
+# own ament lint tests (cpplint, uncrustify, ament_copyright) enforcing an
+# upstream style we neither set nor want to argue with, and running them means
+# `make test` is red for reasons nobody here can act on.
+VENDORED_PACKAGES := \
+	ackermann_mux \
+	f1tenth_stack \
+	f1tenth_gym_ros \
+	joy_teleop \
+	key_teleop \
+	mouse_teleop \
+	teleop_tools \
+	teleop_tools_msgs \
+	vesc \
+	vesc_ackermann \
+	vesc_driver \
+	vesc_msgs
+
 # Vendored third-party trees. Single source of truth for what `make lint` skips.
 VENDORED_PATHS := \
 	$(SRC_DIR)/hardware/f1tenth_system \
+	$(SRC_DIR)/navigation/pure_pursuit \
 	$(SRC_DIR)/perception/livox_sdk2 \
 	$(SRC_DIR)/perception/livox_ros_driver2 \
 	$(SRC_DIR)/perception/zed_wrapper \
-	$(SRC_DIR)/simulation
+	$(SRC_DIR)/simulation/f1tenth_gym \
+	$(SRC_DIR)/simulation/f1tenth_gym_ros
 
 # find(1) prune expression built from VENDORED_PATHS, plus build output dirs.
 FIND_PRUNE := $(foreach p,$(VENDORED_PATHS),-path '$(p)' -o ) \
@@ -114,8 +139,9 @@ rebuild: clean build ## clean followed by build
 
 test: ## Run colcon test and print the full results
 	@$(SOURCE_ENV); \
-	cd $(WS_ROOT) && colcon test --base-paths $(SRC_DIR) --packages-ignore $(PACKAGES_IGNORE) \
-		&& colcon test-result --verbose
+	cd $(WS_ROOT) && colcon test --base-paths $(SRC_DIR) --log-base $(WS_ROOT)/log \
+		--packages-ignore $(PACKAGES_IGNORE) $(VENDORED_PACKAGES) \
+		&& colcon test-result --verbose --test-result-base $(WS_ROOT)/build
 
 lint: lint-python lint-cpp ## Run every linter CI runs, over all of src/
 
@@ -126,17 +152,26 @@ lint-python: ## ruff check, ruff format --check and mypy over all first-party Py
 	ruff format --check --config pyproject.toml src && \
 	mypy --config-file pyproject.toml src
 
+# clang-format runs over headers too, since formatting needs no compilation.
+# clang-tidy runs over translation units only: a header is not in
+# compile_commands.json, so passing one directly makes clang-tidy fail with an
+# argument error rather than lint it. Headers are covered through the .cpp files
+# that include them.
+
 lint-cpp: ## clang-format and clang-tidy over all first-party C++
 	@if [ ! -f "$(WS_ROOT)/build/compile_commands.json" ]; then \
 		echo "No compile_commands.json in $(WS_ROOT)/build -- run 'make build' first."; \
 		exit 2; \
 	fi
 	@$(SOURCE_ENV); \
-	files=$$(find $(SRC_DIR) \( $(FIND_PRUNE) \) -prune -o \
+	all=$$(find $(SRC_DIR) \( $(FIND_PRUNE) \) -prune -o \
 		-type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' \) -print); \
-	if [ -z "$$files" ]; then echo "No first-party C++ sources found."; exit 0; fi; \
-	echo "$$files" | xargs clang-format --dry-run -Werror -style=file && \
-	echo "$$files" | xargs clang-tidy -p $(WS_ROOT)/build --quiet
+	if [ -z "$$all" ]; then echo "No first-party C++ sources found."; exit 0; fi; \
+	echo "$$all" | xargs clang-format --dry-run -Werror -style=file || exit 1; \
+	units=$$(find $(SRC_DIR) \( $(FIND_PRUNE) \) -prune -o \
+		-type f \( -name '*.cpp' -o -name '*.cc' \) -print); \
+	if [ -z "$$units" ]; then echo "No first-party translation units found."; exit 0; fi; \
+	echo "$$units" | xargs clang-tidy -p $(WS_ROOT)/build --quiet
 
 run_auto: ## Launch the autonomous stack on the car
 	@$(SOURCE_ENV); \
