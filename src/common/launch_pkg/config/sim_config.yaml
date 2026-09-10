@@ -1,6 +1,9 @@
 launch:
   zed_camera: false
   lidar_driver: false
+  simulator: true
+  cone_detector_sim: true
+  track_map_publisher: true
   camera_detection: false
   lidar_cone_filtering: false
   path_planning: true
