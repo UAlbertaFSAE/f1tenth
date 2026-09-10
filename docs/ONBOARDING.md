@@ -82,9 +82,9 @@ Log into github and click on your profile icon in the top right corner > click s
 
 **Note:** if you aren't yet comfortable with a terminal environment (i.e. bash) or git, we recommend you go through those tutorials in the following section first before attempting to build the software container.
 
-1. Clone the repository into a directory in your **Linux or Mac** instance (either in WSL or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key in this instance as well) with `git clone git@github.com:UAlbertaFSAE/f1tenth.git` and then change into it with `cd f1tenth`
+1. Clone the repository in your **Linux or Mac** instance (either in WSL or natively, depending on what setup steps you followed above. **NOTE:** you should have setup your ssh key in this instance as well). The repository is cloned *as* the workspace's `src/` directory, so clone it into one: `git clone git@github.com:UAlbertaFSAE/f1tenth.git f1tenth_ws/src` and then change into it with `cd f1tenth_ws/src`. See [SETUP.md](SETUP.md) for why the layout looks like that.
 2. Make sure docker is installed and running in the background (either as docker desktop or start it through terminal commands, you can check its running by running `docker --version` in a terminal in your linux instance)
-3. run `code .` to open up vscode inside the f1tenth directory (to ensure you are in the right directory beforehand, run `pwd` and you should see /f1tenth at the end of the output). **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
+3. run `code .` to open up vscode inside the repository (to ensure you are in the right directory beforehand, run `pwd` and you should see `/f1tenth_ws/src` at the end of the output). **Note:** if a new vscode window did not open, open vscode, press `ctrl/cmd + shift + P` and run `Shell Command: Install 'code' command in PATH`, and then restart vscode and re-rerun the previous command
 4. Press `ctrl/cmd + shift + P` and search `Dev Containers: (Re-)build and Reopen in Container` and click enter
 5. Wait for a new vscode window to open inside the dev container (should say Dev Container in the bottom left corner of vscode).
 

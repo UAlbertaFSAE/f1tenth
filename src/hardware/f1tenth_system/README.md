@@ -1,15 +1,10 @@
 # f1tenth_system
 
-Drivers onboard f1tenth race cars. This branch is under development for migration to ROS2. See the [documentation of F1TENTH](https://f1tenth.readthedocs.io/en/foxy_test/getting_started/firmware/index.html) on how to get started.
+Drivers onboard f1tenth race cars: the hardware interface between ROS and the car. It reads sensor data (VESC speed, steering feedback) and converts ROS control messages into the low-level VESC motor and servo commands that physically drive the car.
 
-## Cloning submodules
-If you clone this repository, make sure to clone the submodules as well. You can do this by running:
+Vendored from [f1tenth/f1tenth_system](https://github.com/f1tenth/f1tenth_system) at `humble-devel`. It is a package in this workspace, so it arrives with `git clone` and is built by `make build` alongside everything else -- there is nothing to clone separately and no submodules to initialise.
 
-```bash
-git submodule update --init --recursive --remote
-```
-
-This will ensure you have all the submodules cloned and updated to the configured branches.
+Driving the car by hand, the deadman switch and the teleop/autonomy mux are covered in [MANUAL_DRIVING.md](../../../docs/MANUAL_DRIVING.md). The one-time host setup the car needs -- udev rule, serial permissions, joystick -- is in [JETSON_DEVELOPMENT.md](../../../docs/JETSON_DEVELOPMENT.md#hardware-installation).
 
 ## Deadman's switch
 On Logitech F-710 joysticks, the LB button is the deadman's switch for teleop, and the RB button is the deadman's switch for navigation. You can also remap buttons. See how on the readthedocs documentation.

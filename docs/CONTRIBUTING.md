@@ -6,13 +6,47 @@ This document will help you with contributing issues, bug fixes, and new feature
 
 ## Issues
 
-Issues on GitHub are the process by which you can report bugs or request new features. If these are new to you, check out this [overview](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues). We have two main types of issues:
-1. bug fix
-    - anything that is broken
-2. feature request
-    - some new functionality that didn't exist before, or things like optimizations, refactors, and documentation changes
+Issues on GitHub are the process by which you can report bugs or request new features. If these are new to you, check out this [overview](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues).
 
-We have templates for each type of issue that will ensure all the necessary information is included for work to begin on it.
+Every non-trivial change gets an issue first, then a branch named for that issue, then a pull request that links back to it. Nothing is pushed directly to `main`.
+
+### Which template
+
+The "New issue" chooser offers three templates, and each one sets a title prefix and a label for you. Keep the prefix when you fill in the title.
+
+| Template | Use it for | Title prefix | Label |
+| --- | --- | --- | --- |
+| `bug_report.md` | Something that is broken | `[Bug]:` | `bug` |
+| `feature_request.md` | New work, or an improvement to something that already works | `[Feature]:` | `feature` |
+| `documentation.md` | Docs-only changes | `[Docs]:` | `documentation` |
+
+The templates live in `.github/ISSUE_TEMPLATE/`.
+
+### Labels
+
+These are the only labels this repository has. Anything else you type will not exist, and the issue will end up unlabelled.
+
+| Label | Meaning |
+| --- | --- |
+| `bug` | Something isn't working |
+| `feature` | New feature or request |
+| `documentation` | Improvements or additions to documentation |
+| `performance` | Optimization and performance improvements |
+| `restructure` | Restructuring or organizing the codebase |
+| `hardware` | Onboard compute, sensors, wiring and the images that run on them |
+| `blocked` | Progress is blocked by something else |
+
+Note that the label is `feature`, not `enhancement`.
+
+### What a usable bug report contains
+
+A bug report that cannot be reproduced cannot be fixed. Include:
+- **Reproduction steps** -- the exact commands and launch files, not a summary of them
+- **Expected vs. actual** -- what you thought would happen, what happened instead, and the error output
+- **Environment** -- host OS, container or bare metal, ROS distro, and the branch and commit you are on
+- **Hardware involved** -- car, Jetson, ZED, LiDAR, or none
+
+Say whether it happens every time or intermittently. "It sometimes crashes" and "it crashes on every launch" are different bugs.
 
 We use [github projects](https://github.com/orgs/UAlbertaFSAE/projects) to organize and prioritize issues, so this may be a good place to check out what issues are most pressing. If you want to work on an issue, please assign yourself to it so others can know who is working on an issue. You can leave updates on an issue to let others know your progress, and so that others can help if needed. If you are no longer working on an issue, please unassign yourself and leave a comment explaining why you are no longer working on it (it is fine if you don't have the time or get in over your head!).
 
@@ -52,7 +86,7 @@ Make sure to follow the pull request template when creating a pull request, and 
 
 ## Documentation
 
-Adding and updating documentation is an important part of developing our software. Good documentation allows others (sometimes even yourself) to understand what a piece of code does and how to use it. It is important to update relevant documentation when making changes, so that the documentation stays up to date. Our documentation mainly consists of 4 parts:
+Adding and updating documentation is an important part of developing our software. Good documentation allows others (sometimes even yourself) to understand what a piece of code does and how to use it. It is important to update relevant documentation when making changes, so that the documentation stays up to date. Our documentation mainly consists of 3 parts:
 - Docstrings which describe the function of individual functions and classes. (See [Code Style](#code-style) for more details)
 - README files in each package which explain the function and usage of the package.
 - Markdown files in the `docs/` folder which explain other parts of the repository that are not directly related to a specific package, like the [simulator docs](SIMULATOR.md)
