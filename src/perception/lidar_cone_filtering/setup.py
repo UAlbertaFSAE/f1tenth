@@ -1,0 +1,34 @@
+# Copyright (c) 2026 UAlberta Formula SAE
+#
+# Licensed under the MIT License. See the LICENSE file in this package, or the
+# one at the repository root, for the full text.
+
+from setuptools import find_packages, setup
+
+package_name = "lidar_cone_filtering"
+
+setup(
+    name=package_name,
+    version="0.0.0",
+    packages=find_packages(exclude=["test"]),
+    data_files=[
+        ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
+        ("share/" + package_name, ["package.xml"]),
+    ],
+    install_requires=["setuptools"],
+    zip_safe=True,
+    maintainer="autonomous",
+    maintainer_email="tumoth@ualberta.ca",
+    description="TODO: Package description",
+    license="TODO: License declaration",
+    extras_require={
+        "test": [
+            "pytest",
+        ],
+    },
+    entry_points={
+        "console_scripts": [
+            "lidar_filtering_o3d = lidar_cone_filtering.lidar_filtering_o3d_node:main"
+        ],
+    },
+)

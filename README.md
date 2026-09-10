@@ -6,54 +6,57 @@ Welcome to our autonomous remote control car repository. We are developing an au
 
 **Note**: As of right now, we are only accepting contributions from UofA students.
 
-For building the package please use: colcon build --packages-ignore livox_ros_driver2 --parallel-workers 1
+## Layout
 
-cd fsae_f1tenth_ws/ && source install/setup.bash
-First run the camera zed: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i
-then the detection node: ros2 launch detection_camera camera_detection.launch.py
-then run the following command:ros2
-    ros2 run tf2_ros static_transform_publisher -0.05 -0.15 0.40 0.0 0.0 0.0 base_link zed_camera_link
-    ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
-then run waypoint_new: ros2 launch waypoint_generator waypoint_generator.launch.py
-finally pure-pursuit: ros2 run pure_pursuit pure_pursuit
+This repository is cloned *as* the colcon workspace's `src/` directory:
 
-run the f1tenth bringup stack: `ros2 launch f1tenth_stack bringup_launch.py`
-run our stack using the launch file: `ros2 launch launch_pkg launch_node.launch.py`
+```
+f1tenth_ws/          workspace root -- build/, install/, log/, venv/ land here
+└── src/             this repository
+    └── src/         the ROS packages
+        ├── common/       launch_pkg, rc_interfaces
+        ├── hardware/     f1tenth_system (vesc, ackermann_mux, teleop_tools, f1tenth_stack)
+        ├── navigation/   particle_filter, path_planning, pure_pursuit
+        ├── perception/   camera_detection, lidar_cone_filtering, livox_sdk2,
+        │                 livox_ros_driver2, zed_wrapper
+        └── simulation/   f1tenth_gym, f1tenth_gym_ros
+```
 
-5.5 from base link to top of zed
-1.5 cm from camera moving to the left to the base_link
-0.5cm forward
+There are no submodules. Everything arrives with `git clone`.
 
-x = 0.5cm = 0.05m
-y = 1.5cm = 0.15m
-z = -4.0cm = -0.4m
-We swap the signs.
+## Getting started
 
-Even this may be required:
- ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 map base_link
+Everything goes through the `Makefile` at the root of this repo. Run `make help` for the
+full list.
 
+```bash
+make deps        # ROS, system and rosdep dependencies, plus the Python venv
+make build       # build, skipping the vendored livox and zed packages
+make run_auto    # launch the autonomous stack on the car
+make run_sim     # launch the simulator stack
+```
 
-Notes:
-  ("min_lookahead", 0.8);    // Can be ignored.
-  ("max_lookahead", 4.0);    // If this is too far, the smoothing is too much, and hence a very small correction will also not work.
-  ("lookahead_ratio", 4.0);  // This was I think set to 8.0, which is the ratio between distance and speed.
-        Higher lookahead ratio
-            Larger lookahead distance at a given speed
-            Smoother steering
-            Better at high speed
-            May cut corners or track less precisely
-        Lower lookahead ratio
-            Shorter lookahead distance
-            Tighter path tracking
-            Faster reactions
-            Can become twitchy or oscillatory
-  ("K_p", 0.30);
-        Lower value will correct less - smoother
-        higher value will correct less - aggressive
-  ("steering_limit", 25.0);     - Limit of vesc (which is 25.0)
-  ("velocity_percentage", 1.0);  // 0.6 default
-        Keep it as 1.0, going lower jitters the vechiles. (this is directly proportional to the currently set value in vesc.)
+`make build` skips the vendored LiDAR and ZED packages because they are slow and need SDKs
+that are not on every machine. Use `make build_all` for everything, or
+`make package zed_wrapper` for one of them.
 
+`make lint` runs the same linters CI runs, over all of `src/`, so a green local lint is a
+green CI run. `make test` runs `colcon test` and prints the results.
 
-    Also vesc.yaml has a parameter of steering_angle which has a 0.543 offset, we set it to 0.5 so that it goes straight.
-    no offset causes a problem to detection.
+The autonomous stack is one launch file driven by a config profile:
+
+```bash
+ros2 launch launch_pkg fsae.launch.py                       # config.yaml, the car
+ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml
+```
+
+The profile in `src/common/launch_pkg/config/` decides which components come up -- ZED,
+LiDAR driver, camera detection, LiDAR filtering, path planning, pure pursuit, RViz, rosbag
+-- along with the ZED arguments, the static transforms and the recorded topics. Running
+without a piece of hardware is a config change, not a different launch file.
+
+The hardware bringup stack is still its own launch:
+
+```bash
+ros2 launch f1tenth_stack bringup_launch.py
+```

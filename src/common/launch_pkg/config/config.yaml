@@ -1,0 +1,28 @@
+launch:
+  zed_camera: true
+  lidar_driver: false
+  camera_detection: true
+  lidar_cone_filtering: false
+  path_planning: true
+  pure_pursuit: true
+  visualizer: true
+  rosbag: true
+
+zed:
+  camera_model: zed2i
+  publish_tf: false
+  publish_map_tf: false
+  publish_urdf: true
+
+lidar:
+  launch_file: msg_MID360_launch.py
+
+static_transforms:
+  - parent: base_link
+    child: zed_camera_link
+    xyz: [-0.05, -0.15, 0.40]
+    rpy: [0.0, 0.0, 0.0]
+  - parent: map
+    child: base_link
+    xyz: [0.0, 0.0, 0.0]
+    rpy: [0.0, 0.0, 0.0]

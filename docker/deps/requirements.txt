@@ -1,3 +1,34 @@
+# Python dependencies for the workspace, installed into the venv by `make deps`.
+#
+# f1tenth_gym is not listed here: it is a package in this workspace and is pip
+# installed from the tree by scripts/setup.sh, which pulls its own dependencies
+# (gymnasium, numba, scipy, pyopengl, opencv, ...) with it.
+#
+# pyzed and range_libc are also absent on purpose. pyzed ships with the ZED SDK
+# and cannot be installed from PyPI; range_libc is built from source for
+# particle_filter. Both are optional -- the packages that need them are the ones
+# PACKAGES_IGNORE skips by default.
+
+packaging>=24.0
+
+# ROS message and transform helpers
 transforms3d
+tf-transformations
+
+# camera_detection: YOLO inference on the ZED stream
+ultralytics
+torch
+torchvision
+opencv-python
+
+# lidar_cone_filtering: point cloud filtering
+open3d
+
+# shared numerics and config parsing
+numpy
+scipy
+PyYAML
+
+# lint tooling, the same versions `make lint` and CI use
 ruff
 mypy

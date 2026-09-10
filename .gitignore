@@ -44,12 +44,6 @@ build/*.obj
 # macOS
 .DS_Store
 
-# images (for now)
-*.jpg
-*.svg
-*.jpeg
-*.png
-
 # python cache
 __pycache__
 .mypy_cache
@@ -57,9 +51,10 @@ __pycache__
 
 # clangd cache
 .cache/
+
+# personal scratch notes, not shared
 notes.txt
 
-*.vscode/
 *__pycache__/
 *.mypy_cache/
 *.ruff_cache/

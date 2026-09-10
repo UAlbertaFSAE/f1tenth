@@ -1,0 +1,11 @@
+launch:
+  zed_camera: false
+  lidar_driver: false
+  camera_detection: false
+  lidar_cone_filtering: false
+  path_planning: true
+  pure_pursuit: true
+  visualizer: true
+  rosbag: false
+
+static_transforms: []

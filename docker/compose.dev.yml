@@ -1,7 +1,7 @@
 services:
   dev:
     container_name: f1tenth_dev
-    image:  ualbertaformula/f1tenth
+    image: ualbertaformula/f1tenth
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
@@ -10,27 +10,9 @@ services:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - IS_JETSON=FALSE
     volumes:
-      - ..:/f1tenth:cached
+      - ..:/f1tenth/src:cached
       - /dev:/dev
-    tty: true
-    stdin_open: true
-    networks:
-      - x11
-
-  sim:
-    depends_on:
-      - novnc
-    image:  ualbertaformula/f1tenth-sim
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.sim
-    environment:
-      - DISPLAY=novnc:0.0
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-      - ROS_DOMAIN_ID=42
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     tty: true
     stdin_open: true
     networks:

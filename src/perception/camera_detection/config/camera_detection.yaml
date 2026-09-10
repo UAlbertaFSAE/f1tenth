@@ -1,0 +1,17 @@
+camera_detection:
+  ros__parameters:
+    depth_node: "/zed/zed_node"
+    camera_node: "/zed/zed_node"
+    publishing_topic: "/cone_positions"
+
+    model_file: ""
+    classes_file: ""
+
+    include_depth: true
+    visualize: true
+    detection_confidence: 0.5
+    publish_rate_hz: 30
+
+    apply_tf: true
+    target_frame: "odom"
+    tf_timeout_sec: 0.5

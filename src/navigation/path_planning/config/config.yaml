@@ -1,0 +1,17 @@
+triangulator_node:
+  ros__parameters:
+    cones_topic: "/cone_positions"
+    odom_topic: "/odom"
+    waypoint_topic: "/waypoints"
+    path_topic: "/planned_path"
+
+    lookahead_distance: 4.0
+    num_waypoints: 5
+    min_track_width: 0.0
+    max_track_width: 6.0
+
+    use_start_gate: false
+    start_gate_max_width: 8.0
+    start_colors:
+      - "orange"
+      - "large_orange"
