@@ -26,6 +26,8 @@ There are no submodules. Everything arrives with `git clone`.
 
 ## Getting started
 
+Full instructions are in [docs/SETUP.md](docs/SETUP.md). New to the team? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md) instead.
+
 Everything goes through the `Makefile` at the root of this repo. Run `make help` for the
 full list.
 
@@ -60,3 +62,19 @@ The hardware bringup stack is still its own launch:
 ```bash
 ros2 launch f1tenth_stack bringup_launch.py
 ```
+
+See [docs/MANUAL_DRIVING.md](docs/MANUAL_DRIVING.md) for which bringup to use and how the joystick overrides the autonomous stack.
+
+## Documentation
+
+| Document | What it covers |
+| --- | --- |
+| [SETUP.md](docs/SETUP.md) | Clone to a working build, the Makefile targets, common problems |
+| [ONBOARDING.md](docs/ONBOARDING.md) | New members: prerequisites per OS, the devcontainer, learning resources, the onboarding task |
+| [CONTRIBUTING.md](docs/CONTRIBUTING.md) | Issue and bug conventions, branch and PR flow, code style, lint gates |
+| [MANUAL_DRIVING.md](docs/MANUAL_DRIVING.md) | Driving the car by hand, the deadman switch, the teleop/autonomy mux |
+| [JETSON_DEVELOPMENT.md](docs/JETSON_DEVELOPMENT.md) | Working on the car, and the one-time hardware install |
+| [NETWORK_SETUP.md](docs/NETWORK_SETUP.md) | ssh onto the Jetson, addressing, DDS config |
+| [VSCODE_USAGE.md](docs/VSCODE_USAGE.md) | Devcontainer, linters and formatters in the editor |
+| [BATTERY_USAGE.md](docs/BATTERY_USAGE.md) | LiPo handling, charging and storage |
+| [SIMULATOR.md](docs/SIMULATOR.md) | Running the stack in simulation |

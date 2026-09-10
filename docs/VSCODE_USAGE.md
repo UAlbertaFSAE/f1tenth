@@ -5,12 +5,12 @@ We use VSCode and various extensions to create an integrated development environ
 upon first installing vscode, you should've installed the vscode devcontainer extension. This allows vscode to attach it's GUI client to the development container we use and install any necessary extensions, allowing any code changes to be made directly in the container.
 
 ##### Steps
-1. open up a new terminal in your linux instance and change into the `f1tenth/` repository (wherever it is on your system), and then run `code .` to open up vscode in the `f1tenth/` directory.
+1. open up a new terminal in your linux instance and change into the repository (`f1tenth_ws/src`, wherever it is on your system), and then run `code .` to open vscode there.
 2. either:
     1. click the pop-up in the bottom right that says something like "open up in devcontainer" to start the dev container and attach vscode to it
     2. press `ctrl + shift + p` and type "rebuild", which should give you the option to run the devcontainer rebuild and reopen container command which will also start the devcontainer and attach vscode to it
 3. press on the "open log" popup in the bottom right to see the container build/run process. Once new logs stop being produced you can (probably) safely open up a new terminal in the dev container by pressing the plus button at the top right of the vscode terminal.
-    - you are in the devcontainer if the user in the terminal is `autonomous` and you are in the `/f1tenth` directory
+    - you are in the devcontainer if the user in the terminal is `autonomous` and you are in the `/f1tenth/src` directory
 
 **Note**: you may have to wait a sec for all the extensions to fully load in
 
@@ -29,10 +29,11 @@ Here is a list with the documentation for each of our linters/formatters and git
 - [mypy](https://mypy.readthedocs.io/en/stable/index.html)
 
 ##### C++
-We use `clang-tidy` for linting and `clang-format` for code formatting. Since the clangd language server requires build commands for processing your c++ files, you need to run the following for clang-tidy linting to work on your c++ package:
+We use `clang-tidy` for linting and `clang-format` for code formatting. Since the clangd language server requires build commands for processing your c++ files, you need to build your package for clang-tidy linting to work on it:
 ```bash
-colcon build --packages-select <pkg-name> --cmake-args "-DCMAKE_EXPORT_COMPILE_COMMANDS=On"
+make package <pkg-name>
 ```
+Every Makefile build target exports the compilation database, so there is no extra flag to remember. `make lint-cpp` reads the same database and will tell you to run `make build` first if it is missing.
 
 These tools will enforce the c++ style guides, and also ensure developers are following c++ best practies. If there is ever any lint checks that you think are not useful, don't hesitate to ask a lead about removing it.
 
