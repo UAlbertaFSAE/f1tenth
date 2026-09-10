@@ -1,5 +1,5 @@
-0: yellow
-1: blue
-2: orange
-3: large_orange
-4: unknown
+blue_cone
+large_orange_cone
+orange_cone
+unknown_cone
+yellow_cone
