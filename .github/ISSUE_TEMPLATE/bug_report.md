@@ -1,8 +1,8 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
+about: Something in the stack is broken
+title: '[Bug]: '
+labels: bug
 assignees: ''
 
 ---
@@ -11,19 +11,23 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-Steps to reproduce the behavior:
+Steps to reproduce the behavior, including the exact commands and launch files used:
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
+What you expected to happen.
+
+**Actual behavior**
+What happened instead. Include the error output, and say whether it happens every time or intermittently.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Operating System**
- - [ ] Windows WSL
-- [ ] Mac with no VM
-- [ ] Mac with VM
-- [ ] Linux
+**Environment**
+- Host OS:
+- Container or bare metal:
+- ROS distro:
+- Branch and commit:
+- Hardware involved (car, Jetson, ZED, LiDAR, or none):
 
 **Additional context**
 Add any other context about the problem here.
