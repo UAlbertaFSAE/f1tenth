@@ -172,6 +172,33 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
         if action is not None:
             actions.append(action)
 
+    if enabled.get("simulator", False):
+        action = _optional_package_launch(
+            "f1tenth_gym_ros",
+            "gym_bridge_launch.py",
+            node_log_dir / "simulator.txt",
+        )
+        if action is not None:
+            actions.append(action)
+
+    if enabled.get("cone_detector_sim", False):
+        action = _optional_package_launch(
+            "cone_detector_sim",
+            "cone_detector_sim.launch.py",
+            node_log_dir / "cone_detector_sim.txt",
+        )
+        if action is not None:
+            actions.append(action)
+
+    if enabled.get("track_map_publisher", False):
+        action = _optional_package_launch(
+            "map_generator",
+            "track_map_publisher.launch.py",
+            node_log_dir / "track_map_publisher.txt",
+        )
+        if action is not None:
+            actions.append(action)
+
     actions.extend(_static_transform_nodes(config.get("static_transforms", [])))
 
     if enabled.get("camera_detection", False):
