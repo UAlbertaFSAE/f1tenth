@@ -10,6 +10,7 @@ camera_detection:
     include_depth: true
     visualize: true
     detection_confidence: 0.5
+    imgsz: 832
     publish_rate_hz: 30
 
     apply_tf: true
