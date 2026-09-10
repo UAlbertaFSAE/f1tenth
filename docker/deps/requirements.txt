@@ -16,7 +16,7 @@ transforms3d
 tf-transformations
 
 # camera_detection: YOLO inference on the ZED stream
-ultralytics
+ultralytics>=8.4.0
 torch
 torchvision
 opencv-python
