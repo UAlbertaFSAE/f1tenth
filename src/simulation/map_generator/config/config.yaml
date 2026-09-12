@@ -1,5 +1,5 @@
 track_map_publisher_node:
   ros__parameters:
-    csv_path: "" # ground-truth cone CSV (id,x,y,color) -- set by scripts/set_track.py
+    csv_path: "/home/krupal/Documents/f1/f1tenth_ws/src/src/simulation/cone_detector_sim/data/track-1.csv" # ground-truth cone CSV (id,x,y,color) -- set by scripts/set_track.py
     frame_id: map
     topic: /track_map

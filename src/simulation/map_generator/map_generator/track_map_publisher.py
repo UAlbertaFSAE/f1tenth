@@ -57,7 +57,7 @@ class TrackMapPublisher(Node):
         )
 
     def resolve_csv_path(self, configured_path: str) -> str:
-        """Resolve the configured cone CSV path, falling back to the bundled sample."""
+        """Resolve an explicit CSV path; missing selection is a configuration error."""
         share_dir = Path(get_package_share_directory("cone_detector_sim"))
 
         if configured_path:
@@ -66,7 +66,9 @@ class TrackMapPublisher(Node):
                 return str(configured)
             return str(share_dir / configured)
 
-        return str(share_dir / "data" / "straight.csv")
+        raise ValueError(
+            "csv_path is required; select a track with make run_sim CSV=<path>"
+        )
 
     def _build_markers(self, pairs: list) -> MarkerArray:
         blue = [p["blue"] for p in pairs if p["blue"] is not None]
