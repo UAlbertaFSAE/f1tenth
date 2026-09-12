@@ -3,27 +3,19 @@ Pure Pursuit Implementation in C++. Includes features such as dynamic lookahead.
 waypoint interpolation yet.
 */
 #include <math.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
-
 #include <Eigen/Eigen>
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
-#include <fstream>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
 
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+#include "nav_msgs/msg/path.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
 
 #define _USE_MATH_DEFINES
 using std::placeholders::_1;
@@ -50,10 +42,8 @@ class PurePursuit : public rclcpp::Node {
         current_point_world;  // Locks on to the closest waypoint, which gives a velocity profile
   };
 
-  Eigen::Matrix3d rotation_m;
-
-  double x_car_world;
-  double y_car_world;
+  double x_car_world = 0.0;
+  double y_car_world = 0.0;
 
   double car_orient_w;
   double car_orient_x;
@@ -74,13 +64,8 @@ class PurePursuit : public rclcpp::Node {
   double lookahead_ratio;
   double steering_limit;
   double velocity_percentage;
+  double waypoint_velocity;
   double curr_velocity = 0.0;
-
-  bool emergency_breaking = false;
-  std::string lane_number = "left";  // left or right lane
-
-  // file object
-  std::fstream csvFile_waypoints;
 
   // struct initialisation
   csvFileData waypoints;
@@ -91,17 +76,13 @@ class PurePursuit : public rclcpp::Node {
 
   // declare subscriber sharedpointer obj
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_odom;
-  rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr waypoint_subscriber;
+  rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr waypoint_subscriber;
 
   // declare publisher sharedpointer obj
   rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr publisher_drive;
 
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr vis_current_point_pub;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr vis_lookahead_point_pub;
-
-  // declare tf shared pointers
-  std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};
-  std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
 
   // private functions
   double to_radians(double degrees);
@@ -114,8 +95,6 @@ class PurePursuit : public rclcpp::Node {
 
   void get_waypoint();
 
-  void quat_to_rot(double q0, double q1, double q2, double q3);
-
   bool transformandinterp_waypoint();
 
   double p_controller();
@@ -125,7 +104,7 @@ class PurePursuit : public rclcpp::Node {
   void publish_message(double steering_angle);
 
   void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj);
-  void waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint);
+  void waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path);
 
   void timer_callback();
 };
