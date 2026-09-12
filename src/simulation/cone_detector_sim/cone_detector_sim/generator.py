@@ -305,7 +305,7 @@ class ConeDetectorSim(Node):
         return math.atan2(siny_cosp, cosy_cosp)
 
     def resolve_csv_path(self, configured_path: str) -> str:
-        """Resolve configured cone CSV path, falling back to a bundled sample."""
+        """Resolve an explicit track CSV path; reject a missing track selection."""
         share_dir = Path(get_package_share_directory("cone_detector_sim"))
 
         if configured_path:
@@ -314,7 +314,9 @@ class ConeDetectorSim(Node):
                 return str(configured)
             return str(share_dir / configured)
 
-        return str(share_dir / "data" / "straight.csv")
+        raise ValueError(
+            "csv_path is required; select a track with make run_sim CSV=<path>"
+        )
 
     def read_csv(self, path: str) -> list:
         """Read track CSV rows and group cones into ordered stations by id."""

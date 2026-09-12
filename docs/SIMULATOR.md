@@ -1,6 +1,6 @@
 # Simulator
 
-The simulator runs our stack, not its own. It is the same launch file, the same node names and the same topics the car uses, with a config profile that turns the hardware off and the simulated sensors on. A parameter tuned in sim is the parameter the car uses, and integration bugs — topic name drift, QoS mismatches, TF frame errors — show up here instead of on the track.
+The simulator runs our stack, not its own. It is the same launch file, the same node names and the same topics the car uses, with a config profile that turns the hardware off and the simulated sensors on. Simulator controller tuning lives in `pure_pursuit/config/sim_config.yaml`; the hardware profile remains separate. The simulation exercises the same topic interfaces and exposes integration issues before track testing.
 
 There is no separate simulator image, container or checkout. `f1tenth_gym` and `f1tenth_gym_ros` are packages in this workspace and build with everything else.
 
@@ -8,7 +8,7 @@ There is no separate simulator image, container or checkout. `f1tenth_gym` and `
 
 ```bash
 make build
-make run_sim
+make run_sim CSV=src/simulation/cone_detector_sim/data/eight.csv
 ```
 
 That is `ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml`. To drive a different track:
@@ -21,7 +21,7 @@ Four tracks ship in `src/simulation/cone_detector_sim/data/`:
 
 | Track | Stations | Shape |
 | --- | --- | --- |
-| `straight.csv` | 100 | straight line, the default |
+| `straight.csv` | 100 | straight line |
 | `eight.csv` | 93 | figure eight, crossing itself |
 | `track-1.csv` | 200 | closed circuit |
 | `track-2.csv` | 210 | closed circuit, tighter |
@@ -58,7 +58,7 @@ make run_sim CSV=src/simulation/cone_detector_sim/data/track-1.csv STATION=40
 
 Those configs are rewritten in the source tree, so `make run_sim CSV=...` rebuilds the three affected packages before launching. Running `make run_sim` afterwards with no `CSV=` keeps whatever track was last set.
 
-Leaving `csv_path` empty resolves to the bundled `straight.csv` from the package share, so a fresh clone runs without setting a track first.
+Both track consumers require an explicit `csv_path`. An empty path is an error instead of silently using a straight track. Use `CSV=` to update both track consumers and the spawn together.
 
 ## Authoring a track
 
@@ -82,3 +82,27 @@ Save the result somewhere under `data/`, then point the sim at it with `make run
 | `/cone_positions` | `rc_interfaces/msg/Cones` | `cone_detector_sim` |
 | `/cone_view_markers` | `MarkerArray` | `cone_detector_sim`, currently visible cones |
 | `/track_map` | `MarkerArray` | `track_map_publisher`, whole track, latched |
+
+## Navigation and launch configuration
+
+The simulator profile uses a `packages` list with package launch files and `args`.
+It launches the Python gate-pairing planner with `/ego_racecar/odom` and the
+controller with `config_file:=sim_config.yaml`. The hardware profile still supports
+its existing `launch` flags. Foxglove does not open a browser automatically.
+Set `rviz.enabled: false` in a copied profile for a headless run.
+
+The Python planner publishes each complete local path as `nav_msgs/Path` on
+`/waypoints` and `/planned_path`, using the odometry frame. Pure pursuit replaces
+its previous path on each nonempty update instead of accumulating point targets.
+The start-gate and fallback outputs use the same path interface.
+
+Simulator tuning matches `krupal/develop`: `min_lookahead: 0.3`,
+`max_lookahead: 2.0`, `lookahead_ratio: 4.0`, `K_p: 0.6`, and
+`waypoint_velocity: 6.0`. With `velocity_percentage: 1.0`, the speed is 6 m/s
+below 10 degrees of steering, 2.52 m/s at 10–20 degrees, and 1.98 m/s above
+20 degrees. The Python planning algorithm is unchanged; the C++ planner and
+controller stale/invalid/distant-target stop guards have not been ported.
+
+RViz loads `sim_visualizer.rviz` with fixed frame `map`, the robot, odometry,
+track, visible cones, planned path, and lookahead marker. The Python planner
+does not produce the C++ planner's `/triangulation_markers`.
