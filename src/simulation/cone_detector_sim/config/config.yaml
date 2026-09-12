@@ -1,6 +1,6 @@
 cone_detector_sim_node:
   ros__parameters:
-    csv_path: "" # ground-truth cone CSV (id,x,y,color) -- set by scripts/set_track.py
+    csv_path: "/home/krupal/Documents/f1/f1tenth_ws/src/src/simulation/cone_detector_sim/data/track-1.csv" # ground-truth cone CSV (id,x,y,color) -- set by scripts/set_track.py
     cone_topic: /cone_positions
     odom_topic: /ego_racecar/odom # gym_bridge's ego odom topic (cone_detector_sim is sim-only)
     loop_track: true # whether the track is a closed loop (wraps station lookup around)
