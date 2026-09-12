@@ -7,6 +7,8 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
@@ -23,11 +25,12 @@ def generate_launch_description() -> LaunchDescription:
         executable="triangulator_node",
         name="triangulator_node",
         output="screen",
-        parameters=[config],
+        parameters=[config, {"odom_topic": LaunchConfiguration("odom_topic")}],
     )
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument("odom_topic", default_value="/odom"),
             triangulator_node,
         ]
     )

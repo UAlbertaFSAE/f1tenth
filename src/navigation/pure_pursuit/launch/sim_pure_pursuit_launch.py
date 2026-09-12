@@ -1,32 +1,19 @@
-import os
-
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
-def generate_launch_description():
-    ld = LaunchDescription()
-    config = os.path.join(
-        get_package_share_directory("pure_pursuit"), "config", "sim_config.yaml"
+def generate_launch_description() -> LaunchDescription:
+    """Retain the old entry point as a wrapper around the canonical launcher."""
+    share = get_package_share_directory("pure_pursuit")
+    return LaunchDescription(
+        [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    f"{share}/launch/pure_pursuit_launch.py"
+                ),
+                launch_arguments={"config_file": "sim_config.yaml"}.items(),
+            )
+        ]
     )
-
-    pure_pursuit = Node(
-        package="pure_pursuit",
-        executable="pure_pursuit",
-        name="pure_pursuit",
-        parameters=[config],
-    )
-
-    waypoint_visualizer_node = Node(
-        package="pure_pursuit",
-        executable="waypoint_visualizer",
-        name="waypoint_visualizer_node",
-        parameters=[config],
-    )
-
-    # finalize
-    ld.add_action(pure_pursuit)
-    ld.add_action(waypoint_visualizer_node)
-
-    return ld

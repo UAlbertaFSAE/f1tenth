@@ -1,27 +1,18 @@
 #include "pure_pursuit.hpp"
 
 #include <math.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
-
 #include <Eigen/Eigen>
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
-#include <fstream>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
 
 #include "ackermann_msgs/msg/ackermann_drive_stamped.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
 
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   // initialise parameters
@@ -37,6 +28,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   this->declare_parameter("lookahead_ratio", 4.0);
   this->declare_parameter("K_p", 0.30);
   this->declare_parameter("steering_limit", 25.0);
+  this->declare_parameter("waypoint_velocity", 6.0);
   this->declare_parameter("velocity_percentage", 1.0);  // 0.6 default
 
   // Default Values
@@ -53,11 +45,12 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
   K_p = this->get_parameter("K_p").as_double();
   steering_limit = this->get_parameter("steering_limit").as_double();
   velocity_percentage = this->get_parameter("velocity_percentage").as_double();
+  waypoint_velocity = this->get_parameter("waypoint_velocity").as_double();
 
   subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
 
-  waypoint_subscriber = this->create_subscription<geometry_msgs::msg::Point>(
+  waypoint_subscriber = this->create_subscription<nav_msgs::msg::Path>(
       waypoint_topic, rclcpp::QoS(10), std::bind(&PurePursuit::waypoint_callback, this, _1));
 
   timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
@@ -68,9 +61,6 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
       this->create_publisher<visualization_msgs::msg::Marker>(rviz_current_waypoint_topic, 10);
   vis_lookahead_point_pub =
       this->create_publisher<visualization_msgs::msg::Marker>(rviz_lookahead_waypoint_topic, 10);
-
-  tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-  transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   RCLCPP_INFO(this->get_logger(), "Pure pursuit node has been launched");
 
@@ -219,22 +209,6 @@ bool PurePursuit::point_is_behind_car(double x, double y) {
   return true;
 }
 
-void PurePursuit::quat_to_rot(double q0, double q1, double q2, double q3) {
-  double r00 = (double)(2.0 * (q0 * q0 + q1 * q1) - 1.0);
-  double r01 = (double)(2.0 * (q1 * q2 - q0 * q3));
-  double r02 = (double)(2.0 * (q1 * q3 + q0 * q2));
-
-  double r10 = (double)(2.0 * (q1 * q2 + q0 * q3));
-  double r11 = (double)(2.0 * (q0 * q0 + q2 * q2) - 1.0);
-  double r12 = (double)(2.0 * (q2 * q3 - q0 * q1));
-
-  double r20 = (double)(2.0 * (q1 * q3 - q0 * q2));
-  double r21 = (double)(2.0 * (q2 * q3 + q0 * q1));
-  double r22 = (double)(2.0 * (q0 * q0 + q3 * q3) - 1.0);
-
-  rotation_m << r00, r01, r02, r10, r11, r12, r20, r21, r22;
-}
-
 bool PurePursuit::transformandinterp_waypoint() {  // pass old waypoint here
   // initialise vectors
   waypoints.lookahead_point_world << waypoints.X[waypoints.index], waypoints.Y[waypoints.index],
@@ -281,12 +255,12 @@ double PurePursuit::get_velocity(double steering_angle) {
     velocity = waypoints.V[waypoints.velocity_index] * velocity_percentage;
   } else {  // For waypoints loaded without velocity profiles
     if (abs(steering_angle) >= to_radians(0.0) && abs(steering_angle) < to_radians(10.0)) {
-      velocity = 6.0 * velocity_percentage;
+      velocity = waypoint_velocity * velocity_percentage;
     } else if (abs(steering_angle) >= to_radians(10.0) &&
                abs(steering_angle) <= to_radians(20.0)) {
-      velocity = 2.5 * velocity_percentage;
+      velocity = 0.42 * waypoint_velocity * velocity_percentage;
     } else {
-      velocity = 2.0 * velocity_percentage;
+      velocity = 0.33 * waypoint_velocity * velocity_percentage;
     }
   }
 
@@ -321,34 +295,41 @@ void PurePursuit::publish_message(double steering_angle) {
   publisher_drive->publish(drive_msgObj);
 }
 
-void PurePursuit::waypoint_callback(const geometry_msgs::msg::Point::ConstSharedPtr waypoint) {
-  constexpr int kWaypointHistoryLimit = 20;
+void PurePursuit::waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path) {
+  // The triangulator recomputes and republishes its whole local path every
+  // cycle -- treat each message as the current path, atomically replacing the
+  // old one. Streaming/appending individual points into a small FIFO let a
+  // single noisy frame partially evict a good path and blend in stale points
+  // from an unrelated frame, which is what caused the car to run off track.
+  if (path->poses.empty()) {
+    return;
+  }
 
-  // don't push the same point on multiple times
-  if (num_waypoints > 0) {
-    double last_x = waypoints.X[waypoints.X.size() - 1];
-    double last_y = waypoints.Y[waypoints.Y.size() - 1];
+  waypoints.X.clear();
+  waypoints.Y.clear();
+  waypoints.V.clear();
 
-    if (waypoint->x == last_x && waypoint->y == last_y) {
-      return;
+  for (const auto& pose : path->poses) {
+    waypoints.X.push_back(pose.pose.position.x);
+    waypoints.Y.push_back(pose.pose.position.y);
+    waypoints.V.push_back(0.0);
+  }
+  num_waypoints = static_cast<int>(waypoints.X.size());
+
+  // Re-anchor the search index to whichever new point is closest to the car,
+  // instead of resetting to 0, so get_waypoint continues from the right spot.
+  int nearest_i = 0;
+  double nearest_dist = p2pdist(waypoints.X[0], x_car_world, waypoints.Y[0], y_car_world);
+  for (int i = 1; i < num_waypoints; i++) {
+    double dist = p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world);
+    if (dist < nearest_dist) {
+      nearest_dist = dist;
+      nearest_i = i;
     }
   }
+  waypoints.index = nearest_i;
+  waypoints.velocity_index = nearest_i;
 
-  // Keep only the most recent waypoints so stale cone positions do not dominate control.
-  while (num_waypoints >= kWaypointHistoryLimit) {
-    waypoints.X.erase(waypoints.X.begin());
-    waypoints.Y.erase(waypoints.Y.begin());
-    waypoints.V.erase(waypoints.V.begin());
-    num_waypoints--;
-
-    waypoints.index = std::max(0, waypoints.index - 1);
-    waypoints.velocity_index = std::max(0, waypoints.velocity_index - 1);
-  }
-
-  waypoints.X.push_back(waypoint->x);
-  waypoints.Y.push_back(waypoint->y);
-  waypoints.V.push_back(1);
-  num_waypoints++;
 }
 
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
@@ -367,7 +348,7 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
   // interpolate between different way-points
   get_waypoint();
 
-  // use tf2 transform the goal point
+  // Transform the selected goal point into the car frame.
   if (!transformandinterp_waypoint()) {
     return;
   }
@@ -383,6 +364,7 @@ void PurePursuit::timer_callback() {
   // Periodically check parameters and update
   K_p = this->get_parameter("K_p").as_double();
   velocity_percentage = this->get_parameter("velocity_percentage").as_double();
+  waypoint_velocity = this->get_parameter("waypoint_velocity").as_double();
   min_lookahead = this->get_parameter("min_lookahead").as_double();
   max_lookahead = this->get_parameter("max_lookahead").as_double();
   lookahead_ratio = this->get_parameter("lookahead_ratio").as_double();

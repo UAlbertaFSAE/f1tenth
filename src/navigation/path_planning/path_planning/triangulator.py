@@ -78,7 +78,7 @@ class Triangulator(Node):
         )
 
         # Publishers
-        self.waypoint_pub = self.create_publisher(Point, waypoint_topic, 10)
+        self.controller_path_pub = self.create_publisher(Path, waypoint_topic, 10)
         self.path_pub = self.create_publisher(Path, path_topic, 10)
 
         self.latest_odom: Odometry | None = None
@@ -132,23 +132,7 @@ class Triangulator(Node):
             start_midpoint = self.try_start_gate(msg, vehicle_pos, vehicle_heading)
 
         if start_midpoint is not None:
-            self.waypoint_pub.publish(start_midpoint)
-            self.get_logger().info(
-                f"Published START waypoint: ({start_midpoint.x:.2f}, {start_midpoint.y:.2f})"
-            )
-
-            path_msg = Path()
-            path_msg.header.stamp = self.get_clock().now().to_msg()
-            path_msg.header.frame_id = "odom"
-
-            pose = PoseStamped()
-            pose.header = path_msg.header
-            pose.pose.position = start_midpoint
-            pose.pose.orientation.w = 1.0
-            path_msg.poses.append(pose)
-
-            self.path_pub.publish(path_msg)
-            self.get_logger().info("Published start path with 1 waypoint")
+            self.publish_path([start_midpoint])
             return
 
         # --- 2) Normal triangulation with BLUE/YELLOW boundaries
@@ -174,7 +158,7 @@ class Triangulator(Node):
                     "No lists for pairing; using fallback closest blue/yellow"
                 )
                 waypoint = self.calculate_midpoint(left_cone, right_cone)
-                self.waypoint_pub.publish(waypoint)
+                self.publish_path([waypoint])
                 self.get_logger().info(
                     f"Published fallback waypoint: ({waypoint.x:.2f}, {waypoint.y:.2f})"
                 )
@@ -219,27 +203,21 @@ class Triangulator(Node):
             self.get_logger().warn("No waypoints generated")
             return
 
-        # NOTE: Previously this published waypoints[0] (closest gate).
-        # On curves / end-of-visibility, that tends to straighten the car.
-        # Publishing the farthest gate encourages committing to the turn.
-        target_wp = waypoints[-1]
+        self.publish_path(waypoints)
 
-        self.waypoint_pub.publish(target_wp)
-        self.get_logger().info(
-            f"Published waypoint: ({target_wp.x:.2f}, {target_wp.y:.2f}, {target_wp.z:.2f})"
-        )
-
+    def publish_path(self, waypoints: list[Point]) -> None:
+        """Publish the current gate midpoints as one controller path and RViz path."""
+        assert self.latest_odom is not None
         path_msg = Path()
         path_msg.header.stamp = self.get_clock().now().to_msg()
-        path_msg.header.frame_id = "odom"
-
+        path_msg.header.frame_id = self.latest_odom.header.frame_id
         for waypoint in waypoints:
             pose = PoseStamped()
             pose.header = path_msg.header
             pose.pose.position = waypoint
             pose.pose.orientation.w = 1.0
             path_msg.poses.append(pose)
-
+        self.controller_path_pub.publish(path_msg)
         self.path_pub.publish(path_msg)
         self.get_logger().info(f"Published path with {len(waypoints)} waypoints")
 
