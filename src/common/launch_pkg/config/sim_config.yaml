@@ -1,11 +1,26 @@
-launch:
-  zed_camera: false
-  lidar_driver: false
-  camera_detection: false
-  lidar_cone_filtering: false
-  path_planning: true
-  pure_pursuit: true
-  visualizer: true
-  rosbag: false
+# Package launch arguments select simulator tuning explicitly.
+packages:
+  - name: simulator
+    package: f1tenth_gym_ros
+    launch_file: gym_bridge_launch.py
+    args: ["open_foxglove:=false"]
+  - name: track_map
+    package: map_generator
+    launch_file: track_map_publisher.launch.py
+  - name: cone_detector
+    package: cone_detector_sim
+    launch_file: cone_detector_sim.launch.py
+  - name: planner
+    package: path_planning
+    launch_file: path_planning.launch.py
+    args: ["odom_topic:=/ego_racecar/odom"]
+  - name: controller
+    package: pure_pursuit
+    launch_file: pure_pursuit_launch.py
+    args: ["config_file:=sim_config.yaml"]
+
+rviz:
+  enabled: true
+  config_file: sim_visualizer.rviz
 
 static_transforms: []

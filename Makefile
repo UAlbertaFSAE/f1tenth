@@ -178,17 +178,16 @@ run_auto: ## Launch the autonomous stack on the car
 	source $(WS_ROOT)/install/setup.bash; \
 	ros2 launch launch_pkg fsae.launch.py config:=config.yaml
 
-# CSV=<path> rewrites the track-dependent waypoint path in every config that
-# carries one, so a track change is one argument rather than several hand edits
-# that drift apart.
-run_sim: ## Launch the simulator stack: make run_sim [CSV=<path to waypoints csv>]
+# CSV=<path> points cone_detector_sim, track_map_publisher and the gym's ego
+# spawn pose at one track file, so changing track is one argument rather than
+# three hand edits that drift apart. The configs are rewritten in the source
+# tree, so the build below picks them up.
+run_sim: ## Launch the simulator stack: make run_sim [CSV=<path to track csv>] [STATION=<index>]
 	@$(SOURCE_ENV); \
-	source $(WS_ROOT)/install/setup.bash; \
 	if [ -n "$(CSV)" ]; then \
-		csv=$$(cd "$$(dirname "$(CSV)")" && pwd -P)/$$(basename "$(CSV)"); \
-		if [ ! -f "$$csv" ]; then echo "No such CSV: $$csv"; exit 2; fi; \
-		echo "Pointing track-dependent configs at $$csv"; \
-		grep -rl 'waypoints_path:' $(SRC_DIR) --include='*.yaml' \
-			| xargs sed -i -E 's|(waypoints_path:).*|\1 "'"$$csv"'"|'; \
+		if [ ! -f "$(CSV)" ]; then echo "No such CSV: $(CSV)"; exit 2; fi; \
+		$(REPO_DIR)/scripts/set_track.py "$(CSV)" $(STATION) || exit 1; \
+		$(MAKE) --no-print-directory -C $(REPO_DIR) package cone_detector_sim map_generator f1tenth_gym_ros; \
 	fi; \
+	source $(WS_ROOT)/install/setup.bash; \
 	ros2 launch launch_pkg fsae.launch.py config:=sim_config.yaml

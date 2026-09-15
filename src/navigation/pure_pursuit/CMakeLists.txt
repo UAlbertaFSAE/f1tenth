@@ -14,17 +14,13 @@ endif()
 foreach(PACKAGE
   ament_cmake
   rclcpp
-  rclpy
   geometry_msgs
   nav_msgs
   ackermann_msgs
-  sensor_msgs
   std_msgs
   visualization_msgs
   eigen3_cmake_module
-  Eigen3
-  tf2_ros
-  tf2)
+  Eigen3)
 
   find_package(${PACKAGE} REQUIRED)
 
@@ -41,7 +37,7 @@ include_directories(
 add_executable(pure_pursuit src/pure_pursuit.cpp)
 
 ament_target_dependencies(pure_pursuit
-  rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs visualization_msgs tf2_ros tf2 eigen3_cmake_module Eigen3
+  rclcpp ackermann_msgs nav_msgs visualization_msgs eigen3_cmake_module Eigen3
 )
 
 add_executable(waypoint_visualizer src/waypoint_visualizer.cpp)

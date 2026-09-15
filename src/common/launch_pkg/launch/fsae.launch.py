@@ -14,14 +14,14 @@ YAML config in this package's ``config/`` directory, selected with the
 
 The config is read at launch time (not at import time) inside an
 ``OpaqueFunction``, because the value of a launch argument is not known until
-then. Every component is opt-in via ``launch:`` in that file, so a machine
-without a ZED or a LiDAR runs the same launch file with a different config
-rather than a different launch file.
+then. Simulator profiles list package launch files and arguments in ``packages``.
+Hardware profiles continue to support the existing ``launch`` component flags.
 """
 
 from __future__ import annotations
 
 import os
+import shlex
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -139,6 +139,8 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
     del args, kwargs
 
     config = _load_config(LaunchConfiguration("config").perform(context))
+    if "packages" in config:
+        return _package_actions(config)
     enabled = config.get("launch", {})
     run_dir, node_log_dir = _make_run_dir()
 
@@ -168,6 +170,33 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
             "livox_ros_driver2",
             lidar.get("launch_file", "msg_MID360_launch.py"),
             node_log_dir / "livox_driver.txt",
+        )
+        if action is not None:
+            actions.append(action)
+
+    if enabled.get("simulator", False):
+        action = _optional_package_launch(
+            "f1tenth_gym_ros",
+            "gym_bridge_launch.py",
+            node_log_dir / "simulator.txt",
+        )
+        if action is not None:
+            actions.append(action)
+
+    if enabled.get("cone_detector_sim", False):
+        action = _optional_package_launch(
+            "cone_detector_sim",
+            "cone_detector_sim.launch.py",
+            node_log_dir / "cone_detector_sim.txt",
+        )
+        if action is not None:
+            actions.append(action)
+
+    if enabled.get("track_map_publisher", False):
+        action = _optional_package_launch(
+            "map_generator",
+            "track_map_publisher.launch.py",
+            node_log_dir / "track_map_publisher.txt",
         )
         if action is not None:
             actions.append(action)
@@ -233,8 +262,6 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
         )
 
     if enabled.get("pure_pursuit", False):
-        # pure_pursuit is launched as-is; its own config handling is known to be
-        # broken (#109 leaves it explicitly out of scope) and is not fixed here.
         actions.append(
             Node(
                 package="pure_pursuit",
@@ -272,6 +299,83 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
             )
         )
 
+    return actions
+
+
+def _package_actions(config: dict[str, Any]) -> list[Any]:
+    """Expand a package-list profile, forwarding each package's launch arguments."""
+    actions: list[Any] = []
+    recording = config.get("recording", {})
+    run_dir = None
+    if recording.get("save", False):
+        run_dir = (
+            Path.cwd()
+            / recording.get("folder", "recordings")
+            / datetime.now().strftime("%Y%m%d_%H%M%S")
+        )
+        (run_dir / "node_logs").mkdir(parents=True, exist_ok=True)
+    for entry in config["packages"]:
+        if not entry.get("enabled", True):
+            continue
+        package = entry["package"]
+        if "launch_file" in entry:
+            cmd = ["ros2", "launch", package, entry["launch_file"]]
+        elif "executable" in entry:
+            cmd = ["ros2", "run", package, entry["executable"]]
+        else:
+            raise ValueError(f"Package {package} needs launch_file or executable")
+        cmd.extend(entry.get("args", []))
+        if run_dir is not None:
+            log_path = run_dir / "node_logs" / f"{entry.get('name', package)}.txt"
+            cmd = [
+                "bash",
+                "-o",
+                "pipefail",
+                "-c",
+                f"{shlex.join(cmd)} 2>&1 | tee -a {shlex.quote(str(log_path))}",
+            ]
+        actions.append(
+            ExecuteProcess(
+                cmd=cmd,
+                name=entry.get("name", package),
+                output="screen",
+            )
+        )
+    actions.extend(_static_transform_nodes(config.get("static_transforms", [])))
+    rviz = config.get("rviz", {})
+    if rviz.get("enabled", True):
+        actions.append(
+            Node(
+                package="rviz2",
+                executable="rviz2",
+                name="visualizer",
+                arguments=[
+                    "-d",
+                    str(
+                        Path(get_package_share_directory(PACKAGE_NAME))
+                        / "config"
+                        / rviz.get("config_file", "visualizer.rviz")
+                    ),
+                ],
+                output="screen",
+            )
+        )
+    rosbag = config.get("rosbag", {})
+    if run_dir is not None and rosbag.get("enabled", False):
+        actions.append(
+            ExecuteProcess(
+                cmd=[
+                    "ros2",
+                    "bag",
+                    "record",
+                    "-o",
+                    str(run_dir / "rosbag"),
+                    *rosbag.get("topics", DEFAULT_ROSBAG_TOPICS),
+                ],
+                name="rosbag_record",
+                output="log",
+            )
+        )
     return actions
 
 
