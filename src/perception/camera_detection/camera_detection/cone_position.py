@@ -50,6 +50,7 @@ class ConePublisher(Node):
         self.declare_parameter("include_depth", True)
         self.declare_parameter("visualize", False)
         self.declare_parameter("detection_confidence", 0.5)
+        self.declare_parameter("imgsz", 832)
         self.declare_parameter("publish_rate_hz", 30)
         self.declare_parameter("apply_tf", True)
         self.declare_parameter("target_frame", "odom")
@@ -64,6 +65,7 @@ class ConePublisher(Node):
         self.include_depth = self.get_parameter("include_depth").value
         self.visualize = self.get_parameter("visualize").value
         self.detection_confidence = self.get_parameter("detection_confidence").value
+        self.imgsz = self.get_parameter("imgsz").value
         self.publish_rate_hz = self.get_parameter("publish_rate_hz").value
         self.apply_tf = self.get_parameter("apply_tf").value
         self.target_frame = self.get_parameter("target_frame").value
@@ -76,6 +78,7 @@ class ConePublisher(Node):
         self.get_logger().info(f"  Include depth: {self.include_depth}")
         self.get_logger().info(f"  Visualize: {self.visualize}")
         self.get_logger().info(f"  Confidence threshold: {self.detection_confidence}")
+        self.get_logger().info(f"  Inference size: {self.imgsz}")
         self.get_logger().info(f"  Apply TF: {self.apply_tf}")
         self.get_logger().info(f"  Target frame: {self.target_frame}")
 
@@ -252,6 +255,7 @@ class ConePublisher(Node):
             results = self.model(
                 cv_image,
                 conf=self.detection_confidence,
+                imgsz=self.imgsz,
                 device=self.device,
                 verbose=False,
             )
