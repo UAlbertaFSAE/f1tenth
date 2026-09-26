@@ -6,7 +6,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description() -> LaunchDescription:
     """Generate launch description."""
-    # 1. Declare the command-line arguments (with default values fallback)
+    # Declare the command-line arguments (with default values fallback)
     v_launch_arg = DeclareLaunchArgument(
         "v", default_value="0.0", description="Speed of the vehicle (m/s)"
     )
