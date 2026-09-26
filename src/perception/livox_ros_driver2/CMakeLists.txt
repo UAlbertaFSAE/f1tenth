@@ -51,13 +51,53 @@ rosidl_generate_interfaces(${LIVOX_INTERFACES}
   LIBRARY_NAME ${PROJECT_NAME}
 )
 
-# make sure the livox_lidar_sdk_shared library is installed
-find_library(LIVOX_LIDAR_SDK_LIBRARY liblivox_lidar_sdk_shared.so /usr/local/lib REQUIRED)
+# Locate the Livox SDK this driver links against.
+#
+# The SDK is vendored in this workspace as livox_sdk2 and colcon installs it to
+# <ws>/install/livox_sdk2. A copy of an older Livox SDK is also commonly left
+# behind in /usr/local by upstream's own install steps, and the unhinted
+# find_path this used to be picked that one up. The result was a build that got
+# all the way to compiling before dying on:
+#
+#   error: 'kLivoxLidarTypeMid360s' is not a member of 'LivoxLidarDeviceType'
+#
+# because the MID360s device type only exists in the newer vendored header.
+# Worse, headers and library could be resolved from different SDKs, which links
+# cleanly and then misbehaves at runtime.
+#
+# HINTS are searched ahead of the platform paths, so listing the workspace
+# install space (and the vendored tree behind it) here makes the in-workspace
+# SDK win, while /usr/local still works as a fallback on a machine that only
+# has the system install.
+# colcon installs each package to <ws>/install/<package>, so the sibling of our
+# own install prefix is where livox_sdk2's lib/ and include/ land. That is the
+# one location guaranteed to hold a matching pair, and it is derived from CMake
+# state rather than from COLCON_PREFIX_PATH, which is not exported into the
+# configure step. The vendored source tree is listed last: it supplies headers
+# on a from-scratch configure, but never a library, so it must not outrank the
+# install space.
+set(LIVOX_SDK2_SEARCH_PATHS "${CMAKE_INSTALL_PREFIX}/../livox_sdk2")
+foreach(_livox_prefix $ENV{COLCON_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
+  list(APPEND LIVOX_SDK2_SEARCH_PATHS "${_livox_prefix}/livox_sdk2" "${_livox_prefix}")
+endforeach()
+list(APPEND LIVOX_SDK2_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../livox_sdk2")
+
+find_library(LIVOX_LIDAR_SDK_LIBRARY
+  NAMES livox_lidar_sdk_shared
+  HINTS ${LIVOX_SDK2_SEARCH_PATHS}
+  PATH_SUFFIXES lib
+  REQUIRED
+)
 
 find_path(LIVOX_LIDAR_SDK_INCLUDE_DIR
   NAMES "livox_lidar_api.h" "livox_lidar_def.h"
+  HINTS ${LIVOX_SDK2_SEARCH_PATHS}
+  PATH_SUFFIXES include
   REQUIRED
 )
+
+message(STATUS "Livox SDK library: ${LIVOX_LIDAR_SDK_LIBRARY}")
+message(STATUS "Livox SDK headers: ${LIVOX_LIDAR_SDK_INCLUDE_DIR}")
 
 # PCL library
 link_directories(${PCL_LIBRARY_DIRS})

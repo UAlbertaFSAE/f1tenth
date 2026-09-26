@@ -1,0 +1,60 @@
+# Override for f1tenth_stack's vesc.yaml, passed to bringup_launch.py as
+# vesc_config. Kept here rather than edited in place: f1tenth_system is a
+# vendored third-party tree.
+/**:
+  # general parameters shared by all vesc-related nodes
+  ros__parameters:
+    # erpm (electrical rpm) = speed_to_erpm_gain * speed (meters / second) + speed_to_erpm_offset
+    speed_to_erpm_gain: 4614.0
+    speed_to_erpm_offset: 0.0
+
+    # servo value (0 to 1) =  steering_angle_to_servo_gain * steering angle (radians) + steering_angle_to_servo_offset
+    steering_angle_to_servo_gain: -1.2135
+    steering_angle_to_servo_offset: 0.500
+
+    port: /dev/sensors/vesc
+    duty_cycle_min: 0.0
+    duty_cycle_max: 0.0
+    current_min: 0.0
+    current_max: 100.0
+    brake_min: -20000.0
+    brake_max: 200000.0
+    speed_min: -23250.0
+    speed_max: 23250.0
+    position_min: 0.0
+    position_max: 0.0
+    servo_min: 0.15
+    servo_max: 0.85
+
+vesc_to_odom_node:
+  ros__parameters:
+    # The VESC reports ERPM with the same sign as the commanded ERPM, but
+    # vesc_to_odom negates it: current_speed = (-speed - offset) / gain. Driving
+    # forward at +5029 ERPM gave -1.09 m/s, so odometry integrated backwards,
+    # taking yaw and the odom->base_link TF with it and steering pure_pursuit off
+    # a straight track. Negating the gain here cancels that negation for this
+    # node alone; ackermann_to_vesc keeps the +4614.0 above, so the command path
+    # is unchanged. Drop this once the vendored vesc is updated past 1bc8251.
+    speed_to_erpm_gain: -4614.0
+    odom_frame: odom
+    base_frame: base_link
+    # publish odom to base link tf
+    publish_tf: true
+    use_servo_cmd_to_calc_angular_velocity: true
+    # Measured rear-axle to front-axle on the car. The vendored default of .25
+    # understated it, inflating yaw_rate = v * tan(steer) / wheelbase by ~34%.
+    wheelbase: 0.335
+
+throttle_interpolator:
+  ros__parameters:
+    rpm_input_topic: commands/motor/unsmoothed_speed
+    rpm_output_topic: commands/motor/speed
+    servo_input_topic: commands/servo/unsmoothed_position
+    servo_output_topic: commands/servo/position
+
+    # servo smoother - limits acceleration and smooths anything above limit
+    max_acceleration: 2.5 # meters/second^2
+    throttle_smoother_rate: 75.0 # messages/sec
+    # servo smoother - limits rotation speed and smooths anything above limit
+    max_servo_speed: 3.2 # radians/second
+    servo_smoother_rate: 75.0 # messages/sec

@@ -8,6 +8,7 @@ on:
       - 'docker/deps/packages.txt'
       - 'docker/deps/packages-jetson.txt'
       - 'docker/deps/requirements.txt'
+      - 'docker/deps/requirements-common.txt'
       - 'docker/deps/requirements-jetson.txt'
 
 jobs:

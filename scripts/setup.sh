@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Environment bootstrapper for this workspace, invoked by `make deps`.
+# Environment bootstrapper for this workspace, invoked by `make deps` and by
+# `make deps_jetson` (which passes --jetson).
 # - Installs ROS 2 Humble if missing (Ubuntu 22.04 only, otherwise prints guidance)
 # - Installs prerequisites (Eigen3, build tools)
 # - Installs CDT (artem-ogre/CDT) if missing
@@ -22,6 +23,22 @@ SYSTEM_PYTHON="/usr/bin/python3"
 if [[ ! -x "$SYSTEM_PYTHON" ]]; then
   SYSTEM_PYTHON="python3"
 fi
+
+# --jetson selects requirements-jetson.txt and the CUDA torch install below.
+JETSON=0
+for arg in "$@"; do
+  case "$arg" in
+    --jetson) JETSON=1 ;;
+    *) ;;
+  esac
+done
+
+# CUDA aarch64 wheels for JetPack 6 / CUDA 12.6. torch and torchvision must be
+# a matched pair, or nms fails at runtime with "operator torchvision::nms does
+# not exist".
+JETSON_TORCH_INDEX="https://pypi.jetson-ai-lab.io/jp6/cu126"
+JETSON_TORCH_VERSION="2.8.0"
+JETSON_TORCHVISION_VERSION="0.23.0"
 
 # ---------- logging helpers ----------
 log() { echo -e "[setup] $*"; }
@@ -261,20 +278,64 @@ activate_python_venv() {
   source "$venv_dir/bin/activate"
 }
 
+# Runs before requirements-jetson.txt: ultralytics-thop in there requires torch,
+# and pip would satisfy it from PyPI with the CPU build.
+install_jetson_torch() {
+  log "Installing CUDA torch ${JETSON_TORCH_VERSION} and torchvision ${JETSON_TORCHVISION_VERSION} from ${JETSON_TORCH_INDEX}…"
+
+  # --index-url, not --extra-index-url: PyPI has the same versions as CPU-only
+  # wheels and wins the tie, leaving torch.cuda.is_available() False.
+  python3 -m pip install --index-url "$JETSON_TORCH_INDEX" \
+    "torch==${JETSON_TORCH_VERSION}" "torchvision==${JETSON_TORCHVISION_VERSION}" || {
+    err "Failed to install CUDA torch/torchvision from $JETSON_TORCH_INDEX"
+    return 1
+  }
+
+  if python3 -c "import torch; raise SystemExit(0 if torch.cuda.is_available() else 1)"; then
+    log "torch reports CUDA available ($(python3 -c 'import torch; print(torch.version.cuda)'))."
+  else
+    warn "torch installed but torch.cuda.is_available() is False; YOLO will run on the CPU."
+  fi
+}
+
 setup_python_venv() {
   log "Setting up Python venv and installing Python dependencies…"
 
   activate_python_venv
-  
-  local requirements_path="${FORMULA_HOME}/src/docker/deps/requirements.txt"
+
+  local requirements_name="requirements.txt"
+  if [[ "$JETSON" -eq 1 ]]; then
+    requirements_name="requirements-jetson.txt"
+  fi
+  local requirements_path="${FORMULA_HOME}/src/docker/deps/${requirements_name}"
+
+  # The inherited setuptools 59 predates PEP 621 and installs f1tenth_gym as an
+  # empty UNKNOWN 0.0.0. Upper bound is colcon-core's.
+  python3 -m pip install --upgrade pip "setuptools>=68,<80" wheel || {
+    err "Failed to upgrade pip/setuptools in the venv"
+    return 1
+  }
+
+  if [[ "$JETSON" -eq 1 ]]; then
+    install_jetson_torch || return 1
+  fi
 
   if [[ -f "$requirements_path" ]]; then
       python3 -m pip install -r "$requirements_path" || {
-          error "Failed to install Python dependencies from $requirements_path"
+          err "Failed to install Python dependencies from $requirements_path"
           return 1
       }
   else
-      warn "No requirements.txt found at $requirements_path; skipping."
+      warn "No $requirements_name found at $requirements_path; skipping."
+  fi
+
+  # --no-deps: ultralytics requires torch/torchvision/opencv-python by name and
+  # would pull the PyPI CPU builds. requirements-jetson.txt carries the rest.
+  if [[ "$JETSON" -eq 1 ]]; then
+    python3 -m pip install --no-deps "ultralytics>=8.4.0" || {
+      err "Failed to install ultralytics"
+      return 1
+    }
   fi
 
   # Install f1tenth_gym (and its dependencies) in editable mode.
@@ -341,6 +402,7 @@ main() {
   log "Success."
   echo
   echo "Everything else goes through the Makefile at the repo root:"
+  echo "  make deps_jetson              # this script again, with the JetPack CUDA python stack"
   echo "  make build                    # build, skipping the vendored livox and zed packages"
   echo "  make build_all                # build everything"
   echo "  make package <pkg> [<pkg>..]  # build only these packages"
