@@ -192,9 +192,7 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
     if enabled.get("f1tenth_stack", False):
         action = _optional_package_launch(
             "f1tenth_stack",
-            config.get("f1tenth_stack", {}).get(
-                "launch_file", "bringup_launch.py"
-            ),
+            config.get("f1tenth_stack", {}).get("launch_file", "bringup_launch.py"),
             node_log_dir / "f1tenth_stack.txt",
             {
                 "vesc_config": str(
