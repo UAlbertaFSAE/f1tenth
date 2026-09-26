@@ -1,0 +1,41 @@
+launch:
+  f1tenth_stack: true
+  zed_camera: true
+  lidar_driver: false
+  simulator: false
+  cone_detector_sim: false
+  track_map_publisher: false
+  camera_detection: true
+  lidar_cone_filtering: false
+  path_planning: true
+  pure_pursuit: true
+  visualizer: false
+  rosbag: true
+
+f1tenth_stack:
+  launch_file: bringup_launch.py
+
+zed:
+  camera_model: zed2i
+  publish_tf: false
+  publish_map_tf: false
+  publish_urdf: true
+
+lidar:
+  launch_file: msg_MID360_launch.py
+
+static_transforms:
+  # Measured on the car from the rear axle centre at ground level to the centre
+  # of the ZED body. The URDF already carries the +0.060 offset to the left lens.
+  - parent: base_link
+    child: zed_camera_link
+    xyz: [0.295, 0.0, 0.19]
+    rpy: [0.0, 0.0, 0.0]
+  # base_link is a child of odom, published by vesc_to_odom (publish_tf: true in
+  # f1tenth_stack/config/vesc.yaml). Rooting map at base_link too would give
+  # base_link two parents, which splits the TF tree and makes every
+  # camera->odom lookup fail. map -> odom is the correct root link.
+  - parent: map
+    child: odom
+    xyz: [0.0, 0.0, 0.0]
+    rpy: [0.0, 0.0, 0.0]

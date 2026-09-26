@@ -22,10 +22,9 @@ services:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-      - CYCLONEDDS_URI=file:///f1tenth/cyclonedds_config.xml
-      - IS_JETSON=TRUE
+      - CYCLONEDDS_URI=file:///f1tenth/src/cyclonedds_config.xml
     volumes:
-      - ..:/f1tenth:cached
+      - ..:/f1tenth/src:cached
       - /dev:/dev
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /usr/local/cuda:/usr/local/cuda
@@ -46,6 +45,5 @@ services:
       - /tmp/.X11-unix/:/tmp/.X11-unix
       - /dev:/dev
       - ${PWD}/cyclonedds_config.xml:/cyclonedds_config.xml
-    # image: f1tenth/focal-l4t-foxy:f1tenth-stack
     stdin_open: true
     tty: true

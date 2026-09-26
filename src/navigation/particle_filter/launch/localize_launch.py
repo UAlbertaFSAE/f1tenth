@@ -30,12 +30,14 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
+    """Launch the particle filter alongside a map server for the configured map."""
     # config and args
     localize_config = os.path.join(
         get_package_share_directory("particle_filter"), "config", "localize.yaml"
     )
-    localize_config_dict = yaml.safe_load(open(localize_config, "r"))
+    with open(localize_config) as config_file:
+        localize_config_dict = yaml.safe_load(config_file)
     map_name = localize_config_dict["map_server"]["ros__parameters"]["map"]
     localize_la = DeclareLaunchArgument(
         "localize_config",
