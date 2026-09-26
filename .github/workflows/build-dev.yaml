@@ -7,6 +7,7 @@ on:
       - 'docker/Dockerfile.dev'
       - 'docker/deps/packages.txt'
       - 'docker/deps/requirements.txt'
+      - 'docker/deps/requirements-common.txt'
 
 jobs:
   docker-dev:

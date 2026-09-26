@@ -8,8 +8,8 @@ camera_detection:
     classes_file: ""
 
     include_depth: true
-    visualize: true
-    detection_confidence: 0.5
+    visualize: false
+    detection_confidence: 0.25
     imgsz: 832
     publish_rate_hz: 30
 

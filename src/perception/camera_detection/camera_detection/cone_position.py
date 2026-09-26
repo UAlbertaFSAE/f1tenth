@@ -16,6 +16,7 @@ holds the detection, its frame and its timestamp together.
 
 import math
 import os
+import threading
 import traceback
 
 import cv2
@@ -26,7 +27,9 @@ import torch
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped
 from rc_interfaces.msg import Cone, Cones
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import Header
@@ -131,11 +134,19 @@ class ConePublisher(Node):
             self.get_logger().info("  /detection_visualization/depth")
 
         # Subscribe to left image (rectified color), depth registered to left, and camera_info for intrinsics
+        self._image_cb_group = MutuallyExclusiveCallbackGroup()
+        self._sensor_cb_group = MutuallyExclusiveCallbackGroup()
+        self._pending_image: Image | None = None
+        self._pending_lock = threading.Lock()
+        self._frame_ready = threading.Event()
+        self._shutdown = threading.Event()
+
         self.left_image_sub = self.create_subscription(
             Image,
             f"{self.camera_node}/rgb/color/rect/image",
-            self.left_image_callback,
-            10,
+            self._enqueue_image,
+            1,
+            callback_group=self._image_cb_group,
         )
 
         if self.include_depth:
@@ -143,7 +154,8 @@ class ConePublisher(Node):
                 Image,
                 f"{self.depth_node}/depth/depth_registered",
                 self.depth_callback,
-                10,
+                1,
+                callback_group=self._sensor_cb_group,
             )
 
             self.caminfo_sub = self.create_subscription(
@@ -151,6 +163,7 @@ class ConePublisher(Node):
                 f"{self.camera_node}/depth/depth_registered/camera_info",
                 self.caminfo_callback,
                 10,
+                callback_group=self._sensor_cb_group,
             )
             self.get_logger().info(
                 f"Subscribed to depth at: {self.depth_node}/depth/depth_registered"
@@ -172,6 +185,9 @@ class ConePublisher(Node):
         self.latest_caminfo: CameraInfo | None = None  # sensor_msgs/CameraInfo
         # (fx, fy, cx, cy), parsed once per CameraInfo message
         self.intrinsics: tuple[float, float, float, float] | None = None
+
+        self._worker = threading.Thread(target=self._inference_loop, daemon=True)
+        self._worker.start()
         self.get_logger().info("ConePublisher node started successfully.")
 
     # -------------------------
@@ -231,6 +247,40 @@ class ConePublisher(Node):
     # -------------------------
     # Main image processing callback (YOLO runs here)
     # -------------------------
+    def stop(self) -> None:
+        """Signal the detection worker to exit.
+
+        The worker is a daemon thread and is not joined: an in-flight YOLO pass would
+        hold shutdown for as long as it takes to finish, so it is left to be torn down
+        with the interpreter instead.
+        """
+        self._shutdown.set()
+        self._frame_ready.set()
+
+    def _enqueue_image(self, msg: Image) -> None:
+        """Park the newest frame for the worker thread; never block the executor."""
+        with self._pending_lock:
+            self._pending_image = msg
+        self._frame_ready.set()
+
+    def _inference_loop(self) -> None:
+        """Run detection off the executor so callbacks are never blocked."""
+        while not self._shutdown.is_set():
+            if not self._frame_ready.wait(timeout=0.5):
+                continue
+            self._frame_ready.clear()
+            with self._pending_lock:
+                msg = self._pending_image
+                self._pending_image = None
+            if msg is None:
+                continue
+            try:
+                self.left_image_callback(msg)
+            except Exception:
+                self.get_logger().error(
+                    "Unhandled error in detection worker:\n" + traceback.format_exc()
+                )
+
     def left_image_callback(self, msg: Image) -> None:
         """Process incoming left rectified image with YOLO detection.
 
@@ -497,13 +547,36 @@ class ConePublisher(Node):
                 timeout=self.tf_timeout,
             )
         except TransformException as ex:
-            # Throttled: a missing transform fails for every cone in every
-            # frame, and one line per cone drowns the log.
+            # An exact-stamp lookup fails whenever the image stamp falls outside
+            # the odom TF buffer window. The detector runs at a few FPS while
+            # odom is published at 50 Hz, so one slow inference pass is enough to
+            # miss it, and dropping the cone there makes the whole pipeline see
+            # zero cones while detection is working perfectly. Fall back to the
+            # latest available transform (stamp 0) before giving up: the car
+            # moves centimetres in that interval, which beats publishing nothing.
+            fallback_point = PointStamped()
+            fallback_point.header.frame_id = source_header.frame_id
+            fallback_point.point = input_point.point
+            try:
+                output_point = self.tf_buffer.transform(
+                    fallback_point,
+                    self.target_frame,
+                    timeout=self.tf_timeout,
+                )
+            except TransformException as fallback_ex:
+                # Throttled: a missing transform fails for every cone in every
+                # frame, and one line per cone drowns the log.
+                self.get_logger().warn(
+                    f"TF transform to '{self.target_frame}' failed: {ex} "
+                    f"(latest-transform fallback also failed: {fallback_ex})",
+                    throttle_duration_sec=5.0,
+                )
+                return None
             self.get_logger().warn(
-                f"TF transform to '{self.target_frame}' failed: {ex}",
+                f"TF transform to '{self.target_frame}' at the image stamp "
+                f"failed ({ex}); using the latest available transform instead.",
                 throttle_duration_sec=5.0,
             )
-            return None
 
         return (
             float(output_point.point.x),
@@ -636,7 +709,15 @@ class ConePublisher(Node):
                 raise FileNotFoundError(f"Model file not found: {self.model_file}")
 
             # Load model based on file extension
-            if self.model_file.endswith(".onnx"):
+            if self.model_file.endswith(".engine"):
+                # A TensorRT engine carries no task metadata the loader can rely
+                # on, so it is stated explicitly. The engine is built for one
+                # imgsz and one device: it must be re-exported if either changes.
+                self.get_logger().info(
+                    f"Loading TensorRT engine from: {self.model_file}"
+                )
+                model = YOLO(self.model_file, task="detect")
+            elif self.model_file.endswith(".onnx"):
                 self.get_logger().info(f"Loading ONNX model from: {self.model_file}")
                 model = YOLO(self.model_file, task="detect")
             elif self.model_file.endswith(".pt"):
@@ -691,7 +772,15 @@ def main(args: list | None = None) -> None:
     node = None
     try:
         node = ConePublisher()
-        rclpy.spin(node)
+        # Multi-threaded so the sensor callbacks and the TF listener keep being
+        # serviced while a detection is in flight.
+        executor = MultiThreadedExecutor(num_threads=3)
+        executor.add_node(node)
+        try:
+            executor.spin()
+        finally:
+            node.stop()
+            executor.shutdown()
     except KeyboardInterrupt:
         pass
     finally:
