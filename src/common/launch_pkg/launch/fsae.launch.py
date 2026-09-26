@@ -41,11 +41,12 @@ PACKAGE_NAME = "launch_pkg"
 #: Topics recorded when ``launch.rosbag`` is enabled and the config does not
 #: override ``rosbag.topics``.
 DEFAULT_ROSBAG_TOPICS = [
+    "/ackermann_cmd",
     "/clicked_point",
+    "/commands/motor/speed",
+    "/commands/servo/position",
     "/cone_positions",
     "/current_waypoint",
-    "/detection_visualization/depth",
-    "/detection_visualization/detections",
     "/diagnostics",
     "/drive",
     "/lookahead_waypoint",
@@ -53,6 +54,8 @@ DEFAULT_ROSBAG_TOPICS = [
     "/parameter_events",
     "/planned_path",
     "/rosout",
+    "/sensors/core",
+    "/teleop",
     "/tf",
     "/tf_static",
     "/waypoints",
@@ -80,6 +83,21 @@ def _make_run_dir() -> tuple[Path, Path]:
     node_log_dir = run_dir / "node_logs"
     node_log_dir.mkdir(parents=True, exist_ok=True)
     return run_dir, node_log_dir
+
+
+def _camera_detection_model() -> str:
+    """Return the camera_detection weights to load, preferring TensorRT.
+
+    A TensorRT engine is several times faster than the PyTorch weights on the
+    Jetson, but it is built for one GPU and one TensorRT version, so it cannot
+    be committed and is not present on every machine. Use it when it has been
+    exported here, and fall back to the .pt weights that always ship.
+    """
+    models_dir = Path(get_package_share_directory("camera_detection")) / "models"
+    engine = models_dir / "model.engine"
+    if engine.is_file():
+        return str(engine)
+    return str(models_dir / "model.pt")
 
 
 def _static_transform_nodes(transforms: list[dict[str, Any]]) -> list[Node]:
@@ -153,12 +171,37 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
             "zed_camera.launch.py",
             node_log_dir / "zed_camera.txt",
             {
+                # Parameter overrides live in this package so the vendored
+                # zed_wrapper config stays untouched.
+                "ros_params_override_path": str(
+                    Path(get_package_share_directory(PACKAGE_NAME))
+                    / "config"
+                    / "zed_overrides.yaml"
+                ),
                 "camera_model": zed.get("camera_model", "zed2i"),
                 # We publish base_link -> zed_camera_link ourselves (see
                 # static_transforms), so the wrapper must not also publish it.
                 "publish_tf": str(zed.get("publish_tf", False)).lower(),
                 "publish_map_tf": str(zed.get("publish_map_tf", False)).lower(),
                 "publish_urdf": str(zed.get("publish_urdf", True)).lower(),
+            },
+        )
+        if action is not None:
+            actions.append(action)
+
+    if enabled.get("f1tenth_stack", False):
+        action = _optional_package_launch(
+            "f1tenth_stack",
+            config.get("f1tenth_stack", {}).get(
+                "launch_file", "bringup_launch.py"
+            ),
+            node_log_dir / "f1tenth_stack.txt",
+            {
+                "vesc_config": str(
+                    Path(get_package_share_directory(PACKAGE_NAME))
+                    / "config"
+                    / "f1tenth_vesc.yaml"
+                ),
             },
         )
         if action is not None:
@@ -219,11 +262,7 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                     # The weights ship with the package; resolving them here keeps
                     # an absolute path off one person's machine out of the config.
                     {
-                        "model_file": os.path.join(
-                            get_package_share_directory("camera_detection"),
-                            "models",
-                            "model.pt",
-                        ),
+                        "model_file": _camera_detection_model(),
                         "classes_file": os.path.join(
                             get_package_share_directory("camera_detection"),
                             "models",
@@ -268,6 +307,13 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                 executable="pure_pursuit",
                 name="pure_pursuit",
                 output="screen",
+                parameters=[
+                    os.path.join(
+                        get_package_share_directory("pure_pursuit"),
+                        "config",
+                        "config.yaml",
+                    )
+                ],
             )
         )
 

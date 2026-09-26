@@ -66,6 +66,8 @@ PACKAGES_IGNORE ?= \
 # `make test` is red for reasons nobody here can act on.
 VENDORED_PACKAGES := \
 	ackermann_mux \
+	livox_sdk2 \
+	livox_ros_driver2 \
 	f1tenth_stack \
 	f1tenth_gym_ros \
 	joy_teleop \
@@ -92,7 +94,7 @@ VENDORED_PATHS := \
 FIND_PRUNE := $(foreach p,$(VENDORED_PATHS),-path '$(p)' -o ) \
 	-name build -o -name install -o -name log -o -name .git
 
-.PHONY: help deps build build_all package clean rebuild test lint lint-python lint-cpp \
+.PHONY: help deps deps_jetson build build_all package livox clean rebuild test lint lint-python lint-cpp \
         run_auto run_sim
 
 help: ## Show this help
@@ -104,6 +106,9 @@ help: ## Show this help
 
 deps: ## Full environment setup: ROS/system/rosdep deps plus the Python venv
 	@$(REPO_DIR)/scripts/setup.sh
+
+deps_jetson: ## Full environment setup on a Jetson (JetPack 6 / CUDA 12.6)
+	@$(REPO_DIR)/scripts/setup.sh --jetson
 
 build: ## colcon build, minus PACKAGES_IGNORE (livox, zed)
 	@$(SOURCE_ENV); \
@@ -130,6 +135,10 @@ ifneq (,$(filter package,$(MAKECMDGOALS)))
 $(PACKAGE_ARGS):
 	@:
 endif
+
+livox: ## Build the vendored Livox SDK and ROS 2 driver (both skipped by `make build`)
+	@$(SOURCE_ENV); \
+	cd $(WS_ROOT) && colcon build $(COLCON_BUILD_ARGS) --packages-up-to livox_ros_driver2
 
 clean: ## Remove build/, install/ and log/ from the workspace root
 	@echo "Removing $(WS_ROOT)/{build,install,log}"

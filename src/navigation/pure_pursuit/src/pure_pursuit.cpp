@@ -345,6 +345,36 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
   car_orient_y = odom_submsgObj->pose.pose.orientation.y;
   car_orient_z = odom_submsgObj->pose.pose.orientation.z;
 
+  // A path is driven once. When every waypoint is behind the car the path has
+  // been consumed, and holding on to it would keep commanding a route the
+  // triangulator is no longer publishing. Drop it and stop instead. While any
+  // waypoint is still ahead this is a no-op, so the selection in get_waypoint()
+  // is unchanged.
+  bool all_behind = true;
+  for (int i = 0; i < num_waypoints; i++) {
+    if (!point_is_behind_car(waypoints.X[i], waypoints.Y[i])) {
+      all_behind = false;
+      break;
+    }
+  }
+  if (all_behind) {
+    waypoints.X.clear();
+    waypoints.Y.clear();
+    waypoints.V.clear();
+    waypoints.index = 0;
+    waypoints.velocity_index = 0;
+    num_waypoints = 0;
+
+    auto stop_msgObj = ackermann_msgs::msg::AckermannDriveStamped();
+    stop_msgObj.drive.speed = 0.0;
+    stop_msgObj.drive.steering_angle = 0.0;
+    curr_velocity = 0.0;
+    publisher_drive->publish(stop_msgObj);
+
+    RCLCPP_WARN(this->get_logger(), "Path fully driven; stopping.");
+    return;
+  }
+
   // interpolate between different way-points
   get_waypoint();
 

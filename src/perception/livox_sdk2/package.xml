@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!--
+  Upstream Livox-SDK2 is a plain CMake project and ships no package.xml. colcon
+  will still build it (it falls back to the directory name), but nothing can
+  then declare a dependency on it, so livox_ros_driver2 is free to configure
+  before the SDK it links against has been built. Declaring the package here
+  gives colcon the name it needs to order the two.
+-->
+<package format="3">
+  <name>livox_sdk2</name>
+  <version>1.2.5</version>
+  <description>Livox SDK2, the driver library for Livox HAP and MID360 LiDARs</description>
+  <maintainer email="dev@livoxtech.com">livox</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
