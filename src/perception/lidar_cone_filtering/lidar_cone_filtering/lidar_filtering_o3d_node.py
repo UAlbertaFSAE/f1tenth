@@ -44,6 +44,14 @@ class LidarFilteringOpen3D(Node):
         self.declare_parameter("roi_z_min", -2.0)
         self.declare_parameter("roi_z_max", 2.0)
 
+        # Cone geometry filtering, based on FSAE Driverless cone regulations
+        self.declare_parameter("small_cone_height", 0.325)
+        self.declare_parameter("large_cone_height", 0.505)
+        self.declare_parameter("cone_height_tolerance", 0.10)
+        self.declare_parameter("small_cone_width", 0.228)
+        self.declare_parameter("large_cone_width", 0.285)
+        self.declare_parameter("cone_width_tolerance", 0.10)
+
         self.declare_parameter(
             "voxel", 0.05
         )  # voxel downsampling size, each cube will be 5cm^3, all points in each cube get turned into a centroid
@@ -93,6 +101,45 @@ class LidarFilteringOpen3D(Node):
         self.get_logger().info(f"Subscribed to: {input_topic}")
         self.get_logger().info(f"Publishing no-ground: {no_ground_topic}")
         self.get_logger().info(f"Publishing centroids: {centroids_topic}")
+
+    def is_cone_cluster(self, cluster_pts: np.ndarray) -> bool:
+        """Determines whether cluster resembles a cone."""
+        z_min = float(np.min(cluster_pts[:, 2]))
+        z_max = float(np.max(cluster_pts[:, 2]))
+        height = z_max - z_min
+
+        x_min = float(np.min(cluster_pts[:, 0]))
+        x_max = float(np.max(cluster_pts[:, 0]))
+
+        y_min = float(np.min(cluster_pts[:, 1]))
+        y_max = float(np.max(cluster_pts[:, 1]))
+
+        x_width = x_max - x_min
+        y_width = y_max - y_min
+
+        width = max(x_width, y_width)
+
+        small_height = float(self.get_parameter("small_cone_height").value)
+        large_height = float(self.get_parameter("large_cone_height").value)
+        tolerance = float(self.get_parameter("cone_height_tolerance").value)
+
+        small_width = float(self.get_parameter("small_cone_width").value)
+
+        large_width = float(self.get_parameter("large_cone_width").value)
+
+        width_tolerance = float(self.get_parameter("cone_width_tolerance").value)
+
+        small_ok = (
+            abs(height - small_height) <= tolerance
+            and abs(width - small_width) <= width_tolerance
+        )
+
+        large_ok = (
+            abs(height - large_height) <= tolerance
+            and abs(width - large_width) <= width_tolerance
+        )
+
+        return small_ok or large_ok
 
     def callback(self, msg: PointCloud2) -> None:
         """Process one ``PointCloud2`` message and publish filtered output."""
@@ -210,8 +257,14 @@ class LidarFilteringOpen3D(Node):
                 for k in range(labels.max() + 1):
                     cluster_pts = objects_xyz[labels == k]
                     n = cluster_pts.shape[0]
-                    if min_cluster <= n <= max_cluster:
-                        centroids.append(cluster_pts.mean(axis=0))
+
+                    if not (min_cluster <= n <= max_cluster):
+                        continue
+
+                    if not self.is_cone_cluster(cluster_pts):
+                        continue
+
+                    centroids.append(cluster_pts.mean(axis=0))
 
         return objects_xyz, centroids
 
