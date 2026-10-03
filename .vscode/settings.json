@@ -141,5 +141,5 @@
     "ros.distro": "humble",
     "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
     "ROS2.distro": "humble",
-    "cmake.sourceDirectory": "/Users/finco/Desktop/f1tenth/build/rc_interfaces/rc_interfaces__py",
+    "cmake.sourceDirectory": "/f1tenth/src/onboarding",
 }

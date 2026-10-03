@@ -1,0 +1,84 @@
+header:
+  stamp:
+    sec: 1790623574
+    nanosec: 364996469
+  frame_id: ''
+drive:
+  steering_angle: 20.0
+  steering_angle_velocity: 0.0
+  speed: 50.0
+  acceleration: 0.0
+  jerk: 0.0
+---
+header:
+  stamp:
+    sec: 1790623575
+    nanosec: 368061011
+  frame_id: ''
+drive:
+  steering_angle: 20.0
+  steering_angle_velocity: 0.0
+  speed: 50.0
+  acceleration: 0.0
+  jerk: 0.0
+---
+header:
+  stamp:
+    sec: 1790623576
+    nanosec: 364117428
+  frame_id: ''
+drive:
+  steering_angle: 20.0
+  steering_angle_velocity: 0.0
+  speed: 50.0
+  acceleration: 0.0
+  jerk: 0.0
+---
+header:
+  stamp:
+    sec: 1790623577
+    nanosec: 366241137
+  frame_id: ''
+drive:
+  steering_angle: 20.0
+  steering_angle_velocity: 0.0
+  speed: 50.0
+  acceleration: 0.0
+  jerk: 0.0
+---
+header:
+  stamp:
+    sec: 1790623578
+    nanosec: 364405262
+  frame_id: ''
+drive:
+  steering_angle: 20.0
+  steering_angle_velocity: 0.0
+  speed: 50.0
+  acceleration: 0.0
+  jerk: 0.0
+---
+header:
+  stamp:
+    sec: 1790623579
+    nanosec: 365113763
+  frame_id: ''
+drive:
+  steering_angle: 20.0
+  steering_angle_velocity: 0.0
+  speed: 50.0
+  acceleration: 0.0
+  jerk: 0.0
+---
+header:
+  stamp:
+    sec: 1790623580
+    nanosec: 364475846
+  frame_id: ''
+drive:
+  steering_angle: 20.0
+  steering_angle_velocity: 0.0
+  speed: 50.0
+  acceleration: 0.0
+  jerk: 0.0
+---
