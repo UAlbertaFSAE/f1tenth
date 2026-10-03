@@ -15,11 +15,11 @@ lidar_cone_filtering:
     roi_z_max: 2.0
 
     # FSAE Driverless cone sizes, metres, plus an acceptance band.
-    small_cone_height: 0.325
-    large_cone_height: 0.505
+    small_cone_height: 0.165
+    large_cone_height: 10.0
     cone_height_tolerance: 0.10
-    small_cone_width: 0.228
-    large_cone_width: 0.285
+    small_cone_width: 0.130
+    large_cone_width: 10.0
     cone_width_tolerance: 0.10
 
     # Voxel edge length. 0.05 m cubes; points in a cube collapse to one centroid.

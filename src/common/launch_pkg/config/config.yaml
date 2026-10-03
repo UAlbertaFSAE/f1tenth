@@ -1,15 +1,15 @@
 launch:
   f1tenth_stack: true
   zed_camera: true
-  lidar_driver: false
+  lidar_driver: true
   simulator: false
   cone_detector_sim: false
   track_map_publisher: false
-  camera_detection: true
+  camera_detection: false
   lidar_cone_filtering: true
   path_planning: true
   pure_pursuit: true
-  visualizer: false
+  visualizer: true
   rosbag: true
 
 f1tenth_stack:
@@ -35,6 +35,12 @@ static_transforms:
   # f1tenth_stack/config/vesc.yaml). Rooting map at base_link too would give
   # base_link two parents, which splits the TF tree and makes every
   # camera->odom lookup fail. map -> odom is the correct root link.
+  # Livox MID360 mount. Placeholder: measure from the rear axle centre at
+  # ground level to the LiDAR's optical centre and fill in.
+  - parent: base_link
+    child: livox_frame
+    xyz: [0.0, 0.0, 0.0]
+    rpy: [0.0, 0.0, 0.0]
   - parent: map
     child: odom
     xyz: [0.0, 0.0, 0.0]
