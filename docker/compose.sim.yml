@@ -11,9 +11,15 @@ services:
     environment:
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - DISPLAY=${DISPLAY}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - PULSE_SERVER=unix:/mnt/wslg/PulseServer
 
     volumes:
       - ../gazebo_sim:/sim/gazebo_sim
+      - /mnt/wslg:/mnt/wslg
+      - /tmp/.X11-unix:/tmp/.X11-unix
 
     tty: true
     stdin_open: true
