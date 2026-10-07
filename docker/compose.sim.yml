@@ -1,0 +1,19 @@
+services:
+  sim:
+    container_name: f1tenth_sim
+
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sim
+
+    image: ualbertaformula/f1tenth-sim
+
+    environment:
+      - ROS_DOMAIN_ID=42
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+    volumes:
+      - ../gazebo_sim:/sim/gazebo_sim
+
+    tty: true
+    stdin_open: true
