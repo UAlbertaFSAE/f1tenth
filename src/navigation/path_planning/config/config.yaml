@@ -1,17 +1,31 @@
-triangulator_node:
+path_planner:
   ros__parameters:
-    cones_topic: "/cone_positions"
-    odom_topic: "/odom"
-    waypoint_topic: "/waypoints"
-    path_topic: "/planned_path"
+    cones_topic: /cone_positions
+    odom_topic: /odom
+    waypoint_topic: /waypoints
+    marker_topic: /triangulation_markers
+    frame_id: odom
 
-    lookahead_distance: 4.0
-    num_waypoints: 5
-    min_track_width: 0.0
-    max_track_width: 6.0
+    left_color: blue
+    right_color: yellow
 
-    use_start_gate: false
-    start_gate_max_width: 8.0
-    start_colors:
-      - "orange"
-      - "large_orange"
+    position_tolerance: 0.2
+    cluster_distance: 8.0
+    min_track_width: 0.4
+    max_track_width: 10.0
+    qos_depth: 1
+
+    gate_enabled: false
+    start_colors: [orange, small_orange]
+    stop_colors: [orange, small_orange]
+    gate_min_cone_count: 2
+    gate_max_distance: 5.0
+
+    stop_distance: 20.0
+    extrapolation_step: 1.0
+    heading_smoothing_alpha: 0.1
+
+    max_odom_age_s: 0.2
+    max_cone_age_s: 0.2
+    delaunay_max_edge_m: 5.0
+    waypoint_spacing_m: 0.5

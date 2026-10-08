@@ -285,8 +285,8 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
         actions.append(
             Node(
                 package="path_planning",
-                executable="triangulator_node",
-                name="triangulator_node",
+                executable="path_planner",
+                name="path_planner",
                 output="screen",
                 parameters=[
                     os.path.join(
