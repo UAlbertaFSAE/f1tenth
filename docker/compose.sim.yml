@@ -12,14 +12,16 @@ services:
       - ROS_DOMAIN_ID=42
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - DISPLAY=${DISPLAY}
-      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
-      - XDG_RUNTIME_DIR=/tmp/runtime-root
-      - PULSE_SERVER=unix:/mnt/wslg/PulseServer
+      - LD_LIBRARY_PATH=/usr/lib/wsl/lib
+      - QT_QPA_PLATFORM=xcb
+
+    devices:
+      - /dev/dxg:/dev/dxg
 
     volumes:
       - ../gazebo_sim:/sim/gazebo_sim
-      - /mnt/wslg:/mnt/wslg
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - /usr/lib/wsl:/usr/lib/wsl:ro
 
     tty: true
     stdin_open: true
