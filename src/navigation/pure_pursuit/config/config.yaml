@@ -24,9 +24,9 @@ pure_pursuit:
     waypoint_velocity: 6.0
     velocity_percentage: 0.25
 
-    # Backstop only. The triangulator now publishes an explicit empty path when
+    # Backstop only. The path_planner now publishes an explicit empty path when
     # it has nothing to follow, and pure_pursuit stops on that immediately, so
-    # this timeout only has to catch the triangulator dying outright. It is set
+    # this timeout only has to catch the path_planner dying outright. It is set
     # well clear of normal inter-frame gaps (~0.5s observed) so ordinary jitter
     # never trips it.
     path_timeout: 3.0

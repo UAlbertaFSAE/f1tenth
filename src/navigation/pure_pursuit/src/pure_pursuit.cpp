@@ -296,7 +296,7 @@ void PurePursuit::publish_message(double steering_angle) {
 }
 
 void PurePursuit::waypoint_callback(const nav_msgs::msg::Path::ConstSharedPtr path) {
-  // The triangulator recomputes and republishes its whole local path every
+  // The path_planner recomputes and republishes its whole local path every
   // cycle -- treat each message as the current path, atomically replacing the
   // old one. Streaming/appending individual points into a small FIFO let a
   // single noisy frame partially evict a good path and blend in stale points
@@ -347,7 +347,7 @@ void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr od
 
   // A path is driven once. When every waypoint is behind the car the path has
   // been consumed, and holding on to it would keep commanding a route the
-  // triangulator is no longer publishing. Drop it and stop instead. While any
+  // path_planner is no longer publishing. Drop it and stop instead. While any
   // waypoint is still ahead this is a no-op, so the selection in get_waypoint()
   // is unchanged.
   bool all_behind = true;
