@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>dashboard</name>
+  <version>0.0.0</version>
+  <description>
+    WebSocket bridge between the stack and the browser dashboard. Throttles the
+    topics the dashboard needs into /dashboard/*, serves them over rosbridge,
+    and serves the web page that connects to it.
+  </description>
+  <maintainer email="mraidanlynch@gmail.com">Aidan Lynch</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+
+  <exec_depend>rclcpp_components</exec_depend>
+  <exec_depend>rosbridge_server</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+
+  <!-- rosbridge imports these to encode the bridged topics as JSON. -->
+  <exec_depend>ackermann_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rc_interfaces</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
