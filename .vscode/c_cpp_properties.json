@@ -24,7 +24,7 @@
             "compilerPath": "/usr/bin/clang-18",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            "compileCommands": "${workspaceFolder}/build/VCI/compile_commands.json",
             "intelliSenseMode": "linux-clang-x64"
         }
     ],

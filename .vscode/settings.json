@@ -141,5 +141,5 @@
     "ros.distro": "humble",
     "ros.rosSetupScript": "/opt/ros/humble/install/setup.bash",
     "ROS2.distro": "humble",
-    "cmake.sourceDirectory": "/f1tenth/src/onboarding",
+    "cmake.sourceDirectory": "/f1tenth/src/VCI",
 }
