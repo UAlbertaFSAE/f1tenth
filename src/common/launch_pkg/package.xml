@@ -18,6 +18,7 @@
   <exec_depend>python3-yaml</exec_depend>
 
   <exec_depend>camera_detection</exec_depend>
+  <exec_depend>dashboard</exec_depend>
   <exec_depend>lidar_cone_filtering</exec_depend>
   <exec_depend>path_planning</exec_depend>
   <exec_depend>pure_pursuit</exec_depend>

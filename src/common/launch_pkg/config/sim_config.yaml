@@ -18,6 +18,9 @@ packages:
     package: pure_pursuit
     launch_file: pure_pursuit_launch.py
     args: ["config_file:=sim_config.yaml"]
+  - name: dashboard
+    package: dashboard
+    launch_file: dashboard.launch.py
 
 rviz:
   enabled: true
