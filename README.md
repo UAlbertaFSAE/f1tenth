@@ -75,6 +75,7 @@ See [docs/MANUAL_DRIVING.md](docs/MANUAL_DRIVING.md) for which bringup to use an
 | [MANUAL_DRIVING.md](docs/MANUAL_DRIVING.md) | Driving the car by hand, the deadman switch, the teleop/autonomy mux |
 | [JETSON_DEVELOPMENT.md](docs/JETSON_DEVELOPMENT.md) | Working on the car, and the one-time hardware install |
 | [NETWORK_SETUP.md](docs/NETWORK_SETUP.md) | ssh onto the Jetson, addressing, DDS config |
+| [Lidar_setup.md](docs/Lidar_setup.md) | Livox MID360 network setup, driver config, viewing the point cloud |
 | [VSCODE_USAGE.md](docs/VSCODE_USAGE.md) | Devcontainer, linters and formatters in the editor |
 | [BATTERY_USAGE.md](docs/BATTERY_USAGE.md) | LiPo handling, charging and storage |
 | [SIMULATOR.md](docs/SIMULATOR.md) | Running the stack in simulation |
