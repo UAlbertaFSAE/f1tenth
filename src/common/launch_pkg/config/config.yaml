@@ -8,6 +8,7 @@ launch:
   camera_detection: true
   lidar_cone_filtering: false
   path_planning: true
+  safety_node: true
   pure_pursuit: true
   visualizer: false
   rosbag: true
