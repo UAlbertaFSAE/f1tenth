@@ -24,9 +24,6 @@ pure_pursuit:
     waypoint_velocity: 6.0
     velocity_percentage: 0.25
 
-    # Backstop only. The path_planner now publishes an explicit empty path when
-    # it has nothing to follow, and pure_pursuit stops on that immediately, so
-    # this timeout only has to catch the path_planner dying outright. It is set
-    # well clear of normal inter-frame gaps (~0.5s observed) so ordinary jitter
-    # never trips it.
+    # Not read by pure_pursuit. Stopping on a missing or empty path is done by
+    # safety_node's drive_watchdog through the /safety_stop mux input.
     path_timeout: 3.0
