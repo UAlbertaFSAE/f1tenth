@@ -1,0 +1,164 @@
+<!doctype html>
+<!--
+  Copyright (c) 2026 UAlberta Formula SAE
+  Licensed under the MIT License. See the LICENSE file in this package.
+
+  Bare dashboard page: proves data is arriving over the WebSocket. The
+  transport lives in `Bridge` below; the views built on top of it should only
+  ever call bridge.subscribe(topic, type, callback).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F1Tenth Dashboard</title>
+<style>
+  :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+  body { margin: 0 auto; padding: 16px; max-width: 960px; }
+  h1 { font-size: 1.25rem; margin: 0 0 8px; }
+  #status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem; }
+  #status.connected { background: #1a7f37; color: #fff; }
+  #status.connecting { background: #9a6700; color: #fff; }
+  #status.disconnected { background: #cf222e; color: #fff; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #8884; vertical-align: top; }
+  td.num { font-variant-numeric: tabular-nums; }
+  .stale { opacity: 0.5; }
+  pre { margin: 4px 0 0; max-height: 240px; overflow: auto; font-size: 0.8rem; }
+  .muted { opacity: 0.7; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<h1>F1Tenth Dashboard</h1>
+<span id="status" class="connecting">connecting</span>
+<span id="url" class="muted"></span>
+<table>
+  <thead><tr><th>Topic</th><th>Messages</th><th>Hz</th><th>Last</th></tr></thead>
+  <tbody id="topics"></tbody>
+</table>
+<script>
+"use strict";
+
+/**
+ * Thin rosbridge client. Owns the WebSocket, reconnects with backoff and
+ * re-subscribes everything after a reconnect, so callers subscribe once.
+ *
+ * Every message on the wire is the rosbridge envelope:
+ *   {"op": "publish", "topic": "/dashboard/odom", "msg": {...}}
+ */
+class Bridge {
+  constructor(url, onStatus) {
+    this.url = url;
+    this.onStatus = onStatus;
+    this.handlers = new Map(); // topic -> {type, callbacks: []}
+    this.backoffMs = 500;
+    this.connect();
+  }
+
+  connect() {
+    this.onStatus("connecting");
+    this.ws = new WebSocket(this.url);
+    this.ws.onopen = () => {
+      this.backoffMs = 500;
+      this.onStatus("connected");
+      for (const [topic, { type }] of this.handlers) this.sendSubscribe(topic, type);
+    };
+    this.ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.op !== "publish") return;
+      const entry = this.handlers.get(data.topic);
+      if (entry) for (const cb of entry.callbacks) cb(data.msg);
+    };
+    this.ws.onclose = () => {
+      this.onStatus("disconnected");
+      setTimeout(() => this.connect(), this.backoffMs);
+      this.backoffMs = Math.min(this.backoffMs * 2, 10000);
+    };
+  }
+
+  sendSubscribe(topic, type) {
+    // queue_length 1: a slow client gets the latest message, not a backlog.
+    this.ws.send(JSON.stringify({ op: "subscribe", topic, type, queue_length: 1 }));
+  }
+
+  subscribe(topic, type, callback) {
+    let entry = this.handlers.get(topic);
+    if (!entry) {
+      entry = { type, callbacks: [] };
+      this.handlers.set(topic, entry);
+      if (this.ws.readyState === WebSocket.OPEN) this.sendSubscribe(topic, type);
+    }
+    entry.callbacks.push(callback);
+  }
+}
+
+const statusEl = document.getElementById("status");
+const rows = new Map(); // topic -> {count, times: [], last, el}
+
+function setStatus(state) {
+  statusEl.textContent = state;
+  statusEl.className = state;
+}
+
+function addRow(topic, type, sources) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><code>${topic}</code><div class="muted">${type} &larr; ${sources.join(", ")}</div>
+      <details><summary class="muted">last message</summary><pre></pre></details></td>
+    <td class="num count">0</td><td class="num hz">0.0</td><td class="num age">never</td>`;
+  document.getElementById("topics").appendChild(tr);
+  rows.set(topic, { count: 0, times: [], last: null, el: tr });
+}
+
+function onMessage(topic, msg) {
+  const row = rows.get(topic);
+  const now = performance.now();
+  row.count += 1;
+  row.times.push(now);
+  row.last = now;
+  row.el.querySelector(".count").textContent = row.count;
+  const details = row.el.querySelector("details");
+  if (details.open) details.querySelector("pre").textContent = JSON.stringify(msg, null, 2);
+  row.msg = msg;
+}
+
+// Render Hz and age on a timer rather than per message, so a fast topic
+// cannot make the page do more work than the display needs.
+setInterval(() => {
+  const now = performance.now();
+  for (const row of rows.values()) {
+    row.times = row.times.filter((t) => now - t < 2000);
+    row.el.querySelector(".hz").textContent = (row.times.length / 2).toFixed(1);
+    const age = row.last === null ? null : (now - row.last) / 1000;
+    row.el.querySelector(".age").textContent = age === null ? "never" : `${age.toFixed(1)} s ago`;
+    row.el.classList.toggle("stale", age === null || age > 2);
+  }
+}, 250);
+
+document.getElementById("topics").addEventListener("toggle", (event) => {
+  const details = event.target;
+  const row = [...rows.values()].find((r) => r.el.contains(details));
+  if (details.open && row && row.msg) {
+    details.querySelector("pre").textContent = JSON.stringify(row.msg, null, 2);
+  }
+}, true);
+
+// topics.json is generated at launch from config/dashboard.yaml.
+fetch("topics.json")
+  .then((response) => response.json())
+  .then((config) => {
+    const url = `ws://${location.hostname}:${config.port}`;
+    document.getElementById("url").textContent = url;
+    const bridge = new Bridge(url, setStatus);
+    for (const { topic, type, sources } of config.topics) {
+      addRow(topic, type, sources);
+      bridge.subscribe(topic, type, (msg) => onMessage(topic, msg));
+    }
+  })
+  .catch((error) => {
+    setStatus("disconnected");
+    statusEl.textContent = `could not load topics.json: ${error}`;
+  });
+</script>
+</body>
+</html>

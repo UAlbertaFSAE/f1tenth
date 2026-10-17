@@ -12,6 +12,7 @@ launch:
   pure_pursuit: true
   visualizer: true
   rosbag: true
+  dashboard: true
 
 f1tenth_stack:
   launch_file: bringup_launch.py

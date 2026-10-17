@@ -27,6 +27,13 @@
   // with either of them.
   "ruff.configuration": "${workspaceFolder}/pyproject.toml",
   "mypy-type-checker.args": ["--config-file=${workspaceFolder}/pyproject.toml"],
+  // Run the mypy `make lint` runs. The venv has no mypy, so by default the
+  // extension uses its own bundled (older) one, which flags things `make lint`
+  // accepts. `path` alone is not enough: under the default importStrategy
+  // ("useBundled") the bundled libs come first on sys.path, so even
+  // /usr/local/bin/mypy imports the bundled version.
+  "mypy-type-checker.path": ["/usr/local/bin/mypy"],
+  "mypy-type-checker.importStrategy": "fromEnvironment",
 
   // ---- C++ --------------------------------------------------------------
   // clangd is the only C++ language server here. The Microsoft IntelliSense

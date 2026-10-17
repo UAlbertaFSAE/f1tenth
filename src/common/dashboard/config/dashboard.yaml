@@ -1,0 +1,42 @@
+# Dashboard bridge configuration, read by launch/dashboard.launch.py.
+#
+# Every entry is throttled into /dashboard/<name> and only /dashboard/* is
+# exposed over the WebSocket. Browsers never see the real topics, so nothing a
+# browser publishes can reach the planner or the controller.
+#
+# Keep rates low and leave images, point clouds and raw scans out: the Jetson
+# JSON-encodes every message rosbridge sends.
+#
+# `type` is needed because the page subscribes before the throttle has
+# necessarily seen its source, and rosbridge cannot infer the type of a topic
+# with no publisher yet.
+
+# rosbridge WebSocket port.
+port: 9090
+# Port the web page is served on.
+http_port: 8000
+
+topics:
+  - name: cones
+    source: /cone_positions
+    type: rc_interfaces/msg/Cones
+    rate: 10.0
+  # The car publishes odometry on /odom and the simulator on
+  # /ego_racecar/odom. Only one exists in a given run, so both map to
+  # /dashboard/odom and views get one name to subscribe to.
+  - name: odom
+    source: /odom
+    type: nav_msgs/msg/Odometry
+    rate: 20.0
+  - name: odom
+    source: /ego_racecar/odom
+    type: nav_msgs/msg/Odometry
+    rate: 20.0
+  - name: planned_path
+    source: /planned_path
+    type: nav_msgs/msg/Path
+    rate: 5.0
+  - name: drive
+    source: /drive
+    type: ackermann_msgs/msg/AckermannDriveStamped
+    rate: 10.0

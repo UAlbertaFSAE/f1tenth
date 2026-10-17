@@ -267,6 +267,15 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
         if action is not None:
             actions.append(action)
 
+    if enabled.get("dashboard", False):
+        action = _optional_package_launch(
+            "dashboard",
+            "dashboard.launch.py",
+            node_log_dir / "dashboard.txt",
+        )
+        if action is not None:
+            actions.append(action)
+
     actions.extend(_static_transform_nodes(config.get("static_transforms", [])))
 
     if enabled.get("camera_detection", False):

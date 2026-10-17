@@ -14,7 +14,7 @@ This repository is cloned *as* the colcon workspace's `src/` directory:
 f1tenth_ws/          workspace root -- build/, install/, log/, venv/ land here
 └── src/             this repository
     └── src/         the ROS packages
-        ├── common/       launch_pkg, rc_interfaces
+        ├── common/       launch_pkg, rc_interfaces, dashboard
         ├── hardware/     f1tenth_system (vesc, ackermann_mux, teleop_tools, f1tenth_stack)
         ├── navigation/   particle_filter, path_planning, pure_pursuit
         ├── perception/   camera_detection, lidar_cone_filtering, livox_sdk2,
@@ -79,3 +79,4 @@ See [docs/MANUAL_DRIVING.md](docs/MANUAL_DRIVING.md) for which bringup to use an
 | [VSCODE_USAGE.md](docs/VSCODE_USAGE.md) | Devcontainer, linters and formatters in the editor |
 | [BATTERY_USAGE.md](docs/BATTERY_USAGE.md) | LiPo handling, charging and storage |
 | [SIMULATOR.md](docs/SIMULATOR.md) | Running the stack in simulation |
+| [dashboard](src/common/dashboard/README.md) | Watching the stack from a browser: the WebSocket bridge, its message envelope, adding topics |
