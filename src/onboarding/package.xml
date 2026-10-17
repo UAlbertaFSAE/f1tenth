@@ -4,7 +4,7 @@
   <name>onboarding</name>
   <version>0.0.0</version>
   <description>Onboarding task: drive publisher, relay node and launch</description>
-  <maintainer email="bmling@ualberta.ca">Benjamin Ling</maintainer>
+  <maintainer email="bmling@ualberta.ca">bling</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>

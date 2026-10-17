@@ -1,4 +1,6 @@
 # Copyright (c) 2026, Your Name. Subject to the MIT license.
+import os
+from glob import glob
 
 from setuptools import find_packages, setup
 
@@ -11,6 +13,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        (os.path.join("share", package_name, "launch"), glob("launch/*.launch.py")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -22,6 +25,9 @@ setup(
         "test": ["pytest"],
     },
     entry_points={
-        "console_scripts": ["odom_publisher = onboarding.odom_publisher:main"],
+        "console_scripts": [
+            "odom_publisher = onboarding.odom_publisher:main",
+            "odom_relay = onboarding.odom_relay:main",
+        ],
     },
 )
