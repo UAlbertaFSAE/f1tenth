@@ -21,6 +21,7 @@
   <exec_depend>dashboard</exec_depend>
   <exec_depend>lidar_cone_filtering</exec_depend>
   <exec_depend>path_planning</exec_depend>
+  <exec_depend>safety_node</exec_depend>
   <exec_depend>pure_pursuit</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
