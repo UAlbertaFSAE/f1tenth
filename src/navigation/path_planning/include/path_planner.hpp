@@ -35,6 +35,12 @@ class PathPlanner : public rclcpp::Node {
   std::vector<path_planning::Point2D> preprocess_cones(const rc_interfaces::msg::Cones& msg) const;
   std::vector<path_planning::Point2D> plan_path(
       const std::vector<path_planning::ConePair>& gates) const;
+  std::vector<path_planning::Point2D> one_sided_path(
+      const std::vector<path_planning::Point2D>& cones) const;
+  std::vector<path_planning::Point2D> extend_end(std::vector<path_planning::Point2D> path) const;
+  bool passed_end(const std::vector<path_planning::Point2D>& path) const;
+  void update_track_width(const std::vector<path_planning::ConePair>& gates);
+  void publish_held_path();
   void publish_path(const std::vector<path_planning::Point2D>& points);
   void publish_markers(const std::vector<path_planning::Point2D>& cones,
                        const std::vector<path_planning::ConePair>& gates,
@@ -50,7 +56,10 @@ class PathPlanner : public rclcpp::Node {
   int gate_min_cone_count_;
   double gate_max_distance_, stop_distance_, extrapolation_step_;
   double heading_smoothing_alpha_, max_odom_age_s_, max_cone_age_s_, delaunay_max_edge_m_;
-  double waypoint_spacing_m_;
+  double waypoint_spacing_m_, end_margin_m_, hold_timeout_s_, track_width_m_;
+
+  std::vector<path_planning::Point2D> held_path_;
+  rclcpp::Time held_stamp_{0, 0, RCL_ROS_TIME};
 
   path_planning::CarPose car_pose_;
   double smoothed_yaw_ = NAN;

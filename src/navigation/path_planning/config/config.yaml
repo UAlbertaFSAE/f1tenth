@@ -26,6 +26,12 @@ path_planner:
     heading_smoothing_alpha: 0.1
 
     max_odom_age_s: 0.2
-    max_cone_age_s: 0.2
-    delaunay_max_edge_m: 5.0
-    waypoint_spacing_m: 0.5
+    max_cone_age_s: 0.5
+    delaunay_max_edge_m: 1.5
+    waypoint_spacing_m: 0.1
+    # The path ends this far past the last gate, so the car stops just past the final cones.
+    end_margin_m: 0.15
+    # Keep following the last valid path for at most this long once cones drop out of view.
+    hold_timeout_s: 2.0
+    # One-sided paths sit half this from the visible boundary; updated from the narrowest gate seen.
+    track_width_m: 0.92

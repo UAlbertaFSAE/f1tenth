@@ -20,3 +20,6 @@
       use_pub_timestamps: true
     stream_server:
       gop_size: -1
+    depth:
+      # Record RGB + depth; reconstruct point clouds offline when needed.
+      publish_point_cloud: false

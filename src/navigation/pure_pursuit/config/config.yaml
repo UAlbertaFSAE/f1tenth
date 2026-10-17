@@ -10,7 +10,7 @@ pure_pursuit:
     drive_topic: "/drive"
 
     # Lookahead: lookahead = min(max(min_lookahead, max_lookahead * curr_velocity / lookahead_ratio), max_lookahead)
-    min_lookahead: 0.3
+    min_lookahead: 1.0
     max_lookahead: 2.0
     lookahead_ratio: 4.0
     K_p: 0.35
