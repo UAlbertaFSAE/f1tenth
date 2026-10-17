@@ -207,6 +207,13 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
             actions.append(action)
 
     if enabled.get("f1tenth_stack", False):
+        mux_arguments = {}
+        if enabled.get("safety_node", False):
+            mux_arguments["mux_config"] = str(
+                Path(get_package_share_directory("safety_node"))
+                / "config"
+                / "f1tenth_mux.yaml"
+            )
         action = _optional_package_launch(
             "f1tenth_stack",
             config.get("f1tenth_stack", {}).get("launch_file", "bringup_launch.py"),
@@ -217,6 +224,7 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                     / "config"
                     / "f1tenth_vesc.yaml"
                 ),
+                **mux_arguments,
             },
         )
         if action is not None:
@@ -308,6 +316,23 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                 parameters=[
                     os.path.join(
                         get_package_share_directory("path_planning"),
+                        "config",
+                        "config.yaml",
+                    )
+                ],
+            )
+        )
+
+    if enabled.get("safety_node", False):
+        actions.append(
+            Node(
+                package="safety_node",
+                executable="drive_watchdog",
+                name="drive_watchdog",
+                output="screen",
+                parameters=[
+                    os.path.join(
+                        get_package_share_directory("safety_node"),
                         "config",
                         "config.yaml",
                     )

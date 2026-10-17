@@ -1,0 +1,18 @@
+# Override for f1tenth_stack's mux.yaml. safety sits above navigation so
+# drive_watchdog can stop autonomous driving, and below joystick so manual
+# control still wins.
+ackermann_mux:
+  ros__parameters:
+    topics:
+      navigation:
+        topic   : drive
+        timeout : 0.2
+        priority: 10
+      safety:
+        topic   : safety_stop
+        timeout : 0.2
+        priority: 50
+      joystick:
+        topic   : teleop
+        timeout : 0.2
+        priority: 100
