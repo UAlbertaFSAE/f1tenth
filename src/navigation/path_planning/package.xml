@@ -3,22 +3,24 @@
 <package format="3">
   <name>path_planning</name>
   <version>0.0.0</version>
-  <description>Waypoint triangulation node for F1TENTH</description>
-  <maintainer email="mokshdip0804@gmail.com">autonomous</maintainer>
+  <description>Path Planning node to generate path for the vehicle to move at.</description>
+  <maintainer email="fsae@ualberta.ca">UAlbertaFSAE</maintainer>
   <license>MIT</license>
 
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>nav_msgs</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>rc_interfaces</exec_depend>
+  <depend>rclcpp</depend>
+  <depend>rc_interfaces</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>visualization_msgs</depend>
 
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>python3-pytest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_clang_format</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

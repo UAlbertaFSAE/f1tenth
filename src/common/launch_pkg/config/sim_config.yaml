@@ -12,8 +12,8 @@ packages:
     launch_file: cone_detector_sim.launch.py
   - name: planner
     package: path_planning
-    launch_file: path_planning.launch.py
-    args: ["odom_topic:=/ego_racecar/odom"]
+    launch_file: path_planner.launch.py
+    args: ["odom_topic:=/ego_racecar/odom", "frame_id:=map"]
   - name: controller
     package: pure_pursuit
     launch_file: pure_pursuit_launch.py
@@ -22,5 +22,11 @@ packages:
 rviz:
   enabled: true
   config_file: sim_visualizer.rviz
+
+recording:
+  save: false
+
+rosbag:
+  enabled: false
 
 static_transforms: []

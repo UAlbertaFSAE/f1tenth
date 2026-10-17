@@ -316,6 +316,10 @@ class ConePublisher(Node):
         # Build Cones
         cone_list, detections_info = self.process_detections(results, msg.header)
         cones_msg = Cones()
+        cones_msg.header.stamp = msg.header.stamp
+        cones_msg.header.frame_id = (
+            self.target_frame if self.apply_tf else msg.header.frame_id
+        )
         cones_msg.cones = cone_list
 
         self.publisher_.publish(cones_msg)

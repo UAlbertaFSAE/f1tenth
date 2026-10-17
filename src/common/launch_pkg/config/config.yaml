@@ -25,11 +25,20 @@ lidar:
   launch_file: msg_MID360_launch.py
 
 static_transforms:
-  # Measured on the car from the rear axle centre at ground level to the centre
-  # of the ZED body. The URDF already carries the +0.060 offset to the left lens.
+  # Metres and radians, relative to the rear axle centre at ground level.
+  # ZED bottom mounting centre: 5 cm behind the axle, centred, 27 cm high.
+  # The ZED URDF supplies the camera-centre, lens and optical-frame offsets.
   - parent: base_link
     child: zed_camera_link
-    xyz: [0.295, 0.0, 0.19]
+    xyz: [-0.05, 0.0, 0.27]
+    rpy: [0.0, 0.0, 0.0]
+  # MID-360 bottom mounting centre: 22.5 cm forward, centred, 17 cm high.
+  # Its point-cloud origin is 47 mm above the bottom (Livox manual v1.2, p19):
+  # z = 0.170 + 0.047 = 0.217 m. Upright, logo forward and cable rearward.
+  # Keep the driver JSON extrinsic_parameter at zero to avoid applying twice.
+  - parent: base_link
+    child: livox_frame
+    xyz: [0.225, 0.0, 0.217]
     rpy: [0.0, 0.0, 0.0]
   # base_link is a child of odom, published by vesc_to_odom (publish_tf: true in
   # f1tenth_stack/config/vesc.yaml). Rooting map at base_link too would give
@@ -39,3 +48,33 @@ static_transforms:
     child: odom
     xyz: [0.0, 0.0, 0.0]
     rpy: [0.0, 0.0, 0.0]
+
+# Record sensor streams and calibration alongside the existing driving topics.
+rosbag:
+  topics:
+  - /ackermann_cmd
+  - /clicked_point
+  - /commands/motor/speed
+  - /commands/servo/position
+  - /cone_positions
+  - /current_waypoint
+  - /diagnostics
+  - /drive
+  - /lookahead_waypoint
+  - /odom
+  - /parameter_events
+  - /planned_path
+  - /rosout
+  - /sensors/core
+  - /teleop
+  - /tf
+  - /tf_static
+  - /waypoints
+  - /joy
+  - /livox/lidar
+  - /livox/imu
+  - /zed/zed_node/rgb/color/rect/image/compressed
+  - /zed/zed_node/rgb/color/rect/camera_info
+  - /zed/zed_node/depth/depth_registered
+  - /zed/zed_node/depth/depth_registered/camera_info
+  - /zed/zed_node/imu/data

@@ -113,7 +113,24 @@ def _static_transform_nodes(transforms: list[dict[str, Any]]) -> list[Node]:
                 package="tf2_ros",
                 executable="static_transform_publisher",
                 name=f"static_tf_{index}_{parent}_to_{child}",
-                arguments=[*xyz, *rpy, parent, child],
+                arguments=[
+                    "--x",
+                    xyz[0],
+                    "--y",
+                    xyz[1],
+                    "--z",
+                    xyz[2],
+                    "--roll",
+                    rpy[0],
+                    "--pitch",
+                    rpy[1],
+                    "--yaw",
+                    rpy[2],
+                    "--frame-id",
+                    parent,
+                    "--child-frame-id",
+                    child,
+                ],
                 output="screen",
             )
         )
@@ -285,8 +302,8 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
         actions.append(
             Node(
                 package="path_planning",
-                executable="triangulator_node",
-                name="triangulator_node",
+                executable="path_planner",
+                name="path_planner",
                 output="screen",
                 parameters=[
                     os.path.join(

@@ -24,11 +24,11 @@ setup(
     ],
     install_requires=["setuptools"],
     zip_safe=True,
-    maintainer="nvidia",
-    maintainer_email="nvidia@todo.todo",
+    maintainer="UAlbertaFSAE",
+    maintainer_email="fsae@ualberta.ca",
     description="Cone detection using ZED camera and YOLO",
-    license="Apache-2.0",
-    tests_require=["pytest"],
+    license="MIT",
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "camera_detection = camera_detection.cone_position:main",
