@@ -14,7 +14,6 @@ the LiDAR half of perception; the camera half is ``camera_detection``.
 from typing import cast
 
 import numpy as np
-import open3d as o3d
 import rclpy
 import sensor_msgs_py.point_cloud2 as pc2
 from rclpy.node import Node
@@ -22,6 +21,14 @@ from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import Header
 from visualization_msgs.msg import Marker, MarkerArray
+
+from lidar_cone_filtering.clustering import cluster_points
+from lidar_cone_filtering.cone_classification import cone_centroids
+from lidar_cone_filtering.ground_removal import remove_ground
+from lidar_cone_filtering.preprocessing import (
+    downsample_and_denoise,
+    roi_crop,
+)
 
 
 class LidarFilteringOpen3D(Node):
@@ -102,52 +109,20 @@ class LidarFilteringOpen3D(Node):
         self.get_logger().info(f"Publishing no-ground: {no_ground_topic}")
         self.get_logger().info(f"Publishing centroids: {centroids_topic}")
 
-    def is_cone_cluster(self, cluster_pts: np.ndarray) -> bool:
-        """Determines whether cluster resembles a cone."""
-        z_min = float(np.min(cluster_pts[:, 2]))
-        z_max = float(np.max(cluster_pts[:, 2]))
-        height = z_max - z_min
-
-        x_min = float(np.min(cluster_pts[:, 0]))
-        x_max = float(np.max(cluster_pts[:, 0]))
-
-        y_min = float(np.min(cluster_pts[:, 1]))
-        y_max = float(np.max(cluster_pts[:, 1]))
-
-        x_width = x_max - x_min
-        y_width = y_max - y_min
-
-        width = max(x_width, y_width)
-
-        small_height = float(self.get_parameter("small_cone_height").value)
-        large_height = float(self.get_parameter("large_cone_height").value)
-        tolerance = float(self.get_parameter("cone_height_tolerance").value)
-
-        small_width = float(self.get_parameter("small_cone_width").value)
-
-        large_width = float(self.get_parameter("large_cone_width").value)
-
-        width_tolerance = float(self.get_parameter("cone_width_tolerance").value)
-
-        small_ok = (
-            abs(height - small_height) <= tolerance
-            and abs(width - small_width) <= width_tolerance
-        )
-
-        large_ok = (
-            abs(height - large_height) <= tolerance
-            and abs(width - large_width) <= width_tolerance
-        )
-
-        return small_ok or large_ok
-
     def callback(self, msg: PointCloud2) -> None:
         """Process one ``PointCloud2`` message and publish filtered output."""
         xyz = self.pc2_to_xyz(msg)
         if xyz.shape[0] < 50:
             return
 
-        xyz = self.roi_crop(xyz)
+        x_min = float(self.get_parameter("roi_x_min").value)
+        x_max = float(self.get_parameter("roi_x_max").value)
+        y_min = float(self.get_parameter("roi_y_min").value)
+        y_max = float(self.get_parameter("roi_y_max").value)
+        z_min = float(self.get_parameter("roi_z_min").value)
+        z_max = float(self.get_parameter("roi_z_max").value)
+
+        xyz = roi_crop(xyz, x_min, x_max, y_min, y_max, z_min, z_max)
         if xyz.shape[0] < 50:
             return
 
@@ -164,32 +139,13 @@ class LidarFilteringOpen3D(Node):
         gen = pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)
         points = list(gen)
         if not points:
-            return np.empty((0, 3), dtype=np.float32)
+            return cast(np.ndarray, np.empty((0, 3), dtype=np.float32))
         points_np = np.array(points).view(np.float32).reshape(-1, 3)
         return cast(np.ndarray, points_np)
 
     def xyz_to_pc2(self, xyz: np.ndarray, header: Header) -> PointCloud2:
         """Build a ``PointCloud2`` from XYZ rows using ``header``."""
         return pc2.create_cloud_xyz32(header, xyz.astype(np.float32).tolist())
-
-    def roi_crop(self, xyz: np.ndarray) -> np.ndarray:
-        """Keep points inside the configured ROI box."""
-        x_min = float(self.get_parameter("roi_x_min").value)
-        x_max = float(self.get_parameter("roi_x_max").value)
-        y_min = float(self.get_parameter("roi_y_min").value)
-        y_max = float(self.get_parameter("roi_y_max").value)
-        z_min = float(self.get_parameter("roi_z_min").value)
-        z_max = float(self.get_parameter("roi_z_max").value)
-
-        m = (
-            (xyz[:, 0] >= x_min)
-            & (xyz[:, 0] <= x_max)
-            & (xyz[:, 1] >= y_min)
-            & (xyz[:, 1] <= y_max)
-            & (xyz[:, 2] >= z_min)
-            & (xyz[:, 2] <= z_max)
-        )
-        return cast(np.ndarray, xyz[m])
 
     def process_with_open3d(
         self, xyz: np.ndarray
@@ -210,61 +166,31 @@ class LidarFilteringOpen3D(Node):
         cluster_min_pts = int(self.get_parameter("cluster_min_points").value)
         min_cluster = int(self.get_parameter("min_cluster_size").value)
         max_cluster = int(self.get_parameter("max_cluster_size").value)
-
-        pcd = o3d.geometry.PointCloud()  # creating open3d point cloud object
-        pcd.points = o3d.utility.Vector3dVector(
-            xyz.astype(np.float64)
-        )  # populating pcd.points with the xyz pc data
-
-        if voxel > 0.0:
-            pcd = pcd.voxel_down_sample(
-                voxel_size=voxel
-            )  # thins out data points, one point per voxel^3 cube
-
-        if len(pcd.points) > sor_nb:
-            pcd, _ = pcd.remove_statistical_outlier(
-                nb_neighbors=sor_nb, std_ratio=sor_std
-            )  # remove points that are sor_nb away from normal
-
-        if len(pcd.points) >= 50:
-            _, inliers = pcd.segment_plane(  # running ransac plane filtering
-                distance_threshold=ransac_dist,  # how far away a point can be from plane
-                ransac_n=3,  # each plane hypothesis is 3 sampled points
-                num_iterations=ransac_iters,
-            )
-            objects = pcd.select_by_index(
-                inliers, invert=True
-            )  # Select all points except for the plane
-        else:  # not enough points to make a plane
-            objects = pcd
+        small_height = float(self.get_parameter("small_cone_height").value)
+        large_height = float(self.get_parameter("large_cone_height").value)
+        tolerance = float(self.get_parameter("cone_height_tolerance").value)
+        small_width = float(self.get_parameter("small_cone_width").value)
+        large_width = float(self.get_parameter("large_cone_width").value)
+        width_tolerance = float(self.get_parameter("cone_width_tolerance").value)
+        pcd = downsample_and_denoise(xyz, voxel, sor_nb, sor_std)
+        objects = remove_ground(pcd, ransac_dist, ransac_iters)
 
         objects_xyz = np.asarray(
             objects.points, dtype=np.float32
         )  # convert o3d object back to numpy
 
-        centroids: list[
-            np.ndarray
-        ] = []  # holds one [x, y, z] centroid per accepted cluster
-        if len(objects.points) > 0:
-            labels = np.array(
-                objects.cluster_dbscan(
-                    eps=cluster_eps, min_points=cluster_min_pts, print_progress=False
-                ),
-                dtype=np.int32,
-            )
-
-            if labels.size > 0 and labels.max() >= 0:
-                for k in range(labels.max() + 1):
-                    cluster_pts = objects_xyz[labels == k]
-                    n = cluster_pts.shape[0]
-
-                    if not (min_cluster <= n <= max_cluster):
-                        continue
-
-                    if not self.is_cone_cluster(cluster_pts):
-                        continue
-
-                    centroids.append(cluster_pts.mean(axis=0))
+        clusters = cluster_points(
+            objects, cluster_eps, cluster_min_pts, min_cluster, max_cluster
+        )
+        centroids = cone_centroids(
+            clusters,
+            small_height,
+            large_height,
+            tolerance,
+            small_width,
+            large_width,
+            width_tolerance,
+        )
 
         return objects_xyz, centroids
 
