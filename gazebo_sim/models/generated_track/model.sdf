@@ -1,0 +1,5407 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="generated_track">
+    <static>true</static>
+
+    <link name="blue_cone_0_0">
+      <pose>-0.05224286888644012 1.4499983231787823 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_0_1">
+      <pose>-0.047757131113559885 -1.5499983231787824 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_1_2">
+      <pose>0.8980566004028492 1.451419256175529 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_1_3">
+      <pose>0.9025423381757296 -1.5485773901820357 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_2_4">
+      <pose>1.8983718312336801 1.452914975119473 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_2_5">
+      <pose>1.9028575690065606 -1.5470816712380917 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_3_6">
+      <pose>2.898687062064512 1.454410694063417 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_3_7">
+      <pose>2.903172799837392 -1.5455859522941477 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_4_8">
+      <pose>3.8990022928953425 1.455906413007361 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_4_9">
+      <pose>3.9034880306682225 -1.5440902333502038 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_5_10">
+      <pose>4.8993175237261735 1.4574021319513049 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_5_11">
+      <pose>4.903803261499053 -1.5425945144062598 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_6_12">
+      <pose>5.899632754557005 1.4588978508952488 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_6_13">
+      <pose>5.904118492329885 -1.5410987954623159 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_7_14">
+      <pose>6.899947985387836 1.4603935698391928 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_7_15">
+      <pose>6.904433723160716 -1.539603076518372 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_8_16">
+      <pose>7.900263216218667 1.4618892887831367 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_8_17">
+      <pose>7.904748953991547 -1.538107357574428 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_9_18">
+      <pose>8.900578447049496 1.4633850077270807 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_9_19">
+      <pose>8.905064184822377 -1.536611638630484 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_10_20">
+      <pose>9.900893677880326 1.4648807266710246 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_10_21">
+      <pose>9.905379415653208 -1.53511591968654 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_11_22">
+      <pose>10.901208908711158 1.4663764456149686 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_11_23">
+      <pose>10.90569464648404 -1.533620200742596 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_12_24">
+      <pose>11.901524139541989 1.4678721645589126 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_12_25">
+      <pose>11.90600987731487 -1.5321244817986521 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_13_26">
+      <pose>12.901839370372821 1.4693678835028565 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_13_27">
+      <pose>12.906325108145703 -1.5306287628547082 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_14_28">
+      <pose>13.902154601203652 1.4708636024468005 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_14_29">
+      <pose>13.906640338976533 -1.5291330439107642 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_15_30">
+      <pose>14.902469832034482 1.4723593213907444 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_15_31">
+      <pose>14.906955569807364 -1.5276373249668203 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_16_32">
+      <pose>15.902785062865313 1.4738550403346884 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_16_33">
+      <pose>15.907270800638194 -1.5261416060228763 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_17_34">
+      <pose>16.903100293696145 1.4753507592786324 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_17_35">
+      <pose>16.907586031469027 -1.5246458870789323 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_18_36">
+      <pose>17.903415524526977 1.4768464782225763 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_18_37">
+      <pose>17.90790126229986 -1.5231501681349884 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_19_38">
+      <pose>18.903730755357806 1.4783421971665203 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_19_39">
+      <pose>18.908216493130688 -1.5216544491910444 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_20_40">
+      <pose>19.90404598618864 1.4798379161104642 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_20_41">
+      <pose>19.90853172396152 -1.5201587302471005 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_21_42">
+      <pose>20.90436121701947 1.481333635054408 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_21_43">
+      <pose>20.908846954792352 -1.5186630113031567 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_22_44">
+      <pose>21.9046764478503 1.482829353998352 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_22_45">
+      <pose>21.90916218562318 -1.5171672923592128 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_23_46">
+      <pose>22.90499167868113 1.4843250729422959 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_23_47">
+      <pose>22.909477416454013 -1.5156715734152688 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_24_48">
+      <pose>23.90530690951196 1.4858207918862398 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_24_49">
+      <pose>23.909792647284842 -1.5141758544713249 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_25_50">
+      <pose>24.905622140342796 1.4873165108301838 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_25_51">
+      <pose>24.910107878115678 -1.512680135527381 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_26_52">
+      <pose>25.90593737117362 1.4888122297741277 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_26_53">
+      <pose>25.910423108946503 -1.511184416583437 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_27_54">
+      <pose>26.906252602004454 1.4903079487180717 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_27_55">
+      <pose>26.910738339777335 -1.509688697639493 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_28_56">
+      <pose>27.906567832835282 1.4918036676620157 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_28_57">
+      <pose>27.911053570608164 -1.508192978695549 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_29_58">
+      <pose>28.906883063666115 1.4932993866059596 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_29_59">
+      <pose>28.911368801438996 -1.506697259751605 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_30_60">
+      <pose>29.907198294496947 1.4947951055499036 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_30_61">
+      <pose>29.91168403226983 -1.505201540807661 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_31_62">
+      <pose>30.907513525327776 1.4962908244938475 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_31_63">
+      <pose>30.911999263100657 -1.5037058218637172 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_32_64">
+      <pose>31.907828756158608 1.4977865434377915 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_32_65">
+      <pose>31.91231449393149 -1.5022101029197732 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_33_66">
+      <pose>32.908143986989444 1.4992822623817355 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_33_67">
+      <pose>32.912629724762326 -1.5007143839758292 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_34_68">
+      <pose>33.90845921782028 1.5007779813256794 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_34_69">
+      <pose>33.91294495559316 -1.4992186650318853 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_35_70">
+      <pose>34.9087744486511 1.5022737002696234 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_35_71">
+      <pose>34.91326018642398 -1.4977229460879413 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_36_72">
+      <pose>35.90908967948194 1.5037694192135673 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_36_73">
+      <pose>35.91357541725482 -1.4962272271439974 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_37_74">
+      <pose>36.909404910312766 1.5052651381575113 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_37_75">
+      <pose>36.91389064808565 -1.4947315082000534 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_38_76">
+      <pose>37.9097201411436 1.5067608571014552 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_38_77">
+      <pose>37.91420587891648 -1.4932357892561094 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_39_78">
+      <pose>38.91003537197443 1.5082565760453992 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_39_79">
+      <pose>38.91452110974731 -1.4917400703121655 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_40_80">
+      <pose>39.91035060280526 1.5097522949893432 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_40_81">
+      <pose>39.91483634057814 -1.4902443513682215 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_41_82">
+      <pose>40.910665833636095 1.5112480139332871 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_41_83">
+      <pose>40.91515157140898 -1.4887486324242776 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_42_84">
+      <pose>41.910981064466924 1.512743732877231 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_42_85">
+      <pose>41.915466802239806 -1.4872529134803336 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_43_86">
+      <pose>42.91129629529775 1.514239451821175 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_43_87">
+      <pose>42.915782033070634 -1.4857571945363897 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_44_88">
+      <pose>43.91161152612859 1.5157351707651188 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_44_89">
+      <pose>43.91609726390147 -1.484261475592446 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_45_90">
+      <pose>44.91192675695942 1.5172308897090627 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_45_91">
+      <pose>44.9164124947323 -1.482765756648502 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_46_92">
+      <pose>45.912241987790246 1.5187266086530067 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_46_93">
+      <pose>45.91672772556313 -1.481270037704558 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_47_94">
+      <pose>46.912557218621075 1.5202223275969506 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_47_95">
+      <pose>46.917042956393956 -1.479774318760614 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_48_96">
+      <pose>47.91287244945191 1.5217180465408946 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_48_97">
+      <pose>47.91735818722479 -1.47827859981667 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_49_98">
+      <pose>48.91318768028274 1.5232137654848386 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_49_99">
+      <pose>48.91767341805562 -1.4767828808727261 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_50_100">
+      <pose>49.913502911113575 1.5247094844287825 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_50_101">
+      <pose>49.91798864888646 -1.4752871619287822 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_51_102">
+      <pose>50.913818141944404 1.5262052033727265 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_51_103">
+      <pose>50.918303879717286 -1.4737914429848382 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_52_104">
+      <pose>51.91413337277524 1.5277009223166704 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_52_105">
+      <pose>51.91861911054812 -1.4722957240408943 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_53_106">
+      <pose>52.91444860360607 1.5291966412606144 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_53_107">
+      <pose>52.91893434137895 -1.4708000050969503 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_54_108">
+      <pose>53.9147638344369 1.5306923602045583 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_54_109">
+      <pose>53.91924957220978 -1.4693042861530063 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_55_110">
+      <pose>54.915079065267726 1.5321880791485023 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_55_111">
+      <pose>54.91956480304061 -1.4678085672090624 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_56_112">
+      <pose>55.91539429609856 1.5336837980924463 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_56_113">
+      <pose>55.91988003387144 -1.4663128482651184 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_57_114">
+      <pose>56.91570952692939 1.5351795170363902 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_57_115">
+      <pose>56.92019526470227 -1.4648171293211745 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_58_116">
+      <pose>57.91602475776022 1.5366752359803342 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_58_117">
+      <pose>57.9205104955331 -1.4633214103772305 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_59_118">
+      <pose>58.916339988591055 1.5381709549242781 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_59_119">
+      <pose>58.92082572636394 -1.4618256914332866 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_60_120">
+      <pose>59.916655219421884 1.539666673868222 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_60_121">
+      <pose>59.921140957194766 -1.4603299724893426 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_61_122">
+      <pose>60.91697045025271 1.541162392812166 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_61_123">
+      <pose>60.921456188025594 -1.4588342535453986 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_62_124">
+      <pose>61.91728568108354 1.54265811175611 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_62_125">
+      <pose>61.92177141885642 -1.4573385346014547 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_63_126">
+      <pose>62.91760091191438 1.544153830700054 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_63_127">
+      <pose>62.92208664968726 -1.4558428156575107 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_64_128">
+      <pose>63.917916142745206 1.545649549643998 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_64_129">
+      <pose>63.92240188051809 -1.4543470967135668 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_65_130">
+      <pose>64.91823137357603 1.5471452685879419 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_65_131">
+      <pose>64.92271711134892 -1.4528513777696228 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_66_132">
+      <pose>65.91854660440688 1.5486409875318858 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_66_133">
+      <pose>65.92303234217977 -1.4513556588256789 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_67_134">
+      <pose>66.91886183523769 1.5501367064758296 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_67_135">
+      <pose>66.92334757301057 -1.4498599398817351 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_68_136">
+      <pose>67.91917706606853 1.5516324254197735 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_68_137">
+      <pose>67.92366280384141 -1.4483642209377912 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_69_138">
+      <pose>68.91949229689936 1.5531281443637175 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_69_139">
+      <pose>68.92397803467225 -1.4468685019938472 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_70_140">
+      <pose>69.9198075277302 1.5546238633076614 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_70_141">
+      <pose>69.92429326550308 -1.4453727830499032 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_71_142">
+      <pose>70.92012275856104 1.5561195822516054 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_71_143">
+      <pose>70.92460849633392 -1.4438770641059593 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_72_144">
+      <pose>71.92043798939186 1.5576153011955494 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_72_145">
+      <pose>71.92492372716474 -1.4423813451620153 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_73_146">
+      <pose>72.92075322022268 1.5591110201394933 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_73_147">
+      <pose>72.92523895799556 -1.4408856262180714 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_74_148">
+      <pose>73.92106845105351 1.5606067390834373 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_74_149">
+      <pose>73.9255541888264 -1.4393899072741274 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_75_150">
+      <pose>74.92138368188435 1.5621024580273812 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_75_151">
+      <pose>74.92586941965723 -1.4378941883301835 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_76_152">
+      <pose>75.92169891271517 1.5635981769713252 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_76_153">
+      <pose>75.92618465048805 -1.4363984693862395 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_77_154">
+      <pose>76.92201414354601 1.5650938959152692 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_77_155">
+      <pose>76.92649988131889 -1.4349027504422955 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_78_156">
+      <pose>77.92232937437683 1.566589614859213 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_78_157">
+      <pose>77.92681511214971 -1.4334070314983516 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_79_158">
+      <pose>78.92264460520768 1.568085333803157 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_79_159">
+      <pose>78.92713034298056 -1.4319113125544076 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_80_160">
+      <pose>79.92295983603852 1.569581052747101 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_80_161">
+      <pose>79.9274455738114 -1.4304155936104637 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_81_162">
+      <pose>80.92327506686932 1.571076771691045 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_81_163">
+      <pose>80.9277608046422 -1.4289198746665197 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_82_164">
+      <pose>81.92359029770016 1.572572490634989 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_82_165">
+      <pose>81.92807603547304 -1.4274241557225757 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_83_166">
+      <pose>82.923905528531 1.574068209578933 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_83_167">
+      <pose>82.92839126630388 -1.4259284367786318 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_84_168">
+      <pose>83.92422075936183 1.5755639285228769 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_84_169">
+      <pose>83.92870649713471 -1.4244327178346878 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_85_170">
+      <pose>84.92453599019265 1.5770596474668208 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_85_171">
+      <pose>84.92902172796553 -1.4229369988907439 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_86_172">
+      <pose>85.92485122102349 1.5785553664107648 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_86_173">
+      <pose>85.92933695879637 -1.4214412799468 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_87_174">
+      <pose>86.92516645185432 1.5800510853547087 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_87_175">
+      <pose>86.9296521896272 -1.419945561002856 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_88_176">
+      <pose>87.92548168268516 1.5815468042986527 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_88_177">
+      <pose>87.92996742045804 -1.418449842058912 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_89_178">
+      <pose>88.92579691351598 1.5830425232425966 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_89_179">
+      <pose>88.93028265128886 -1.416954123114968 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_90_180">
+      <pose>89.9261121443468 1.5845382421865404 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_90_181">
+      <pose>89.93059788211968 -1.4154584041710243 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_91_182">
+      <pose>90.92642737517765 1.5860339611304846 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_91_183">
+      <pose>90.93091311295053 -1.4139626852270801 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_92_184">
+      <pose>91.92674260600847 1.5875296800744283 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_92_185">
+      <pose>91.93122834378136 -1.4124669662831364 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_93_186">
+      <pose>92.92705783683931 1.5890253990183723 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_93_187">
+      <pose>92.93154357461219 -1.4109712473391924 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_94_188">
+      <pose>93.92737306767013 1.5905211179623162 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_94_189">
+      <pose>93.93185880544301 -1.4094755283952485 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_95_190">
+      <pose>94.92768829850097 1.5920168369062602 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_95_191">
+      <pose>94.93217403627385 -1.4079798094513045 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_96_192">
+      <pose>95.9280035293318 1.5935125558502041 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_96_193">
+      <pose>95.93248926710469 -1.4064840905073606 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_97_194">
+      <pose>96.92831876016263 1.595008274794148 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_97_195">
+      <pose>96.9328044979355 -1.4049883715634166 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_98_196">
+      <pose>97.92863399099345 1.596503993738092 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_98_197">
+      <pose>97.93311972876633 -1.4034926526194726 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="blue_cone_99_198">
+      <pose>98.9289492218243 1.597999712682036 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="yellow_cone_99_199">
+      <pose>98.93343495959718 -1.4019969336755287 0.15 0 0 0</pose>
+
+      <visual name="visual">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+
+        <material>
+          <ambient>1 1 0 1</ambient>
+          <diffuse>1 1 0 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <cone>
+            <radius>0.12</radius>
+            <length>0.3</length>
+          </cone>
+        </geometry>
+      </collision>
+    </link>
+
+  </model>
+</sdf>
