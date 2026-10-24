@@ -1,0 +1,69 @@
+# Tuning for lidar_filtering_o3d. Edit this file instead of the node source.
+# Loaded by launch_pkg when launch.lidar_cone_filtering is true.
+lidar_cone_filtering:
+  ros__parameters:
+    input_topic: "/livox/lidar"
+    no_ground_topic: "/lidar/no_ground"
+    centroids_topic: "/lidar/cone_cluster_centroids"
+
+    # Axis-aligned crop in the LiDAR frame, metres.
+    roi_x_min: 0.0
+    roi_x_max: 30.0
+    roi_y_min: -10.0
+    roi_y_max: 10.0
+    roi_z_min: -2.0
+    roi_z_max: 2.0
+
+    # FSAE Driverless cone sizes, metres, plus an acceptance band.
+    # A cluster passes when its height and width are both within tolerance of
+    # either the small or the large target. The old large target of 10 m with a
+    # 0.10 m band never matched, so only the small cone was reachable.
+    small_cone_height: 0.165
+    large_cone_height: 0.505
+    cone_height_tolerance: 0.20
+    small_cone_width: 0.200
+    large_cone_width: 0.350
+    cone_width_tolerance: 0.35
+
+    # Voxel edge length. 0.05 m cubes; points in a cube collapse to one centroid.
+    voxel: 0.05
+    # Statistical outlier removal: neighbour count and std-dev cutoff.
+    sor_nb_neighbors: 20
+    sor_std_ratio: 2.0
+
+    # RANSAC planes. Inliers are points within ransac_dist of a plane.
+    # The floor is near-horizontal (normal within ground_max_tilt_deg of vertical)
+    # and its points sit at or below ground_max_z. A wall is near-vertical, has
+    # at least wall_min_points inliers, and spans wall_min_width by wall_min_height.
+    # Each fit is repeated plane_fit_attempts times and the largest match is kept.
+    # Planes are removed on each scan before the scans are stacked.
+    ransac_dist: 0.05
+    ransac_iters: 1000
+    ground_max_tilt_deg: 15.0
+    ground_max_z: 0.15
+    plane_max_fits: 8
+    plane_fit_attempts: 3
+    wall_min_tilt_deg: 75.0
+    wall_min_points: 200
+    wall_min_width: 2.0
+    wall_min_height: 1.0
+
+    # DBSCAN. Points within cluster_eps of each other join a cluster.
+    cluster_eps: 0.1
+    cluster_min_points: 1
+    min_cluster_size: 7
+    max_cluster_size: 2000
+    # Highest point of a cluster, metres above the fitted floor. A large cone is
+    # 0.505 m, so 0.70 m leaves slack for the plane fit. Skipped when no floor
+    # was found on that scan.
+    cluster_max_height_above_ground: 0.70
+
+    marker_scale: 0.25
+
+    # Stack this many seconds of scans in accumulate_frame, then cluster the
+    # stack in the latest LiDAR frame. The floor and walls are removed from
+    # each scan first. Each scan is voxelized before it is stored, so hits
+    # from later scans stay as extra points. 0 clusters the current scan only.
+    # Requires /tf to that frame.
+    accumulate_window_sec: 0.30
+    accumulate_frame: "odom"

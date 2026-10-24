@@ -278,6 +278,13 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                 executable="lidar_filtering_o3d",
                 name="lidar_cone_filtering",
                 output="screen",
+                parameters=[
+                    os.path.join(
+                        get_package_share_directory("lidar_cone_filtering"),
+                        "config",
+                        "lidar_filtering.yaml",
+                    )
+                ],
             )
         )
 
