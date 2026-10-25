@@ -1,12 +1,13 @@
-#include <chrono>
-#include <functional>
 #include <memory>
 #include <rclcpp/publisher.hpp>
 #include <std_msgs/msg/detail/string__struct.hpp>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
+#include "../include/CanController.hpp"
+#include "../include/SerialHandler.hpp"
 /*
   1. Create the data frame that the telemetry node is going to receive/transmit.
   So the telemetry node is also going to publish this data frame
@@ -15,52 +16,55 @@
     to communicate with the telemetry node. And the telemetry node needs to receive it and send
     information
 
-    publishers have multiple topics
+    publishers for multiple topics
     subscribers only have one topic
     only one subscriber on a topic -> and my node is going to multiplex it to know
     where it should send the info to
   2.
 */
 
-/*
-  Different topics that the CanController node is going to publish to. This structure is created
-  and added to a list inside of the CanController node. They're all created inside of a method
+#define MAX_TOPICS 5
 
-    - Has an array of arbitration ID's for that specific electrical control unit. This might need
-    to be a class if I have to handle the arbitration ID's differently for each thing
-*/
-using UnitTopic = struct UnitTopic {};
+using namespace std;
 
-/*
-  Creating a unique dataframe that is going to work for both my Publishers and Subscriber
+CanController::CanController(string topics_loc): Node("CanController"){
+  createPublishersByTopics(
+    readFromLoc(topics_loc)
+    );
+}
 
-  Header — marks the start of a message and identifies the protocol version.
-  ID — says what kind of message this is and who it is from.
-  Body — the actual payload.
-  Checksum — so the receiver can tell if the message arrived intact.
-*/
+vector<string> CanController::readFromLoc(string loc){
+  vector<string> out;
 
-using CANFrame = struct CanFrame {};
+  return out;
+}
 
 /*
-  This class will probably create a new child process that's going to constantly
-  be reading from a specific port -> So this can be made super easy if its just socket programming,
-  and then some other helper methods that allows it to read
-*/
-class SerialReceiver {};
+  we can assign a standard callback, that is just going to post a standard message to all
+  the topics
+ */
+void CanController::createPublishersByTopics(vector<string> topics_dict) {
+  for (int i = 0; i < topicsList_.size(); ++i) {
+    std::unique_ptr<TelemetryPublisher> telemetry_publisher = std::make_unique<TelemetryPublisher>();
 
-/*
-  Inits multiple publishers. Sets the callback for every Publisher, to publisher to UnitTopic
-  struct, using the CANFrame struct
-*/
-class TelemetryPublishers {};
+    telemetry_publisher->topic = topicsList_.at(i);
+    telemetry_publisher->publisher =
+      this->create_publisher<std_msgs::msg::String>(telemetry_publisher->topic, 0);
 
-class CanController : rclcpp::Node {
- public:
-  CanController() : Node("CanController") {}
+    if (publisherTable_->head != nullptr) {
+      publisherTable_->head = telemetry_publisher;
+    } else {
+      auto curr = publisherTable_->head;
 
- private:
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
-};
+      while (curr != nullptr)
+        curr = curr->next;
+      curr->next = telemetry_publisher;
 
-int main() {}
+      publisherTable_->count++;
+    }
+  }
+}
+
+int main(int argc, char* argv[]) {
+  // init rclcpp
+}
