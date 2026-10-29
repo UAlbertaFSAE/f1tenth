@@ -136,12 +136,13 @@ class LidarFilteringOpen3D(Node):
 
     def pc2_to_xyz(self, msg: PointCloud2) -> np.ndarray:
         """Convert ``msg`` to an ``(N, 3)`` float32 XYZ array."""
-        gen = pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)
-        points = list(gen)
-        if not points:
+        points = pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)
+        if len(points) == 0:
             return cast(np.ndarray, np.empty((0, 3), dtype=np.float32))
-        points_np = np.array(points).view(np.float32).reshape(-1, 3)
-        return cast(np.ndarray, points_np)
+        # Copy the fields by name. The Livox point_step is 26 bytes, so viewing
+        # the padded records as float32 fails on older numpy.
+        points_np = np.column_stack((points["x"], points["y"], points["z"]))
+        return cast(np.ndarray, points_np.astype(np.float32))
 
     def xyz_to_pc2(self, xyz: np.ndarray, header: Header) -> PointCloud2:
         """Build a ``PointCloud2`` from XYZ rows using ``header``."""
