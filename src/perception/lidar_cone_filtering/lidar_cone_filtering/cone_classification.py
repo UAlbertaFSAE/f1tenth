@@ -16,6 +16,7 @@ def is_cone_cluster(
     small_width: float,
     large_width: float,
     width_tolerance: float,
+    min_height: float,
 ) -> bool:
     """Determines whether cluster resembles a cone."""
     z_min = float(np.min(cluster_pts[:, 2]))
@@ -33,9 +34,10 @@ def is_cone_cluster(
 
     width = max(x_width, y_width)
 
+    # Only upper limits on width, a far cone can show as a few points close together
     small_ok = (
-        abs(height - small_height) <= tolerance
-        and abs(width - small_width) <= width_tolerance
+        min_height <= height <= small_height + tolerance
+        and width <= small_width + width_tolerance
     )
 
     large_ok = (
@@ -54,6 +56,7 @@ def cone_centroids(
     small_width: float,
     large_width: float,
     width_tolerance: float,
+    min_height: float,
 ) -> list[np.ndarray]:
     """Return the centroid of every cluster that is shaped like a cone."""
     centroids: list[
@@ -68,8 +71,27 @@ def cone_centroids(
             small_width,
             large_width,
             width_tolerance,
+            min_height,
         ):
             continue
 
         centroids.append(cluster_pts.mean(axis=0))
     return centroids
+
+
+def remove_isolated_cones(
+    centroids: list[np.ndarray],
+    neighbor_radius: float,
+    min_neighbors: int,
+) -> list[np.ndarray]:
+    """Return the centroids with enough other cones nearby, measured in the XY plane."""
+    if not centroids:
+        return centroids
+
+    xy = np.array(centroids)[:, :2]
+    distances = np.linalg.norm(xy[:, None] - xy[None], axis=2)
+    neighbor_counts = np.sum(distances <= neighbor_radius, axis=1) - 1  # skip itself
+
+    return [
+        c for c, n in zip(centroids, neighbor_counts, strict=True) if n >= min_neighbors
+    ]

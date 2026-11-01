@@ -23,7 +23,10 @@ from std_msgs.msg import Header
 from visualization_msgs.msg import Marker, MarkerArray
 
 from lidar_cone_filtering.clustering import cluster_points
-from lidar_cone_filtering.cone_classification import cone_centroids
+from lidar_cone_filtering.cone_classification import (
+    cone_centroids,
+    remove_isolated_cones,
+)
 from lidar_cone_filtering.ground_removal import remove_ground
 from lidar_cone_filtering.preprocessing import (
     downsample_and_denoise,
@@ -45,11 +48,11 @@ class LidarFilteringOpen3D(Node):
 
         # limiting roi
         self.declare_parameter("roi_x_min", 0.0)
-        self.declare_parameter("roi_x_max", 30.0)
-        self.declare_parameter("roi_y_min", -10.0)
-        self.declare_parameter("roi_y_max", 10.0)
-        self.declare_parameter("roi_z_min", -2.0)
-        self.declare_parameter("roi_z_max", 2.0)
+        self.declare_parameter("roi_x_max", 5.0)
+        self.declare_parameter("roi_y_min", -2.0)
+        self.declare_parameter("roi_y_max", 2.0)
+        self.declare_parameter("roi_z_min", -0.5)
+        self.declare_parameter("roi_z_max", 0.5)
 
         # Cone geometry filtering, based on FSAE Driverless cone regulations
         self.declare_parameter("small_cone_height", 0.325)
@@ -58,10 +61,18 @@ class LidarFilteringOpen3D(Node):
         self.declare_parameter("small_cone_width", 0.228)
         self.declare_parameter("large_cone_width", 0.285)
         self.declare_parameter("cone_width_tolerance", 0.10)
+        self.declare_parameter("cone_min_height", 0.03)
 
         self.declare_parameter(
-            "voxel", 0.05
-        )  # voxel downsampling size, each cube will be 5cm^3, all points in each cube get turned into a centroid
+            "cone_neighbor_radius", 3.0
+        )  # how close another cone must be to count as a neighbor
+        self.declare_parameter(
+            "cone_min_neighbors", 2
+        )  # cones with fewer neighbors than this are removed, 0 turns the check off
+
+        self.declare_parameter(
+            "voxel", 0.01
+        )  # voxel downsampling size, each cube will be 1cm^3, all points in each cube get turned into a centroid
         self.declare_parameter(
             "sor_nb_neighbors", 20
         )  # look at 20 neighbors for each point
@@ -75,6 +86,12 @@ class LidarFilteringOpen3D(Node):
         self.declare_parameter(
             "ransac_iters", 1000
         )  # Do 1000 iterations to find best plane
+        self.declare_parameter(
+            "ground_max_tilt_deg", 15.0
+        )  # Plane normal must be within this many degrees of vertical to be the floor
+        self.declare_parameter(
+            "ground_max_fits", 4
+        )  # How many RANSAC fits to try before giving up on finding the floor
 
         # Open3D DBSCAN. With min_points=1
         self.declare_parameter(
@@ -162,6 +179,8 @@ class LidarFilteringOpen3D(Node):
 
         ransac_dist = float(self.get_parameter("ransac_dist").value)
         ransac_iters = int(self.get_parameter("ransac_iters").value)
+        max_tilt = float(self.get_parameter("ground_max_tilt_deg").value)
+        max_fits = int(self.get_parameter("ground_max_fits").value)
 
         cluster_eps = float(self.get_parameter("cluster_eps").value)
         cluster_min_pts = int(self.get_parameter("cluster_min_points").value)
@@ -173,8 +192,11 @@ class LidarFilteringOpen3D(Node):
         small_width = float(self.get_parameter("small_cone_width").value)
         large_width = float(self.get_parameter("large_cone_width").value)
         width_tolerance = float(self.get_parameter("cone_width_tolerance").value)
+        min_height = float(self.get_parameter("cone_min_height").value)
+        neighbor_radius = float(self.get_parameter("cone_neighbor_radius").value)
+        min_neighbors = int(self.get_parameter("cone_min_neighbors").value)
         pcd = downsample_and_denoise(xyz, voxel, sor_nb, sor_std)
-        objects = remove_ground(pcd, ransac_dist, ransac_iters)
+        objects = remove_ground(pcd, ransac_dist, ransac_iters, max_tilt, max_fits)
 
         objects_xyz = np.asarray(
             objects.points, dtype=np.float32
@@ -191,7 +213,9 @@ class LidarFilteringOpen3D(Node):
             small_width,
             large_width,
             width_tolerance,
+            min_height,
         )
+        centroids = remove_isolated_cones(centroids, neighbor_radius, min_neighbors)
 
         return objects_xyz, centroids
 

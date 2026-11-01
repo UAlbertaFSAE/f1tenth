@@ -8,11 +8,11 @@ lidar_cone_filtering:
 
     # Axis-aligned crop in the LiDAR frame, metres.
     roi_x_min: 0.0
-    roi_x_max: 30.0
-    roi_y_min: -10.0
-    roi_y_max: 10.0
+    roi_x_max: 10.0
+    roi_y_min: -5.0
+    roi_y_max: 5.0
     roi_z_min: -2.0
-    roi_z_max: 2.0
+    roi_z_max: 1.0
 
     # FSAE Driverless cone sizes, metres, plus an acceptance band.
     small_cone_height: 0.165
@@ -21,11 +21,18 @@ lidar_cone_filtering:
     small_cone_width: 0.130
     large_cone_width: 10.0
     cone_width_tolerance: 0.10
+    # Shortest small cone cluster accepted. Far cones only show a few points near the tip.
+    cone_min_height: 0.03
 
-    # Voxel edge length. 0.05 m cubes; points in a cube collapse to one centroid.
-    voxel: 0.05
+    # Remove cones with fewer than cone_min_neighbors other cones within
+    # cone_neighbor_radius metres. Set cone_min_neighbors to 0 to turn this off.
+    cone_neighbor_radius: 3.0
+    cone_min_neighbors: 2
+
+    # Voxel edge length. 0.02 m cubes; points in a cube collapse to one centroid.
+    voxel: 0.02
     # Statistical outlier removal: neighbour count and std-dev cutoff.
-    sor_nb_neighbors: 20
+    sor_nb_neighbors: 1000000
     sor_std_ratio: 2.0
 
     # Ground-plane RANSAC. Inliers are points within ransac_dist of the plane.
@@ -35,7 +42,7 @@ lidar_cone_filtering:
     # DBSCAN. Points within cluster_eps of each other join a cluster.
     cluster_eps: 0.25
     cluster_min_points: 1
-    min_cluster_size: 10
+    min_cluster_size: 3
     max_cluster_size: 2000
 
     marker_scale: 0.25
