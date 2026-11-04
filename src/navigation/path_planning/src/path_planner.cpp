@@ -303,8 +303,8 @@ bool PathPlanner::passed_end(const std::vector<path_planning::Point2D>& path) co
 void PathPlanner::update_track_width(const std::vector<path_planning::ConePair>& gates) {
   double width = INFINITY;
   for (const auto& gate : gates) {
-    width = std::min(width, std::hypot(gate.start_pos.x - gate.end_pos.x,
-                                       gate.start_pos.y - gate.end_pos.y));
+    width = std::min(
+        width, std::hypot(gate.start_pos.x - gate.end_pos.x, gate.start_pos.y - gate.end_pos.y));
   }
   if (std::isfinite(width) && width >= min_track_width_) track_width_m_ = width;
 }
