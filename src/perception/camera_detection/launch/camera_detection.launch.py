@@ -25,7 +25,7 @@ def _model_file() -> str:
 
 
 def generate_launch_description() -> LaunchDescription:
-    """Launch camera detection nodes along with RVIZ and triangulator."""
+    """Launch camera detection nodes along with RVIZ and path_planner."""
     pkg_share = FindPackageShare("camera_detection")
 
     config_file_path = PathJoinSubstitution(

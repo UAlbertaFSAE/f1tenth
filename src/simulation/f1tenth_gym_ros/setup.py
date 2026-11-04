@@ -26,7 +26,7 @@ setup(
     maintainer_email='billyzheng.bz@gmail.com',
     description='Bridge for using f1tenth_gym in ROS2',
     license='MIT',
-    tests_require=['pytest'],
+    extras_require={'test': ['pytest']},
     entry_points={
         'console_scripts': [
             'gym_bridge = f1tenth_gym_ros.gym_bridge:main'

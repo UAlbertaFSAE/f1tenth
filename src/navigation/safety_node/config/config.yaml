@@ -1,0 +1,14 @@
+drive_watchdog:
+  ros__parameters:
+    waypoint_topic: /waypoints
+    odom_topic: /odom
+    drive_topic: /drive
+    stop_topic: /safety_stop
+    # Maximum gap between usable path messages (planner runs at ~5 Hz).
+    path_timeout_s: 0.4
+    # Independent limit on plan generation age, including republished held paths.
+    # Path.header.stamp must retain the original generation time.
+    max_plan_age_s: 2.0
+    odom_timeout_s: 0.2
+    drive_timeout_s: 0.2
+    rate_hz: 20.0

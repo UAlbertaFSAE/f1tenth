@@ -22,7 +22,7 @@ setup(
     maintainer_email="billyzheng.bz@gmail.com",
     description="Particle Filter Localization using RangeLibc for accelerated ray casting.",
     license="MIT",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": ["particle_filter = particle_filter.particle_filter:main"],
     },

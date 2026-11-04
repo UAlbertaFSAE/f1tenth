@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
 project(launch_pkg)
 
+# This package has no compiled targets to export.
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
+endif()
+
 find_package(ament_cmake REQUIRED)
 
 # This package ships no compiled code -- it exists to hold the workspace-level
