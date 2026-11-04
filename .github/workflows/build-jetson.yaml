@@ -1,36 +1,59 @@
-name: Build and push dockerfile to Docker Hub(jetson)
+name: Docker image (jetson)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
     paths:
+      - '.github/workflows/build-jetson.yaml'
       - 'docker/Dockerfile.jetson'
+      - '.dockerignore'
+      - 'Makefile'
+      - 'scripts/setup.sh'
       - 'docker/deps/packages.txt'
-      - 'docker/deps/packages-jetson.txt'
-      - 'docker/deps/requirements.txt'
       - 'docker/deps/requirements-common.txt'
+      - 'src/**/package.xml'
+      - 'docker/deps/packages-jetson.txt'
       - 'docker/deps/requirements-jetson.txt'
+  pull_request:
+    paths:
+      - '.github/workflows/build-jetson.yaml'
+      - 'docker/Dockerfile.jetson'
+      - '.dockerignore'
+      - 'Makefile'
+      - 'scripts/setup.sh'
+      - 'docker/deps/packages.txt'
+      - 'docker/deps/requirements-common.txt'
+      - 'src/**/package.xml'
+      - 'docker/deps/packages-jetson.txt'
+      - 'docker/deps/requirements-jetson.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   docker-jetson:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-arm
 
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
-        run: |
-          docker buildx build --push --platform linux/arm64 -t ualbertaformula/f1tenth-jetson -f ./docker/Dockerfile.jetson .
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker image and publish on main
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile.jetson
+          platforms: linux/arm64
+          push: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+          tags: ualbertaformula/f1tenth-jetson

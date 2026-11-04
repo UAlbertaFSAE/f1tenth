@@ -42,8 +42,6 @@ RUN wget https://apt.llvm.org/llvm.sh \
 
 RUN mkdir -p ${WORKSPACE} && chown -R ${USER_UID}:${USER_GID} ${WORKSPACE}
 
-USER ${USERNAME}
-
 # The repo goes to ${WORKSPACE}/src, which is what makes the Makefile resolve
 # the workspace root to ${WORKSPACE}.
 COPY --chown=${USER_UID}:${USER_GID} . ${WORKSPACE}/src
@@ -53,7 +51,12 @@ COPY --chown=${USER_UID}:${USER_GID} . ${WORKSPACE}/src
 # devcontainer bind-mounts a live checkout over ${WORKSPACE}/src only, so the
 # venv/, build/ and install/ baked at ${WORKSPACE} survive that mount.
 WORKDIR ${WORKSPACE}/src
-RUN make deps && make build
+# System packages must be installed as root. sudo cannot elevate the dev user
+# reliably inside the ARM64 BuildKit/QEMU build.
+RUN make deps && chown -R ${USER_UID}:${USER_GID} ${WORKSPACE}
+
+USER ${USERNAME}
+RUN make build
 
 RUN git config --global --add safe.directory ${WORKSPACE}/src
 

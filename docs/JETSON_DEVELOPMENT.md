@@ -1,6 +1,8 @@
 # NVIDIA Jetson Development Guide
 
-Our onboard computer is an [NVIDIA Jetson Xavier Developer Kit](https://developer.nvidia.com/embedded/jetson-developer-kits) running NVIDIA Jetpack 5.1.1.
+The onboard Jetson runs L4T 36.4.7 (JetPack 6 release family). The Jetson image uses the official Stereolabs L4T 36.4 development image, which includes CUDA 12.6 and ZED SDK 5.1 (matching the host SDK), then installs ROS 2 Humble on top.
+
+The Docker image workflows build pull requests without publishing images. A successful build on `main` publishes to Docker Hub. The Jetson build runs on a native ARM64 runner to avoid QEMU faults during package installation and linking.
 
 Much of the perception work has to happen on the Jetson: the Stereolabs ZED SDK and its ROS 2 wrapper need an NVIDIA GPU and the camera attached. This document covers working on the car, and the one-time hardware setup the Jetson image itself needs.
 
@@ -94,7 +96,7 @@ Confirm the controller is being read with `ros2 topic echo /joy` once the stack 
 
 ### Flashing and first boot
 
-Flashing the Jetson with Jetpack 5.1.1 is done from a separate Ubuntu host using NVIDIA SDK Manager, following NVIDIA's own instructions for the Xavier Developer Kit. After the first boot, what has to be installed on the image rather than in a container is: Docker with the NVIDIA container runtime (`runtime: nvidia` in `compose.jetson.yml` depends on it), the udev rule and serial permissions above, and the repository checkout at `~/fsd/f1tenth`. Everything else -- ROS, the build tooling, the Python environment -- lives in the containers.
+Flash a release supported by the board using NVIDIA SDK Manager and NVIDIA's instructions for that model. Keep the container's L4T release family aligned with the host. After the first boot, install Docker with the NVIDIA container runtime(`runtime: nvidia` in `compose.jetson.yml` depends on it), the udev rule and serial permissions above, and the repository checkout at `~/fsd/f1tenth`. ROS, the build tooling, and the Python environment live in the containers.
 
 ## A note on the hardware container
 

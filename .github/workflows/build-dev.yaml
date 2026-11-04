@@ -1,34 +1,120 @@
-name: Build and push dockerfile to Docker Hub(dev)
+name: Docker image (dev)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
     paths:
+      - '.github/workflows/build-dev.yaml'
       - 'docker/Dockerfile.dev'
+      - '.dockerignore'
+      - 'Makefile'
+      - 'scripts/setup.sh'
       - 'docker/deps/packages.txt'
-      - 'docker/deps/requirements.txt'
       - 'docker/deps/requirements-common.txt'
+      - 'src/**/package.xml'
+      - 'docker/deps/requirements.txt'
+  pull_request:
+    paths:
+      - '.github/workflows/build-dev.yaml'
+      - 'docker/Dockerfile.dev'
+      - '.dockerignore'
+      - 'Makefile'
+      - 'scripts/setup.sh'
+      - 'docker/deps/packages.txt'
+      - 'docker/deps/requirements-common.txt'
+      - 'src/**/package.xml'
+      - 'docker/deps/requirements.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ualbertaformula/f1tenth
+  # Publish only from main; pull requests build both platforms without pushing.
+  PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
 
 jobs:
+  # Each platform builds on a native runner. Emulating arm64 with QEMU on an
+  # amd64 runner segfaults in ldconfig while installing packages.
   docker-dev:
-    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            runner: ubuntu-22.04
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        if: env.PUBLISH == 'true'
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      # On main the image is pushed untagged, by digest; docker-dev-merge then
+      # tags both digests as one multi-platform image.
+      - name: Build Docker image and push by digest on main
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile.dev
+          platforms: ${{ matrix.platform }}
+          outputs: ${{ env.PUBLISH == 'true' && format('type=image,name={0},push-by-digest=true,name-canonical=true,push=true', env.IMAGE) || 'type=cacheonly' }}
+
+      - name: Save image digest
+        if: env.PUBLISH == 'true'
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64 -t ualbertaformula/f1tenth -f ./docker/Dockerfile.dev .
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload image digest
+        if: env.PUBLISH == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  docker-dev-merge:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: docker-dev
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Download image digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Publish multi-platform image
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create -t "$IMAGE" $(printf "$IMAGE@sha256:%s " *)
+          docker buildx imagetools inspect "$IMAGE"
