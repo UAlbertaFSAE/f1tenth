@@ -261,6 +261,25 @@ install_cdt_if_needed() {
   (cd "$workdir/CDT/build" && $SUDO cmake --install .)
 }
 
+# `make lint-cpp` uses clang-format-18 and clang-tidy-18
+install_clang18_if_needed() {
+  if need_cmd clang-format-18 && need_cmd clang-tidy-18; then
+    log "clang-format-18 and clang-tidy-18 already installed."
+    return 0
+  fi
+
+  log "Installing LLVM 18 clang tooling from apt.llvm.org…"
+  require_sudo
+  $SUDO apt-get install -y --no-install-recommends wget lsb-release gnupg software-properties-common
+
+  local llvm_sh
+  llvm_sh="$(mktemp)"
+  wget -qO "$llvm_sh" https://apt.llvm.org/llvm.sh
+  $SUDO bash "$llvm_sh" 18
+  rm -f "$llvm_sh"
+  $SUDO apt-get install -y clang-tools-18 clang-tidy-18 clang-format-18
+}
+
 activate_python_venv() {
   local venv_dir="$FORMULA_HOME/venv"
   if [[ ! -d "$venv_dir" ]]; then
@@ -393,6 +412,7 @@ main() {
   fi
 
   install_cdt_if_needed
+  install_clang18_if_needed
 
   # Activate venv before rosdep so any `pip` rosdeps install into the venv.
   activate_python_venv

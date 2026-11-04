@@ -167,6 +167,9 @@ lint-python: ## ruff check, ruff format --check and mypy over all first-party Py
 # argument error rather than lint it. Headers are covered through the .cpp files
 # that include them.
 
+CLANG_FORMAT ?= clang-format-18
+CLANG_TIDY ?= clang-tidy-18
+
 lint-cpp: ## clang-format and clang-tidy over all first-party C++
 	@if [ ! -f "$(WS_ROOT)/build/compile_commands.json" ]; then \
 		echo "No compile_commands.json in $(WS_ROOT)/build -- run 'make build' first."; \
@@ -176,11 +179,11 @@ lint-cpp: ## clang-format and clang-tidy over all first-party C++
 	all=$$(find $(SRC_DIR) \( $(FIND_PRUNE) \) -prune -o \
 		-type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' \) -print); \
 	if [ -z "$$all" ]; then echo "No first-party C++ sources found."; exit 0; fi; \
-	echo "$$all" | xargs clang-format --dry-run -Werror -style=file || exit 1; \
+	echo "$$all" | xargs $(CLANG_FORMAT) --dry-run -Werror -style=file || exit 1; \
 	units=$$(find $(SRC_DIR) \( $(FIND_PRUNE) \) -prune -o \
 		-type f \( -name '*.cpp' -o -name '*.cc' \) -print); \
 	if [ -z "$$units" ]; then echo "No first-party translation units found."; exit 0; fi; \
-	echo "$$units" | xargs clang-tidy -p $(WS_ROOT)/build --quiet
+	echo "$$units" | xargs $(CLANG_TIDY) -p $(WS_ROOT)/build --quiet
 
 run_auto: ## Launch the autonomous stack on the car
 	@$(SOURCE_ENV); \
