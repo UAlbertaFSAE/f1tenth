@@ -1,4 +1,7 @@
-FROM ros:humble
+# CUDA 12.6 and ZED SDK 5.1 for the car's L4T 36.4.x release family.
+# The vendored ZED wrapper uses SDK 5.x APIs and does not build against 4.2,
+# even though its sl_version.hpp still declares 4.2 as the minimum.
+FROM stereolabs/zed:5.1-devel-l4t-r36.4@sha256:a194acb35508f920588d77c462cb127d199f337e9149349434cdf115e581bcda
 
 # Same root convention as Dockerfile.dev: /f1tenth is the colcon workspace root
 # and the repo is /f1tenth/src, so the Makefile resolves the same way here, in
@@ -6,6 +9,19 @@ FROM ros:humble
 ARG WORKSPACE=/f1tenth
 
 SHELL ["/bin/bash", "-c"]
+
+# Install ROS on the CUDA/ZED base using the same apt-source package as the
+# official Humble image. Pin and verify the repository bootstrap package.
+ENV ROS_DISTRO=humble LANG=C.UTF-8 LC_ALL=C.UTF-8
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+    ca-certificates curl gnupg2 \
+    && curl -fsSL -o /tmp/ros2-apt-source.deb \
+    https://github.com/ros-infrastructure/ros-apt-source/releases/download/1.2.0/ros2-apt-source_1.2.0.jammy_all.deb \
+    && echo "767884cf4ed03116b9d64438930a832ed854147ae435279a7924dfdf60f94433  /tmp/ros2-apt-source.deb" | sha256sum --strict --check \
+    && apt-get install -q -y /tmp/ros2-apt-source.deb \
+    && apt-get update && apt-get install -q -y --no-install-recommends ros-humble-ros-base \
+    && rm -f /tmp/ros2-apt-source.deb \
+    && rm -rf /var/lib/apt/lists/* && apt-get clean
 
 # install apt packages
 COPY docker/deps/packages.txt deps/packages.txt
@@ -25,14 +41,6 @@ RUN wget https://apt.llvm.org/llvm.sh \
     clang-tidy-18 \
     clang-format-18 \
     && rm -rf /var/lib/apt/lists/* && apt-get clean
-
-# install ZED SDK
-RUN apt-get -q -y update && apt-get install -q -y --no-install-recommends lsb-release wget less udev sudo apt-transport-https zstd && \
-    wget -q --no-check-certificate -O ZED_SDK_Linux.run https://download.stereolabs.com/zedsdk/4.1/l4t35.3/jetsons && \
-    chmod +x ZED_SDK_Linux.run ; ./ZED_SDK_Linux.run silent skip_tools && \
-    rm -rf /usr/local/zed/resources/* && \
-    rm -rf ZED_SDK_Linux.run && \
-    rm -rf /var/lib/apt/lists/* && apt-get clean
 
 COPY . ${WORKSPACE}/src
 
