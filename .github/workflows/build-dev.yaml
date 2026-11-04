@@ -2,12 +2,32 @@ name: Build and push dockerfile to Docker Hub(dev)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
     paths:
+      - '.github/workflows/build-dev.yaml'
       - 'docker/Dockerfile.dev'
+      - '.dockerignore'
+      - 'Makefile'
+      - 'scripts/setup.sh'
       - 'docker/deps/packages.txt'
-      - 'docker/deps/requirements.txt'
       - 'docker/deps/requirements-common.txt'
+      - 'src/**/package.xml'
+      - 'docker/deps/requirements.txt'
+  pull_request:
+    paths:
+      - '.github/workflows/build-dev.yaml'
+      - 'docker/Dockerfile.dev'
+      - '.dockerignore'
+      - 'Makefile'
+      - 'scripts/setup.sh'
+      - 'docker/deps/packages.txt'
+      - 'docker/deps/requirements-common.txt'
+      - 'src/**/package.xml'
+      - 'docker/deps/requirements.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   docker-dev:
@@ -17,18 +37,24 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
-        run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64 -t ualbertaformula/f1tenth -f ./docker/Dockerfile.dev .
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker image and publish on main
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile.dev
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+          tags: ualbertaformula/f1tenth
