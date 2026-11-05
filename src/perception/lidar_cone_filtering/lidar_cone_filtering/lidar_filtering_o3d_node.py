@@ -26,6 +26,7 @@ from lidar_cone_filtering.clustering import cluster_points
 from lidar_cone_filtering.cone_classification import (
     cone_centroids,
     remove_isolated_cones,
+    remove_tall_clusters,
 )
 from lidar_cone_filtering.ground_removal import remove_ground
 from lidar_cone_filtering.preprocessing import (
@@ -102,7 +103,9 @@ class LidarFilteringOpen3D(Node):
         )  # min # of points for a group of points to be considered a cluster
         self.declare_parameter("min_cluster_size", 10)
         self.declare_parameter("max_cluster_size", 2000)
-
+        self.declare_parameter(
+            "cluster_max_height_above_ground", 0.70
+        )  # Reject a cluster whose highest point is more than this above the floor
         self.declare_parameter("marker_scale", 0.25)
 
         input_topic = self.get_parameter("input_topic").value
@@ -181,7 +184,7 @@ class LidarFilteringOpen3D(Node):
         ransac_iters = int(self.get_parameter("ransac_iters").value)
         max_tilt = float(self.get_parameter("ground_max_tilt_deg").value)
         max_fits = int(self.get_parameter("ground_max_fits").value)
-
+        max_top = float(self.get_parameter("cluster_max_height_above_ground").value)
         cluster_eps = float(self.get_parameter("cluster_eps").value)
         cluster_min_pts = int(self.get_parameter("cluster_min_points").value)
         min_cluster = int(self.get_parameter("min_cluster_size").value)
@@ -196,7 +199,9 @@ class LidarFilteringOpen3D(Node):
         neighbor_radius = float(self.get_parameter("cone_neighbor_radius").value)
         min_neighbors = int(self.get_parameter("cone_min_neighbors").value)
         pcd = downsample_and_denoise(xyz, voxel, sor_nb, sor_std)
-        objects = remove_ground(pcd, ransac_dist, ransac_iters, max_tilt, max_fits)
+        objects, floor = remove_ground(
+            pcd, ransac_dist, ransac_iters, max_tilt, max_fits
+        )
 
         objects_xyz = np.asarray(
             objects.points, dtype=np.float32
@@ -205,6 +210,8 @@ class LidarFilteringOpen3D(Node):
         clusters = cluster_points(
             objects, cluster_eps, cluster_min_pts, min_cluster, max_cluster
         )
+        clusters = remove_tall_clusters(clusters, floor, max_top)
+
         centroids = cone_centroids(
             clusters,
             small_height,

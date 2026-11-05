@@ -24,12 +24,12 @@ def remove_ground(
     ransac_iters: int,
     max_tilt_deg: float,
     max_fits: int,
-) -> o3d.geometry.PointCloud:
-    """Return every point that is not part of the largest level plane in pcd.
+) -> tuple[o3d.geometry.PointCloud, np.ndarray | None]:
+    """Return every point that is not part of the largest level plane, and that plane.
 
     A plane tilted more than max_tilt_deg is a wall or similar, not the floor. It
     is set aside so the next fit can find the floor, and it stays in the output.
-    If no level plane turns up in max_fits fits, nothing is removed.
+    If no level plane turns up in max_fits fits, nothing is removed and the plane is None.
     """
     search = pcd
     remaining = np.arange(len(pcd.points))  # index in pcd of each point in search
@@ -42,9 +42,10 @@ def remove_ground(
             num_iterations=ransac_iters,
         )
         if plane_tilt_deg(plane) <= max_tilt_deg:
-            return pcd.select_by_index(
+            objects = pcd.select_by_index(
                 remaining[inliers].tolist(), invert=True
             )  # Select all points except for the floor
+            return objects, np.asarray(plane, dtype=np.float64)
         search = search.select_by_index(inliers, invert=True)
         remaining = np.delete(remaining, inliers)
-    return pcd
+    return pcd, None
