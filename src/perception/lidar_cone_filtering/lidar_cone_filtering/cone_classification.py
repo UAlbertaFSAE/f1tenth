@@ -79,6 +79,26 @@ def cone_centroids(
     return centroids
 
 
+def remove_tall_clusters(
+    clusters: list[np.ndarray],
+    floor: np.ndarray | None,
+    max_height: float,
+) -> list[np.ndarray]:
+    """Return the clusters whose top is within max_height metres of the floor."""
+    if floor is None:  # no floor on this scan, so there is nothing to measure from
+        return clusters
+
+    normal = floor[:3] if floor[2] >= 0.0 else -floor[:3]
+    offset = floor[3] if floor[2] >= 0.0 else -floor[3]
+    length = float(np.linalg.norm(normal))
+
+    return [
+        cluster_pts
+        for cluster_pts in clusters
+        if float(np.max(cluster_pts @ normal + offset)) / length <= max_height
+    ]
+
+
 def remove_isolated_cones(
     centroids: list[np.ndarray],
     neighbor_radius: float,

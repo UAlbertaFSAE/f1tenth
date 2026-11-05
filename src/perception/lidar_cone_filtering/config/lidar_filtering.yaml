@@ -44,5 +44,7 @@ lidar_cone_filtering:
     cluster_min_points: 1
     min_cluster_size: 3
     max_cluster_size: 2000
+    # Reject clusters whose top is more than this far above the floor, metres.
+    cluster_max_height_above_ground: 0.70
 
     marker_scale: 0.25
