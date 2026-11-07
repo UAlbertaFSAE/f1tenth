@@ -73,7 +73,8 @@ class LidarFilteringOpen3D(Node):
 
         self.declare_parameter(
             "voxel", 0.01
-        )  # voxel downsampling size, each cube will be 1cm^3, all points in each cube get turned into a centroid
+        )  # voxel downsampling size, each cube will be 1cm^3, 
+           #all points in each cube get turned into a centroid
         self.declare_parameter(
             "sor_nb_neighbors", 20
         )  # look at 20 neighbors for each point
