@@ -73,8 +73,8 @@ class LidarFilteringOpen3D(Node):
 
         self.declare_parameter(
             "voxel", 0.01
-        )  # voxel downsampling size, each cube will be 1cm^3, 
-           #all points in each cube get turned into a centroid
+        )  # voxel downsampling size, each cube will be 1cm^3,
+        # all points in each cube get turned into a centroid
         self.declare_parameter(
             "sor_nb_neighbors", 20
         )  # look at 20 neighbors for each point
@@ -159,7 +159,7 @@ class LidarFilteringOpen3D(Node):
         """Convert ``msg`` to an ``(N, 3)`` float32 XYZ array."""
         points = pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True)
         if len(points) == 0:
-            return cast(np.ndarray, np.empty((0, 3), dtype=np.float32))
+            return np.empty((0, 3), dtype=np.float32)
         # Copy the fields by name. The Livox point_step is 26 bytes, so viewing
         # the padded records as float32 fails on older numpy.
         points_np = np.column_stack((points["x"], points["y"], points["z"]))
