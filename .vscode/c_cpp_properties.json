@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/opt/ros/humble/include/**",
+        "/f1tenth/src/src/hardware/f1tenth_system/ackermann_mux/include/**",
+        "/f1tenth/src/src/hardware/f1tenth_system/vesc/vesc_ackermann/include/**",
+        "/f1tenth/src/src/hardware/f1tenth_system/vesc/vesc_driver/include/**",
+        "/f1tenth/src/src/navigation/pure_pursuit/include/**",
+        "/f1tenth/src/src/perception/livox_sdk2/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
