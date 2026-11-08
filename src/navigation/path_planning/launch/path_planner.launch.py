@@ -17,6 +17,10 @@ def launch_node(context: LaunchContext) -> list[Node]:
         value = LaunchConfiguration(name).perform(context)
         if value:
             overrides[name] = value
+    for name in ("delaunay_max_edge_m", "track_width_m"):
+        value = LaunchConfiguration(name).perform(context)
+        if value:
+            overrides[name] = float(value)
     return [
         Node(
             package="path_planning",
@@ -38,6 +42,8 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("config_file", default_value=default_config),
             DeclareLaunchArgument("odom_topic", default_value=""),
             DeclareLaunchArgument("frame_id", default_value=""),
+            DeclareLaunchArgument("delaunay_max_edge_m", default_value=""),
+            DeclareLaunchArgument("track_width_m", default_value=""),
             OpaqueFunction(function=launch_node),
         ]
     )

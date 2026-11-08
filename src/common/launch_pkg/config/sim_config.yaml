@@ -13,7 +13,11 @@ packages:
   - name: planner
     package: path_planning
     launch_file: path_planner.launch.py
-    args: ["odom_topic:=/ego_racecar/odom", "frame_id:=map"]
+    args:
+      - "odom_topic:=/ego_racecar/odom"
+      - "frame_id:=map"
+      - "delaunay_max_edge_m:=3.5"
+      - "track_width_m:=3.0"
   - name: controller
     package: pure_pursuit
     launch_file: pure_pursuit_launch.py

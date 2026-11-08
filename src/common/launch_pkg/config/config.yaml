@@ -26,30 +26,13 @@ lidar:
   launch_file: msg_MID360_launch.py
 
 static_transforms:
-  # Metres and radians, relative to the rear axle centre at ground level.
-  # ZED bottom mounting centre: 5 cm behind the axle, centred, 27 cm high.
-  # The ZED URDF supplies the camera-centre, lens and optical-frame offsets.
   - parent: base_link
     child: zed_camera_link
     xyz: [-0.05, 0.0, 0.27]
     rpy: [0.0, 0.0, 0.0]
-  # MID-360 bottom mounting centre: 22.5 cm forward, centred, 17 cm high.
-  # Its point-cloud origin is 47 mm above the bottom (Livox manual v1.2, p19):
-  # z = 0.170 + 0.047 = 0.217 m. Upright, logo forward and cable rearward.
-  # Keep the driver JSON extrinsic_parameter at zero to avoid applying twice.
   - parent: base_link
     child: livox_frame
     xyz: [0.225, 0.0, 0.217]
-    rpy: [0.0, 0.0, 0.0]
-  # base_link is a child of odom, published by vesc_to_odom (publish_tf: true in
-  # f1tenth_stack/config/vesc.yaml). Rooting map at base_link too would give
-  # base_link two parents, which splits the TF tree and makes every
-  # camera->odom lookup fail. map -> odom is the correct root link.
-  # Livox MID360 mount. Placeholder: measure from the rear axle centre at
-  # ground level to the LiDAR's optical centre and fill in.
-  - parent: base_link
-    child: livox_frame
-    xyz: [0.0, 0.0, 0.0]
     rpy: [0.0, 0.0, 0.0]
   - parent: map
     child: odom
