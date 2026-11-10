@@ -1,0 +1,32 @@
+# Pure pursuit parameters for the car. The simulator profile lives in
+# sim_config.yaml; the two differ in their frames and topics, so they cannot be
+# one file. Without this file the node fell back to the defaults compiled into
+# pure_pursuit.cpp, which command 6 m/s on a straight.
+pure_pursuit:
+  ros__parameters:
+    odom_topic: "/odom"
+    car_refFrame: "base_link"
+    global_refFrame: "odom"
+    drive_topic: "/drive"
+
+    # Lookahead: lookahead = min(max(min_lookahead, max_lookahead * curr_velocity / lookahead_ratio), max_lookahead)
+    min_lookahead: 0.3
+    max_lookahead: 2.0
+    lookahead_ratio: 4.0
+    K_p: 0.35
+    steering_limit: 25.0
+
+    # Speed. waypoint_velocity is the straight-line target; it is scaled by
+    # velocity_percentage, and further reduced by the node on tighter steering
+    # angles (0.42x past 10 degrees, 0.33x past 20).
+    # 0.25 x 6.0 = 1.5 m/s on a straight.
+    # Raise velocity_percentage once the cone pipeline is trusted on the car.
+    waypoint_velocity: 6.0
+    velocity_percentage: 0.25
+
+    # Backstop only. The triangulator now publishes an explicit empty path when
+    # it has nothing to follow, and pure_pursuit stops on that immediately, so
+    # this timeout only has to catch the triangulator dying outright. It is set
+    # well clear of normal inter-frame gaps (~0.5s observed) so ordinary jitter
+    # never trips it.
+    path_timeout: 3.0

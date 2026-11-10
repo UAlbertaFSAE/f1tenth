@@ -1,0 +1,22 @@
+# ROS parameter overrides for the ZED node, passed to zed_camera.launch.py as
+# ros_params_override_path. Kept here rather than edited into
+# zed_wrapper/config/zed2i.yaml: zed_wrapper is a vendored third-party tree.
+/zed/zed_node:
+  ros__parameters:
+    general:
+      # HD1080 is a centre crop of the sensor and is the narrowest mode the
+      # camera offers: 52.08 deg horizontal, measured on this unit (S/N
+      # 36171447) via the SDK. HD720 uses the full sensor width for 66.79 deg,
+      # which is what brings the near left-hand cones into frame. It also
+      # supports 60 FPS.
+      grab_resolution: 'HD720'
+    debug:
+      # The camera clock ran ~1.05s ahead of ROS time on this Jetson, so images
+      # arrived stamped in the future and every cone TF lookup against odom
+      # failed with "extrapolation into the future", falling back to a ~1s stale
+      # transform -- roughly 1.8m of position error at 1.5 m/s. Stamping at
+      # publication time puts images on the same clock as odom (measured
+      # img - odom: -0.024s afterwards, versus ~1s before).
+      use_pub_timestamps: true
+    stream_server:
+      gop_size: -1

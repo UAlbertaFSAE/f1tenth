@@ -1,0 +1,680 @@
+import numpy as np
+from numba import njit
+
+from f1tenth_gym.envs.dynamic_models.utils import steering_constraint, accl_constraints
+
+from .tire_model import (
+    formula_lateral,
+    formula_lateral_comb,
+    formula_longitudinal,
+    formula_longitudinal_comb,
+)
+from ..kinematic import vehicle_dynamics_ks_cog
+
+def vehicle_dynamics_mb(x: np.ndarray, u_init: np.ndarray, params: np.ndarray) -> np.ndarray:
+    """
+    vehicleDynamics_mb - multi-body vehicle dynamics based on the DoT (department of transportation) vehicle dynamics
+    reference point: center of mass
+
+    Syntax:
+        f = vehicleDynamics_mb(x,u,p)
+
+    Inputs:
+        :param x: vehicle state vector
+        :param uInit: vehicle input vector
+        :param params: vehicle parameter vector
+
+    Outputs:
+        :return f: right-hand side of differential equations
+    """
+
+    # ------------- BEGIN CODE --------------
+
+    # set gravity constant
+    g = 9.81  # [m/s^2]
+
+    # states
+    # x0 = x-position in a global coordinate system
+    # x1 = y-position in a global coordinate system
+    # x2 = steering angle of front wheels
+    # x3 = velocity in x-direction
+    # x4 = yaw angle
+    # x5 = yaw rate
+
+    # x6 = roll angle
+    # x7 = roll rate
+    # x8 = pitch angle
+    # x9 = pitch rate
+    # x10 = velocity in y-direction
+    # x11 = z-position
+    # x12 = velocity in z-direction
+
+    # x13 = roll angle front
+    # x14 = roll rate front
+    # x15 = velocity in y-direction front
+    # x16 = z-position front
+    # x17 = velocity in z-direction front
+
+    # x18 = roll angle rear
+    # x19 = roll rate rear
+    # x20 = velocity in y-direction rear
+    # x21 = z-position rear
+    # x22 = velocity in z-direction rear
+
+    # x23 = left front wheel angular speed
+    # x24 = right front wheel angular speed
+    # x25 = left rear wheel angular speed
+    # x26 = right rear wheel angular speed
+
+    # x27 = delta_y_f
+    # x28 = delta_y_r
+
+    # u0 = steering angle velocity of front wheels
+    # u1 = acceleration
+
+    u = np.zeros_like(u_init)
+
+    mu = params[0]  # lateral friction coefficient
+    C_Sf = params[1]  # front tire cornering stiffness [N/rad]
+    C_Sr = params[2]  # rear tire cornering stiffness [N/rad]
+    lf = params[3]  # distance from CoG to front axle [m]
+    lr = params[4]  # distance from CoG to rear axle [m]
+    h = params[5]  # CoG height of total mass above ground [m]
+    m = params[6]  # total vehicle mass [kg]
+    I = params[7]  # moment of inertia in yaw [kg m^2]
+
+    # Steering constraints
+    s_min = params[8]   # minimum steering angle [rad]
+    s_max = params[9]   # maximum steering angle [rad]
+    sv_min = params[10]  # minimum steering velocity [rad/s]
+    sv_max = params[11]  # maximum steering velocity [rad/s]
+
+    # Longitudinal constraints
+    v_switch = params[12]  # switching velocity [m/s]
+    a_max = params[13]  # maximum absolute acceleration [m/s^2]
+    v_min = params[14]  # minimum velocity [m/s]
+    v_max = params[15]  # maximum velocity [m/s]
+
+    # Vehicle geometry
+    width = params[16]  # vehicle width [m]
+    length = params[17]  # vehicle length [m]
+
+    # Curvature and jerk constraints
+    kappa_dot_max = params[18]  # max curvature rate [1/s]
+    kappa_dot_dot_max = params[19]  # max curvature acceleration [1/s^2]
+    j_max = params[20]  # max longitudinal jerk [m/s^3]
+    j_dot_max = params[21]  # max change in jerk [m/s^4]
+
+    # Mass breakdown
+    m_s = params[22]  # sprung mass [kg]
+    m_uf = params[23]  # front unsprung mass [kg]
+    m_ur = params[24]  # rear unsprung mass [kg]
+
+    # Sprung mass inertia
+    I_Phi_s = params[25]  # roll inertia of sprung mass [kg m^2]
+    I_y_s = params[26]  # pitch inertia of sprung mass [kg m^2]
+    I_z = params[27]  # yaw inertia of sprung mass [kg m^2]
+    I_xz_s = params[28]  # cross-product inertia [kg m^2]
+
+    # Suspension spring/damping
+    K_sf = params[29]  # front suspension spring rate [N/m]
+    K_sdf = params[30]  # front suspension damping [N·s/m]
+    K_sr = params[31]  # rear suspension spring rate [N/m]
+    K_sdr = params[32]  # rear suspension damping [N·s/m]
+
+    # Track widths and compliant joints
+    T_f = params[33]  # front track width [m]
+    T_r = params[34]  # rear track width [m]
+    K_ras = params[35]  # lateral spring rate at pin joint [N/m]
+    K_tsf = params[36]  # front torsion roll stiffness [N·m/rad]
+    K_tsr = params[37]  # rear torsion roll stiffness [N·m/rad]
+    K_rad = params[38]  # damping rate at pin joint [N·s/m]
+    K_zt = params[39]  # vertical tire spring rate [N/m]
+
+    # CoG and roll axis heights
+    h_cg = params[40]  # center of gravity height of total mass [m]
+    h_raf = params[41]  # roll axis front height [m]
+    h_rar = params[42]  # roll axis rear height [m]
+    h_s = params[43]  # sprung mass CoG height [m]
+
+    # Unsprung mass inertias
+    I_uf = params[44]  # front unsprung inertia [kg m^2]
+    I_ur = params[45]  # rear unsprung inertia [kg m^2]
+
+    # Wheel and compliance
+    I_y_w = params[46]  # wheel rotational inertia [kg m^2]
+    K_lt = params[47]  # lateral compliance rate [m/N]
+    R_w = params[48]  # wheel/tire effective radius [m]
+
+    # Torque splits
+    T_sb = params[49]  # brake torque split
+    T_se = params[50]  # engine torque split
+
+    # Suspension toe parameters
+    D_f = params[51]  # front toe compliance [rad/m]
+    D_r = params[52]  # rear toe compliance [rad/m]
+    E_f = params[53]  # front compliance nonlinearity
+    E_r = params[54]  # rear compliance nonlinearity
+
+    KIN_THRESH = 0.5
+
+    # consider steering and acceleration constraints - outside of the integration
+    u[0] = steering_constraint(
+        x[2],
+        u_init[0],
+        s_min,
+        s_max,
+        sv_min,
+        sv_max,
+    )
+    u[1] = accl_constraints(
+        x[3],
+        u_init[1],
+        v_switch,
+        a_max,
+        v_min,
+        v_max,
+    )
+
+    if abs(x[3]) < KIN_THRESH:
+        beta = 0.0
+    else:
+        beta = np.arctan(x[10] / x[3])
+    vel = np.sqrt(x[3] ** 2 + x[10] ** 2)
+
+    # vertical tire forces
+    F_z_LF = (
+        x[16]
+        + R_w * (np.cos(x[13]) - 1)
+        - 0.5 * T_f * np.sin(x[13])
+    ) * K_zt
+    F_z_RF = (
+        x[16]
+        + R_w * (np.cos(x[13]) - 1)
+        + 0.5 * T_f * np.sin(x[13])
+    ) * K_zt
+    F_z_LR = (
+        x[21]
+        + R_w * (np.cos(x[18]) - 1)
+        - 0.5 * T_r * np.sin(x[18])
+    ) * K_zt
+    F_z_RR = (
+        x[21]
+        + R_w * (np.cos(x[18]) - 1)
+        + 0.5 * T_r * np.sin(x[18])
+    ) * K_zt
+
+    # obtain individual tire speeds
+    u_w_lf = (x[3] + 0.5 * T_f * x[5]) * np.cos(x[2]) + (
+        x[10] + lf * x[5]
+    ) * np.sin(x[2])
+    u_w_rf = (x[3] - 0.5 * T_f * x[5]) * np.cos(x[2]) + (
+        x[10] + lf * x[5]
+    ) * np.sin(x[2])
+    u_w_lr = x[3] + 0.5 * T_r * x[5]
+    u_w_rr = x[3] - 0.5 * T_r * x[5]
+
+    # negative wheel spin forbidden
+    if u_w_lf < 0.0:
+        u_w_lf *= 0
+
+    if u_w_rf < 0.0:
+        u_w_rf *= 0
+
+    if u_w_lr < 0.0:
+        u_w_lr *= 0
+
+    if u_w_rr < 0.0:
+        u_w_rr *= 0
+    # compute longitudinal slip
+    # switch to kinematic model for small velocities
+    if abs(x[3]) < KIN_THRESH:
+        s_lf = 0.0
+        s_rf = 0.0
+        s_lr = 0.0
+        s_rr = 0.0
+    else:
+        s_lf = 1 - R_w * x[23] / u_w_lf
+        s_rf = 1 - R_w * x[24] / u_w_rf
+        s_lr = 1 - R_w * x[25] / u_w_lr
+        s_rr = 1 - R_w * x[26] / u_w_rr
+
+    # lateral slip angles
+    # switch to kinematic model for small velocities
+    if abs(x[3]) < KIN_THRESH:
+        alpha_LF = 0.0
+        alpha_RF = 0.0
+        alpha_LR = 0.0
+        alpha_RR = 0.0
+    else:
+        alpha_LF = (
+            np.arctan(
+                (x[10] + lf * x[5] - x[14] * (R_w - x[16]))
+                / (x[3] + 0.5 * T_f * x[5])
+            )
+            - x[2]
+        )
+        alpha_RF = (
+            np.arctan(
+                (x[10] + lf * x[5] - x[14] * (R_w - x[16]))
+                / (x[3] - 0.5 * T_f * x[5])
+            )
+            - x[2]
+        )
+        alpha_LR = np.arctan(
+            (x[10] - lr * x[5] - x[19] * (R_w - x[21]))
+            / (x[3] + 0.5 * T_r * x[5])
+        )
+        alpha_RR = np.arctan(
+            (x[10] - lr * x[5] - x[19] * (R_w - x[21]))
+            / (x[3] - 0.5 * T_r * x[5])
+        )
+
+    # auxiliary suspension movement
+    z_SLF = (
+        (h_s - R_w + x[16] - x[11]) / np.cos(x[6])
+        - h_s
+        + R_w
+        + lf * x[8]
+        + 0.5 * (x[6] - x[13]) * T_f
+    )
+    z_SRF = (
+        (h_s - R_w + x[16] - x[11]) / np.cos(x[6])
+        - h_s
+        + R_w
+        + lf * x[8]
+        - 0.5 * (x[6] - x[13]) * T_f
+    )
+    z_SLR = (
+        (h_s - R_w + x[21] - x[11]) / np.cos(x[6])
+        - h_s
+        + R_w
+        - lr * x[8]
+        + 0.5 * (x[6] - x[18]) * T_r
+    )
+    z_SRR = (
+        (h_s - R_w + x[21] - x[11]) / np.cos(x[6])
+        - h_s
+        + R_w
+        - lr * x[8]
+        - 0.5 * (x[6] - x[18]) * T_r
+    )
+
+    dz_SLF = x[17] - x[12] + lf * x[9] + 0.5 * (x[7] - x[14]) * T_f
+    dz_SRF = x[17] - x[12] + lf * x[9] - 0.5 * (x[7] - x[14]) * T_f
+    dz_SLR = x[22] - x[12] - lr * x[9] + 0.5 * (x[7] - x[19]) * T_r
+    dz_SRR = x[22] - x[12] - lr * x[9] - 0.5 * (x[7] - x[19]) * T_r
+
+    # camber angles
+    gamma_LF = x[6] + D_f * z_SLF + E_f * (z_SLF) ** 2
+    gamma_RF = x[6] - D_f * z_SRF - E_f * (z_SRF) ** 2
+    gamma_LR = x[6] + D_r * z_SLR + E_r * (z_SLR) ** 2
+    gamma_RR = x[6] - D_r * z_SRR - E_r * (z_SRR) ** 2
+
+    # compute longitudinal tire forces using the magic formula for pure slip
+    F0_x_LF = formula_longitudinal(s_lf, gamma_LF, F_z_LF, params)
+    F0_x_RF = formula_longitudinal(s_rf, gamma_RF, F_z_RF, params)
+    F0_x_LR = formula_longitudinal(s_lr, gamma_LR, F_z_LR, params)
+    F0_x_RR = formula_longitudinal(s_rr, gamma_RR, F_z_RR, params)
+
+    # compute lateral tire forces using the magic formula for pure slip
+    res = formula_lateral(alpha_LF, gamma_LF, F_z_LF, params)
+    F0_y_LF = res[0]
+    mu_y_LF = res[1]
+    res = formula_lateral(alpha_RF, gamma_RF, F_z_RF, params)
+    F0_y_RF = res[0]
+    mu_y_RF = res[1]
+    res = formula_lateral(alpha_LR, gamma_LR, F_z_LR, params)
+    F0_y_LR = res[0]
+    mu_y_LR = res[1]
+    res = formula_lateral(alpha_RR, gamma_RR, F_z_RR, params)
+    F0_y_RR = res[0]
+    mu_y_RR = res[1]
+
+    # compute longitudinal tire forces using the magic formula for combined slip
+    F_x_LF = formula_longitudinal_comb(s_lf, alpha_LF, F0_x_LF, params)
+    F_x_RF = formula_longitudinal_comb(s_rf, alpha_RF, F0_x_RF, params)
+    F_x_LR = formula_longitudinal_comb(s_lr, alpha_LR, F0_x_LR, params)
+    F_x_RR = formula_longitudinal_comb(s_rr, alpha_RR, F0_x_RR, params)
+
+    # compute lateral tire forces using the magic formula for combined slip
+    F_y_LF = formula_lateral_comb(
+        s_lf, alpha_LF, gamma_LF, mu_y_LF, F_z_LF, F0_y_LF, params
+    )
+    F_y_RF = formula_lateral_comb(
+        s_rf, alpha_RF, gamma_RF, mu_y_RF, F_z_RF, F0_y_RF, params
+    )
+    F_y_LR = formula_lateral_comb(
+        s_lr, alpha_LR, gamma_LR, mu_y_LR, F_z_LR, F0_y_LR, params
+    )
+    F_y_RR = formula_lateral_comb(
+        s_rr, alpha_RR, gamma_RR, mu_y_RR, F_z_RR, F0_y_RR, params
+    )
+
+    # auxiliary movements for compliant joint equations
+    delta_z_f = h_s - R_w + x[16] - x[11]
+    delta_z_r = h_s - R_w + x[21] - x[11]
+
+    delta_phi_f = x[6] - x[13]
+    delta_phi_r = x[6] - x[18]
+
+    dot_delta_phi_f = x[7] - x[14]
+    dot_delta_phi_r = x[7] - x[19]
+
+    dot_delta_z_f = x[17] - x[12]
+    dot_delta_z_r = x[22] - x[12]
+
+    dot_delta_y_f = x[10] + lf * x[5] - x[15]
+    dot_delta_y_r = x[10] - lr * x[5] - x[20]
+
+    delta_f = (
+        delta_z_f * np.sin(x[6])
+        - x[27] * np.cos(x[6])
+        - (h_raf - R_w) * np.sin(delta_phi_f)
+    )
+    delta_r = (
+        delta_z_r * np.sin(x[6])
+        - x[28] * np.cos(x[6])
+        - (h_rar - R_w) * np.sin(delta_phi_r)
+    )
+
+    dot_delta_f = (
+        (delta_z_f * np.cos(x[6]) + x[27] * np.sin(x[6])) * x[7]
+        + dot_delta_z_f * np.sin(x[6])
+        - dot_delta_y_f * np.cos(x[6])
+        - (h_raf - R_w) * np.cos(delta_phi_f) * dot_delta_phi_f
+    )
+    dot_delta_r = (
+        (delta_z_r * np.cos(x[6]) + x[28] * np.sin(x[6])) * x[7]
+        + dot_delta_z_r * np.sin(x[6])
+        - dot_delta_y_r * np.cos(x[6])
+        - (h_rar - R_w) * np.cos(delta_phi_r) * dot_delta_phi_r
+    )
+
+    # compliant joint forces
+    F_RAF = delta_f * K_ras + dot_delta_f * K_rad
+    F_RAR = delta_r * K_ras + dot_delta_r * K_rad
+
+    # auxiliary suspension forces (bump stop neglected  squat/lift forces neglected)
+    F_SLF = (
+        m_s * g * lr / (2 * (lf + lr))
+        - z_SLF * K_sf
+        - dz_SLF * K_sdf
+        + (x[6] - x[13]) * K_tsf / T_f
+    )
+
+    F_SRF = (
+        m_s * g * lr / (2 * (lf + lr))
+        - z_SRF * K_sf
+        - dz_SRF * K_sdf
+        - (x[6] - x[13]) * K_tsf / T_f
+    )
+
+    F_SLR = (
+        m_s * g * lf / (2 * (lf + lr))
+        - z_SLR * K_sr
+        - dz_SLR * K_sdr
+        + (x[6] - x[18]) * K_tsr / T_r
+    )
+
+    F_SRR = (
+        m_s * g * lf / (2 * (lf + lr))
+        - z_SRR * K_sr
+        - dz_SRR * K_sdr
+        - (x[6] - x[18]) * K_tsr / T_r
+    )
+
+    # auxiliary variables sprung mass
+    sumX = (
+        F_x_LR
+        + F_x_RR
+        + (F_x_LF + F_x_RF) * np.cos(x[2])
+        - (F_y_LF + F_y_RF) * np.sin(x[2])
+    )
+
+    sumN = (
+        (F_y_LF + F_y_RF) * lf * np.cos(x[2])
+        + (F_x_LF + F_x_RF) * lf * np.sin(x[2])
+        + (F_y_RF - F_y_LF) * 0.5 * T_f * np.sin(x[2])
+        + (F_x_LF - F_x_RF) * 0.5 * T_f * np.cos(x[2])
+        + (F_x_LR - F_x_RR) * 0.5 * T_r
+        - (F_y_LR + F_y_RR) * lr
+    )
+
+    sumY_s = (F_RAF + F_RAR) * np.cos(x[6]) + (F_SLF + F_SLR + F_SRF + F_SRR) * np.sin(
+        x[6]
+    )
+
+    sumL = (
+        0.5 * F_SLF * T_f
+        + 0.5 * F_SLR * T_r
+        - 0.5 * F_SRF * T_f
+        - 0.5 * F_SRR * T_r
+        - F_RAF
+        / np.cos(x[6])
+        * (
+            h_s
+            - x[11]
+            - R_w
+            + x[16]
+            - (h_raf - R_w) * np.cos(x[13])
+        )
+        - F_RAR
+        / np.cos(x[6])
+        * (
+            h_s
+            - x[11]
+            - R_w
+            + x[21]
+            - (h_rar - R_w) * np.cos(x[18])
+        )
+    )
+
+    sumZ_s = (F_SLF + F_SLR + F_SRF + F_SRR) * np.cos(x[6]) - (F_RAF + F_RAR) * np.sin(
+        x[6]
+    )
+
+    sumM_s = (
+        lf * (F_SLF + F_SRF)
+        - lr * (F_SLR + F_SRR)
+        + (
+            (F_x_LF + F_x_RF) * np.cos(x[2])
+            - (F_y_LF + F_y_RF) * np.sin(x[2])
+            + F_x_LR
+            + F_x_RR
+        )
+        * (h_s - x[11])
+    )
+
+    # auxiliary variables unsprung mass
+    sumL_uf = (
+        0.5 * F_SRF * T_f
+        - 0.5 * F_SLF * T_f
+        - F_RAF * (h_raf - R_w)
+        + F_z_LF
+        * (
+            R_w * np.sin(x[13])
+            + 0.5 * T_f * np.cos(x[13])
+            - K_lt * F_y_LF
+        )
+        - F_z_RF
+        * (
+            -R_w * np.sin(x[13])
+            + 0.5 * T_f * np.cos(x[13])
+            + K_lt * F_y_RF
+        )
+        - ((F_y_LF + F_y_RF) * np.cos(x[2]) + (F_x_LF + F_x_RF) * np.sin(x[2]))
+        * (R_w - x[16])
+    )
+
+    sumL_ur = (
+        0.5 * F_SRR * T_r
+        - 0.5 * F_SLR * T_r
+        - F_RAR * (h_rar - R_w)
+        + F_z_LR
+        * (
+            R_w * np.sin(x[18])
+            + 0.5 * T_r * np.cos(x[18])
+            - K_lt * F_y_LR
+        )
+        - F_z_RR
+        * (
+            -R_w * np.sin(x[18])
+            + 0.5 * T_r * np.cos(x[18])
+            + K_lt * F_y_RR
+        )
+        - (F_y_LR + F_y_RR) * (R_w - x[21])
+    )
+
+    sumZ_uf = F_z_LF + F_z_RF + F_RAF * np.sin(x[6]) - (F_SLF + F_SRF) * np.cos(x[6])
+
+    sumZ_ur = F_z_LR + F_z_RR + F_RAR * np.sin(x[6]) - (F_SLR + F_SRR) * np.cos(x[6])
+
+    sumY_uf = (
+        (F_y_LF + F_y_RF) * np.cos(x[2])
+        + (F_x_LF + F_x_RF) * np.sin(x[2])
+        - F_RAF * np.cos(x[6])
+        - (F_SLF + F_SRF) * np.sin(x[6])
+    )
+
+    sumY_ur = (F_y_LR + F_y_RR) - F_RAR * np.cos(x[6]) - (F_SLR + F_SRR) * np.sin(x[6])
+
+    # dynamics common with single-track model
+    f = np.zeros(29)  # init 'right hand side'
+    # switch to kinematic model for small velocities
+    if abs(x[3]) < KIN_THRESH:
+        # wheelbase
+        # lwb = lf + lr
+
+        # system dynamics
+        # x_ks = [x[0],  x[1],  x[2],  x[3],  x[4]]
+        # f_ks = vehicle_dynamics_ks(x_ks, u, p)
+        # f.extend(f_ks)
+        # f.append(u[1]*lwb*np.tan(x[2]) + x[3]/(lwb*np.cos(x[2])**2)*u[0])
+
+        # Use kinematic model with reference point at center of mass
+        # wheelbase
+        lwb = lf + lr
+        # system dynamics
+        x_ks = [x[0], x[1], x[2], x[3], x[4]]
+        # kinematic model
+        f_ks = vehicle_dynamics_ks_cog(np.array(x_ks), u, params)
+        f[0:5] = np.array([f_ks[0], f_ks[1], f_ks[2], f_ks[3], f_ks[4]])
+        # derivative of slip angle and yaw rate
+        d_beta = (lr * u[0]) / (
+            lwb
+            * np.cos(x[2]) ** 2
+            * (1 + (np.tan(x[2]) ** 2 * lr / lwb) ** 2)
+        )
+        dd_psi = (
+            1
+            / lwb
+            * (
+                u[1] * np.cos(x[6]) * np.tan(x[2])
+                - x[3] * np.sin(x[6]) * d_beta * np.tan(x[2])
+                + x[3] * np.cos(x[6]) * u[0] / np.cos(x[2]) ** 2
+            )
+        )
+        f[5] = dd_psi
+
+    else:
+        f[0] = np.cos(beta + x[4]) * vel
+        f[1] = np.sin(beta + x[4]) * vel
+        f[2] = u[0]
+        f[3] = 1 / m * sumX + x[5] * x[10]
+        f[4] = x[5]
+        f[5] = (
+            1
+            / (I_z - (I_xz_s) ** 2 / I_Phi_s)
+            * (sumN + I_xz_s / I_Phi_s * sumL)
+        )
+
+    # remaining sprung mass dynamics
+    f[6] = x[7]
+    f[7] = (
+        1
+        / (I_Phi_s - (I_xz_s) ** 2 / I_z)
+        * (I_xz_s / I_z * sumN + sumL)
+    )
+    f[8] = x[9]
+    f[9] = 1 / I_y_s * sumM_s
+    f[10] = 1 / m_s * sumY_s - x[5] * x[3]
+    f[11] = x[12]
+    f[12] = g - 1 / m_s * sumZ_s
+
+    # unsprung mass dynamics (front)
+    f[13] = x[14]
+    f[14] = 1 / I_uf * sumL_uf
+    f[15] = 1 / m_uf * sumY_uf - x[5] * x[3]
+    f[16] = x[17]
+    f[17] = g - 1 / m_uf * sumZ_uf
+
+    # unsprung mass dynamics (rear)
+    f[18] = x[19]
+    f[19] = 1 / I_ur * sumL_ur
+    f[20] = 1 / m_ur * sumY_ur - x[5] * x[3]
+    f[21] = x[22]
+    f[22] = g - 1 / m_ur * sumZ_ur
+
+    # convert acceleration input to brake and engine torque
+    if u[1] > 0:
+        T_B = 0.0
+        T_E = m * R_w * u[1]
+    else:
+        T_B = m * R_w * u[1]
+        T_E = 0.0
+
+    # wheel dynamics  (T  new parameter for torque splitting)
+    f[23] = (
+        1
+        / I_y_w
+        * (
+            -R_w * F_x_LF
+            + 0.5 * T_sb * T_B
+            + 0.5 * T_se * T_E
+        )
+    )
+    f[24] = (
+        1
+        / I_y_w
+        * (
+            -R_w * F_x_RF
+            + 0.5 * T_sb * T_B
+            + 0.5 * T_se * T_E
+        )
+    )
+    f[25] = (
+        1
+        / I_y_w
+        * (
+            -R_w * F_x_LR
+            + 0.5 * (1 - T_sb) * T_B
+            + 0.5 * (1 - T_se) * T_E
+        )
+    )
+    f[26] = (
+        1
+        / I_y_w
+        * (
+            -R_w * F_x_RR
+            + 0.5 * (1 - T_sb) * T_B
+            + 0.5 * (1 - T_se) * T_E
+        )
+    )
+
+    # negative wheel spin forbidden
+    for iState in range(23, 27):
+        if x[iState] < 0.0:
+            x[iState] = 0.0
+            f[iState] = 0.0
+
+    # compliant joint equations
+    f[27] = dot_delta_y_f
+    f[28] = dot_delta_y_r
+
+    return f
+
+@njit(cache=True)
+def get_standardized_state_mb(x: np.ndarray) -> np.ndarray:
+    """[X,Y,Steering_Angle,Speed,YAW,YAW_RATE,V_Y]"""
+    return np.array([x[0], x[1], x[2], np.sqrt(x[3] ** 2 + x[10] ** 2), x[4], x[5], np.arctan2(x[10], x[3])])

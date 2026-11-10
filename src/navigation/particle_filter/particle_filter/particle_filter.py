@@ -22,32 +22,29 @@
 
 import time
 from threading import Lock
+from typing import Any, cast
 
 import numpy as np
 import range_libc
 import rclpy
 import tf_transformations
+from builtin_interfaces.msg import Time
 from geometry_msgs.msg import (
-    Point,
-    Point32,
     PointStamped,
-    Polygon,
     PolygonStamped,
     Pose,
     PoseArray,
     PoseStamped,
     PoseWithCovarianceStamped,
-    Quaternion,
     TransformStamped,
 )
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import MapMetaData, Odometry
 from nav_msgs.srv import GetMap
-from particle_filter import utils as Utils
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
-from std_msgs.msg import Float32MultiArray, Header, String
 from tf2_ros import TransformBroadcaster
-from visualization_msgs.msg import Marker
+
+from particle_filter import utils
 
 """
 These flags indicate several variants of the sensor model. Only one of them is used at a time.
@@ -60,11 +57,10 @@ VAR_RADIAL_CDDT_OPTIMIZATIONS = 4
 
 
 class ParticleFiler(Node):
-    """
-    This class implements Monte Carlo Localization based on odometry and a laser scanner.
-    """
+    """This class implements Monte Carlo Localization based on odometry and a laser scanner."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Declare parameters, allocate the particle buffers and wire up the topics."""
         super().__init__("particle_filter")
 
         # declare parameters
@@ -117,21 +113,31 @@ class ParticleFiler(Node):
             "motion_dispersion_theta"
         ).value
 
-        # various data containers used in the MCL algorithm
-        self.MAX_RANGE_PX = None
+        # Various data containers used in the MCL algorithm. These are all filled in
+        # lazily -- by get_omap once the map server answers, and by the lidar and odom
+        # callbacks once the first message of each arrives -- and guarded at use by the
+        # map_initialized / lidar_initialized / odom_initialized flags. The annotations
+        # give them their real types, and the ignores cover only the None sentinels:
+        # typing them Optional instead would push a narrowing check into every one of
+        # the ~50 uses in the hot path, none of which can actually see a None.
+        self.MAX_RANGE_PX: int = None  # type: ignore[assignment]
         self.odometry_data = np.array([0.0, 0.0, 0.0])
-        self.laser = None
+        self.laser: LaserScan = None
         self.iters = 0
-        self.map_info = None
+        self.map_info: MapMetaData = None
         self.map_initialized = False
         self.lidar_initialized = False
         self.odom_initialized = False
-        self.last_pose = None
-        self.laser_angles = None
-        self.downsampled_angles = None
-        self.range_method = None
-        self.last_time = None
-        self.last_stamp = None
+        self.last_pose: np.ndarray = None  # type: ignore[assignment]
+        self.laser_angles: np.ndarray = None  # type: ignore[assignment]
+        self.downsampled_angles: np.ndarray = None  # type: ignore[assignment]
+        self.downsampled_ranges: np.ndarray = None  # type: ignore[assignment]
+        self.viz_queries: np.ndarray = None  # type: ignore[assignment]
+        self.viz_ranges: np.ndarray = None  # type: ignore[assignment]
+        # range_libc is a Cython extension with no stubs, so its method objects are Any.
+        self.range_method: Any = None
+        self.last_time: float = None  # type: ignore[assignment]
+        self.last_stamp: Time = None
         self.first_sensor_update = True
         self.state_lock = Lock()
 
@@ -139,20 +145,20 @@ class ParticleFiler(Node):
         self.local_deltas = np.zeros((self.MAX_PARTICLES, 3))
 
         # cache this for the sensor model computation
-        self.queries = None
-        self.ranges = None
-        self.tiled_angles = None
-        self.sensor_model_table = None
+        self.queries: np.ndarray = None  # type: ignore[assignment]
+        self.ranges: np.ndarray = None  # type: ignore[assignment]
+        self.tiled_angles: np.ndarray = None  # type: ignore[assignment]
+        self.sensor_model_table: np.ndarray = None  # type: ignore[assignment]
 
         # particle poses and weights
-        self.inferred_pose = None
+        self.inferred_pose: np.ndarray = None  # type: ignore[assignment]
         self.particle_indices = np.arange(self.MAX_PARTICLES)
         self.particles = np.zeros((self.MAX_PARTICLES, 3))
         self.weights = np.ones(self.MAX_PARTICLES) / float(self.MAX_PARTICLES)
 
         # initialize the state
-        self.smoothing = Utils.CircularArray(10)
-        self.timer = Utils.Timer(10)
+        self.smoothing = utils.CircularArray(10)
+        self.timer = utils.Timer(10)
         # map service client
         self.map_client = self.create_client(GetMap, "/map_server/map")
         self.get_omap()
@@ -177,10 +183,10 @@ class ParticleFiler(Node):
 
         # these topics are to receive data from the racecar
         self.laser_sub = self.create_subscription(
-            LaserScan, self.get_parameter("scan_topic").value, self.lidarCB, 1
+            LaserScan, self.get_parameter("scan_topic").value, self.lidar_callback, 1
         )
         self.odom_sub = self.create_subscription(
-            Odometry, self.get_parameter("odometry_topic").value, self.odomCB, 1
+            Odometry, self.get_parameter("odometry_topic").value, self.odom_callback, 1
         )
         self.pose_sub = self.create_subscription(
             PoseWithCovarianceStamped, "/initialpose", self.clicked_pose, 1
@@ -191,12 +197,12 @@ class ParticleFiler(Node):
 
         self.get_logger().info("Finished initializing, waiting on messages...")
 
-    def get_omap(self):
-        """
-        Fetch the occupancy grid map from the map_server instance, and initialize the correct
-        RangeLibc method. Also stores a matrix which indicates the permissible region of the map
-        """
+    def get_omap(self) -> None:
+        """Fetch the occupancy grid map and initialize the RangeLibc method.
 
+        The map comes from the map_server instance. This also stores a matrix marking the
+        permissible region of the map.
+        """
         while not self.map_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info("Get map service not available, waiting...")
         req = GetMap.Request()
@@ -205,27 +211,27 @@ class ParticleFiler(Node):
         map_msg = future.result().map
         self.map_info = map_msg.info
 
-        oMap = range_libc.PyOMap(map_msg)
+        omap = range_libc.PyOMap(map_msg)
         self.MAX_RANGE_PX = int(self.MAX_RANGE_METERS / self.map_info.resolution)
 
         # initialize range method
         self.get_logger().info("Initializing range method: " + self.WHICH_RM)
         if self.WHICH_RM == "bl":
-            self.range_method = range_libc.PyBresenhamsLine(oMap, self.MAX_RANGE_PX)
+            self.range_method = range_libc.PyBresenhamsLine(omap, self.MAX_RANGE_PX)
         elif "cddt" in self.WHICH_RM:
             self.range_method = range_libc.PyCDDTCast(
-                oMap, self.MAX_RANGE_PX, self.THETA_DISCRETIZATION
+                omap, self.MAX_RANGE_PX, self.THETA_DISCRETIZATION
             )
             if self.WHICH_RM == "pcddt":
                 self.get_logger().info("Pruning...")
                 self.range_method.prune()
         elif self.WHICH_RM == "rm":
-            self.range_method = range_libc.PyRayMarching(oMap, self.MAX_RANGE_PX)
+            self.range_method = range_libc.PyRayMarching(omap, self.MAX_RANGE_PX)
         elif self.WHICH_RM == "rmgpu":
-            self.range_method = range_libc.PyRayMarchingGPU(oMap, self.MAX_RANGE_PX)
+            self.range_method = range_libc.PyRayMarchingGPU(omap, self.MAX_RANGE_PX)
         elif self.WHICH_RM == "glt":
             self.range_method = range_libc.PyGiantLUTCast(
-                oMap, self.MAX_RANGE_PX, self.THETA_DISCRETIZATION
+                omap, self.MAX_RANGE_PX, self.THETA_DISCRETIZATION
             )
         self.get_logger().info("Done loading map")
 
@@ -239,9 +245,9 @@ class ParticleFiler(Node):
         self.permissible_region[array_255 == 0] = 1
         self.map_initialized = True
 
-    def publish_tf(self, pose, stamp=None):
+    def publish_tf(self, pose: np.ndarray, stamp: Time | None = None) -> None:
         """Publish a tf for the car. This tells ROS where the car is with respect to the map."""
-        if stamp == None:
+        if stamp is None:
             stamp = self.get_clock().now().to_msg()
 
         t = TransformStamped()
@@ -267,7 +273,7 @@ class ParticleFiler(Node):
             odom.header.frame_id = "/map"
             odom.pose.pose.position.x = pose[0]
             odom.pose.pose.position.y = pose[1]
-            odom.pose.pose.orientation = Utils.angle_to_quaternion(pose[2])
+            odom.pose.pose.orientation = utils.angle_to_quaternion(float(pose[2]))
             cov_mat = np.cov(
                 self.particles, rowvar=False, ddof=0, aweights=self.weights
             ).flatten()
@@ -277,10 +283,8 @@ class ParticleFiler(Node):
 
         return
 
-    def visualize(self):
-        """
-        Publish various visualization messages.
-        """
+    def visualize(self) -> None:
+        """Publish various visualization messages."""
         if not self.DO_VIZ:
             return
 
@@ -293,7 +297,9 @@ class ParticleFiler(Node):
             ps.header.frame_id = "/map"
             ps.pose.position.x = self.inferred_pose[0]
             ps.pose.position.y = self.inferred_pose[1]
-            ps.pose.orientation = Utils.angle_to_quaternion(self.inferred_pose[2])
+            ps.pose.orientation = utils.angle_to_quaternion(
+                float(self.inferred_pose[2])
+            )
             self.pose_pub.publish(ps)
 
         if self.particle_pub.get_subscription_count() > 0:
@@ -318,16 +324,16 @@ class ParticleFiler(Node):
             self.range_method.calc_range_many(self.viz_queries, self.viz_ranges)
             self.publish_scan(self.downsampled_angles, self.viz_ranges)
 
-    def publish_particles(self, particles):
-        # publish the given particles as a PoseArray object
+    def publish_particles(self, particles: np.ndarray) -> None:
+        """Publish the given particles as a PoseArray."""
         pa = PoseArray()
         pa.header.stamp = self.get_clock().now().to_msg()
         pa.header.frame_id = "/map"
-        pa.poses = Utils.particles_to_poses(particles)
+        pa.poses = utils.particles_to_poses(particles)
         self.particle_pub.publish(pa)
 
-    def publish_scan(self, angles, ranges):
-        # publish the given angels and ranges as a laser scan message
+    def publish_scan(self, angles: np.ndarray, ranges: np.ndarray) -> None:
+        """Publish the given angles and ranges as a LaserScan message."""
         ls = LaserScan()
         ls.header.stamp = self.last_stamp
         ls.header.frame_id = "/laser"
@@ -339,11 +345,9 @@ class ParticleFiler(Node):
         ls.ranges = ranges
         self.pub_fake_scan.publish(ls)
 
-    def lidarCB(self, msg):
-        """
-        Initializes reused buffers, and stores the relevant laser scanner data for later use.
-        """
-        if not isinstance(self.laser_angles, np.ndarray):
+    def lidar_callback(self, msg: LaserScan) -> None:
+        """Initializes reused buffers, and stores the relevant laser scanner data for later use."""
+        if not self.lidar_initialized:
             self.get_logger().info("...Received first LiDAR message")
             self.laser_angles = np.linspace(
                 msg.angle_min, msg.angle_max, len(msg.ranges)
@@ -364,21 +368,20 @@ class ParticleFiler(Node):
         self.lidar_initialized = True
         # self.update()
 
-    def odomCB(self, msg):
-        """
-        Store deltas between consecutive odometry messages in the coordinate space of the car.
+    def odom_callback(self, msg: Odometry) -> None:
+        """Store deltas between consecutive odometry messages in the coordinate space of the car.
 
         Odometry data is accumulated via dead reckoning, so it is very inaccurate on its own.
         """
         position = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y])
 
-        orientation = Utils.quaternion_to_angle(msg.pose.pose.orientation)
+        orientation = utils.quaternion_to_angle(msg.pose.pose.orientation)
         pose = np.array([position[0], position[1], orientation])
         self.current_speed = msg.twist.twist.linear.x
 
-        if isinstance(self.last_pose, np.ndarray):
+        if self.odom_initialized:
             # changes in x,y,theta in local coordinate system of the car
-            rot = Utils.rotation_matrix(-self.last_pose[2])
+            rot = utils.rotation_matrix(-float(self.last_pose[2]))
             delta = np.array([position - self.last_pose[0:2]]).transpose()
             local_delta = (rot * delta).transpose()
 
@@ -395,19 +398,15 @@ class ParticleFiler(Node):
         # this topic is slower than lidar, so update every time we receive a message
         self.update()
 
-    def clicked_pose(self, msg):
-        """
-        Receive pose messages from RViz and initialize the particle distribution in response.
-        """
+    def clicked_pose(self, msg: PointStamped | PoseWithCovarianceStamped) -> None:
+        """Receive pose messages from RViz and initialize the particle distribution in response."""
         if isinstance(msg, PointStamped):
             self.initialize_global()
         elif isinstance(msg, PoseWithCovarianceStamped):
             self.initialize_particles_pose(msg.pose.pose)
 
-    def initialize_particles_pose(self, pose):
-        """
-        Initialize particles in the general region of the provided pose.
-        """
+    def initialize_particles_pose(self, pose: Pose) -> None:
+        """Initialize particles in the general region of the provided pose."""
         self.get_logger().info("SETTING POSE")
         self.get_logger().info(str([pose.position.x, pose.position.y]))
         self.state_lock.acquire()
@@ -418,15 +417,13 @@ class ParticleFiler(Node):
         self.particles[:, 1] = pose.position.y + np.random.normal(
             loc=0.0, scale=0.5, size=self.MAX_PARTICLES
         )
-        self.particles[:, 2] = Utils.quaternion_to_angle(
+        self.particles[:, 2] = utils.quaternion_to_angle(
             pose.orientation
         ) + np.random.normal(loc=0.0, scale=0.4, size=self.MAX_PARTICLES)
         self.state_lock.release()
 
-    def initialize_global(self):
-        """
-        Spread the particle distribution over the permissible region of the state space.
-        """
+    def initialize_global(self) -> None:
+        """Spread the particle distribution over the permissible region of the state space."""
         self.get_logger().info("GLOBAL INITIALIZATION")
         # randomize over grid coordinate space
         self.state_lock.acquire()
@@ -438,15 +435,16 @@ class ParticleFiler(Node):
         permissible_states[:, 1] = permissible_x[indices]
         permissible_states[:, 2] = np.random.random(self.MAX_PARTICLES) * np.pi * 2.0
 
-        Utils.map_to_world(permissible_states, self.map_info)
+        utils.map_to_world(permissible_states, self.map_info)
         self.particles = permissible_states
         self.weights[:] = 1.0 / self.MAX_PARTICLES
         self.state_lock.release()
 
-    def precompute_sensor_model(self):
-        """
-        Generate and store a table which represents the sensor model. For each discrete computed
-        range value, this provides the probability of measuring any (discrete) range.
+    def precompute_sensor_model(self) -> None:
+        """Generate and store a table which represents the sensor model.
+
+        For each discrete computed range value, this provides the probability of measuring
+        any (discrete) range.
 
         This table is indexed by the sensor model at runtime by discretizing the measurements
         and computed ranges from RangeLibc.
@@ -462,11 +460,9 @@ class ParticleFiler(Node):
         table_width = int(self.MAX_RANGE_PX) + 1
         self.sensor_model_table = np.zeros((table_width, table_width))
 
-        t = time.time()
         # d is the computed range from RangeLibc
         for d in range(table_width):
             norm = 0.0
-            sum_unkown = 0.0
             # r is the observed range from the lidar unit
             for r in range(table_width):
                 prob = 0.0
@@ -500,10 +496,11 @@ class ParticleFiler(Node):
         if self.RANGELIB_VAR > 0:
             self.range_method.set_sensor_model(self.sensor_model_table)
 
-    def motion_model(self, proposal_dist, action):
-        """
-        The motion model applies the odometry to the particle distribution. Since there the odometry
-        data is inaccurate, the motion model mixes in gaussian noise to spread out the distribution.
+    def motion_model(self, proposal_dist: np.ndarray, action: np.ndarray) -> None:
+        """Apply the odometry to the particle distribution.
+
+        Odometry data is inaccurate, so the motion model mixes in gaussian noise to spread
+        out the distribution.
 
         Vectorized motion model. Computing the motion model over all particles is thousands of times
         faster than doing it for each particle individually due to vectorization and reduction in
@@ -533,11 +530,13 @@ class ParticleFiler(Node):
             loc=0.0, scale=self.MOTION_DISPERSION_THETA, size=self.MAX_PARTICLES
         )
 
-    def sensor_model(self, proposal_dist, obs, weights):
-        """
-        This function computes a probablistic weight for each particle in the proposal distribution.
-        These weights represent how probable each proposed (x,y,theta) pose is given the measured
-        ranges from the lidar scanner.
+    def sensor_model(
+        self, proposal_dist: np.ndarray, obs: np.ndarray, weights: np.ndarray
+    ) -> None:
+        """Compute a probabilistic weight for each particle in the proposal distribution.
+
+        These weights represent how probable each proposed (x, y, theta) pose is given the
+        measured ranges from the lidar scanner.
 
         There are 4 different variants using various features of RangeLibc for demonstration purposes.
         - VAR_REPEAT_ANGLES_EVAL_SENSOR is the most stable, and is very fast.
@@ -547,7 +546,6 @@ class ParticleFiler(Node):
                                         optimizations to CDDT which simultaneously performs ray casting
                                         in two directions, reducing the amount of work by roughly a third
         """
-
         num_rays = self.downsampled_angles.shape[0]
         # only allocate buffers once to avoid slowness
         if self.first_sensor_update:
@@ -663,7 +661,7 @@ class ParticleFiler(Node):
 
             # compute the weight for each particle
             for i in range(self.MAX_PARTICLES):
-                weight = np.product(
+                weight = np.prod(
                     self.sensor_model_table[
                         intobs, intrng[i * num_rays : (i + 1) * num_rays]
                     ]
@@ -673,9 +671,9 @@ class ParticleFiler(Node):
         else:
             self.get_logger().info("PLEASE SET rangelib_variant PARAM to 0-4")
 
-    def MCL(self, a, o):
-        """
-        Performs one step of Monte Carlo Localization.
+    def mcl(self, a: np.ndarray, o: np.ndarray) -> None:
+        """Perform one step of Monte Carlo Localization.
+
             1. resample particle distribution to form the proposal distribution
             2. apply the motion model
             3. apply the sensor model
@@ -728,13 +726,14 @@ class ParticleFiler(Node):
         # save the particles
         self.particles = proposal_distribution
 
-    def expected_pose(self):
-        # returns the expected value of the pose given the particle distribution
-        return np.dot(self.particles.transpose(), self.weights)
+    def expected_pose(self) -> np.ndarray:
+        """Return the expected value of the pose given the particle distribution."""
+        # numpy is followed as Any here (follow_imports = skip), so np.dot's result
+        # needs the cast to satisfy the declared return type.
+        return cast(np.ndarray, np.dot(self.particles.transpose(), self.weights))
 
-    def update(self):
-        """
-        Apply the MCL function to update particle filter state.
+    def update(self) -> None:
+        """Apply the MCL function to update particle filter state.
 
         Ensures the state is correctly initialized, and acquires the state lock before proceeding.
         """
@@ -752,7 +751,7 @@ class ParticleFiler(Node):
                 self.odometry_data = np.zeros(3)
 
                 # run the MCL update algorithm
-                self.MCL(action, observation)
+                self.mcl(action, observation)
 
                 # compute the expected value of the robot pose
                 self.inferred_pose = self.expected_pose()
@@ -802,7 +801,8 @@ class ParticleFiler(Node):
 #                                     interval=0.001)
 
 
-def main(args=None):
+def main(args: list[str] | None = None) -> None:
+    """Spin the particle filter node."""
     rclpy.init(args=args)
     pf = ParticleFiler()
     rclpy.spin(pf)

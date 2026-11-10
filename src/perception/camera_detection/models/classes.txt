@@ -1,0 +1,5 @@
+blue_cone
+large_orange_cone
+orange_cone
+unknown_cone
+yellow_cone

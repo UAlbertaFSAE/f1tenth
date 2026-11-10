@@ -1,0 +1,13 @@
+packaging>=24.0
+
+transforms3d
+tf-transformations
+
+open3d
+
+numpy<2
+scipy
+PyYAML
+
+ruff
+mypy

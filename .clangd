@@ -1,5 +1,7 @@
 CompileFlags:
-    CompilationDatabase: build/
+    # The compile_commands.json `make build` exports. It lands at the
+    # workspace root, which is one level up from this repo.
+    CompilationDatabase: ../build/
 
 Index:
   StandardLibrary: Yes

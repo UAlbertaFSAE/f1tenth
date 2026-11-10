@@ -15,3 +15,8 @@ ros-humble-teleop-twist-keyboard
 ros-humble-diagnostic-updater
 ros-humble-rmw-cyclonedds-cpp
 ros-humble-xacro
+
+qt6-base-dev
+qt6-tools-dev
+qmake6
+python3-dev

@@ -1,5 +1,11 @@
 FROM ros:humble
 
+# The image mirrors the bare-metal layout exactly: /f1tenth is the colcon
+# workspace root (build/, install/, log/, venv/ live there) and the repo is
+# /f1tenth/src. `make deps` and `make build` therefore behave identically in and
+# out of the container.
+ARG WORKSPACE=/f1tenth
+
 # using devcontainer is nice cause it'll remap uid's/gid's for us
 ARG USERNAME=autonomous
 ARG USER_UID=1000
@@ -22,25 +28,33 @@ RUN apt update && apt install -q -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* && apt-get clean
 
 # install clang tooling (version 18)
+# llvm.sh is removed in the same layer: leaving it behind put an installer
+# script in the image that nothing runs and that people mistake for a step.
 RUN wget https://apt.llvm.org/llvm.sh \
     && chmod +x llvm.sh \
     && ./llvm.sh 18 \
+    && rm -f llvm.sh \
     && apt update && apt install -y \
     clang-tools-18 \
     clang-tidy-18 \
-    clang-format-18
+    clang-format-18 \
+    && rm -rf /var/lib/apt/lists/* && apt-get clean
 
-# install python packages
-COPY docker/deps/requirements.txt deps/requirements.txt
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install --upgrade --ignore-installed -r deps/requirements.txt
-
-# setup bashrc
-RUN echo -e "\nsource /f1tenth/scripts/formula_bashrc.sh" >> /home/${USERNAME}/.bashrc
-
-RUN git config --global --add safe.directory /f1tenth
-
-ENV IS_JETSON=FALSE
+RUN mkdir -p ${WORKSPACE} && chown -R ${USER_UID}:${USER_GID} ${WORKSPACE}
 
 USER ${USERNAME}
+
+# The repo goes to ${WORKSPACE}/src, which is what makes the Makefile resolve
+# the workspace root to ${WORKSPACE}.
+COPY --chown=${USER_UID}:${USER_GID} . ${WORKSPACE}/src
+
+# Set the workspace up and build it at image build time, so the devcontainer is
+# usable the moment it opens instead of after a first 20-minute build. The
+# devcontainer bind-mounts a live checkout over ${WORKSPACE}/src only, so the
+# venv/, build/ and install/ baked at ${WORKSPACE} survive that mount.
+WORKDIR ${WORKSPACE}/src
+RUN make deps && make build
+
+RUN git config --global --add safe.directory ${WORKSPACE}/src
+
 ENTRYPOINT [ "/bin/bash" ]
