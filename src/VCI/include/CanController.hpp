@@ -1,15 +1,22 @@
 //
 // Created by David Ola on 2026-10-24.
 //
-
-
 #ifndef CANCONTROLLER_HPP
 #define CANCONTROLLER_HPP
+#include <list>
+#include <memory>
+#include <string>
+#include <vector>
+#include <queue>
+
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
+
 using std::string;
 using std::list;
 using std::vector;
 
-using PublisherPtr = rclcpp::Publisher<std_msgs::msg::String>::SharedPtr;
+using Publisher = rclcpp::Publisher<std_msgs::msg::String>::SharedPtr;
 
 /**
   The SerialReceiver is going to receive a message, and then loop through a linkedlist
@@ -19,32 +26,33 @@ using PublisherPtr = rclcpp::Publisher<std_msgs::msg::String>::SharedPtr;
 
   So, TelemetryPublisher needs a way to
  **/
+
+using Topic = struct Topic {
+  std::string name;
+  string message_type;
+  std::queue<string> message_queue;
+};
+
 using TelemetryPublisher = struct TelemetryPublisher {
-  std::string topic;  // The going to have a list of the different ECU's that correlate to that topic
-  std::shared_ptr<PublisherPtr> publisher;
-  std::shared_ptr<PublisherPtr>* next;
+  Topic topic;  // The going to have a list of the different ECU's that correlate to that topic
+  string message_type;
+  Publisher publisher;
 };
 
-/**
-
- **/
-using PublisherTable = struct PublisherTable {
-  std::unique_ptr<TelemetryPublisher> head;
-  int count;
-};
 
 
 class CanController : rclcpp::Node {
 
 public:
-  explicit CanController(string topics_list_loc);
+  explicit CanController(vector<Topic> topics);
 
   /**
     Creates the publishers and the TelemetryPublisher struct for each publisher. Uses contents
     returned by CanController::readFromLoc() to assign specific things to the TelemetryPublisher
     Then, assigns a standard callback
    **/
-  void createPublishersByTopics(vector<string> topics_dict);
+
+  TelemetryPublisher create_topic_publisher(Topic topic);
 
   /**
    Will read from a file containing the topic, and then the arbitration id's it publishes to
@@ -57,9 +65,8 @@ public:
   void publishToTopic();
 
 private:
-  vector<string> topicsList_;
-  std::shared_ptr<PublisherTable> publisherTable_;
-  vector<PublisherPtr> publishers_;
+  vector<TelemetryPublisher> publishers_;
+  vector<Topic> topics_;
 };
 
 #endif //CANCONTROLLER_HPP

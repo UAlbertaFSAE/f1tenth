@@ -10,7 +10,6 @@
   Checksum — so the receiver can tell if the message arrived intact.
 */
 
-using CANFrame = struct CanFrame {};
 
 /*
   This class will probably create a new child process that's going to constantly
@@ -21,26 +20,16 @@ using CANFrame = struct CanFrame {};
   socket programming here
 */
 
-
-/*
-  The SerialPublisher can receive and then pipe information to the TelemetryPublisher.
-  Then publish to
-
-  The SerialReceiver can send information to the TelemetryPublisher using piping,
-  or a mutex lock on
-*/
-
 class SerialReceiver {
 public:
   SerialReceiver();
 
   /**
-    SerialReceiver calls this method to publish to a specific topic, once it loops
-    through all the topics that have the arbitration ID that it has received
+    SerialReceiver calls this method to the message queue of a specific topic. A function
+    in the CanController checks the topic's message queue incrementally and publishes the message
+    to the topic
    **/
-  void publishToTopic(std::shared_ptr<PublisherPtr> publisher, string message);
-private:
-  vector<> arbitratio
+  void publishToTopic(std::string message, Topic topic);
 };
 
 /*
