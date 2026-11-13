@@ -1,6 +1,3 @@
-//
-// Created by David Ola on 2026-10-24.
-//
 #ifndef CANCONTROLLER_HPP
 #define CANCONTROLLER_HPP
 #include <list>
@@ -16,7 +13,6 @@ using std::string;
 using std::list;
 using std::vector;
 
-using Publisher = rclcpp::Publisher<std_msgs::msg::String>::SharedPtr;
 
 /**
   The SerialReceiver is going to receive a message, and then loop through a linkedlist
@@ -30,21 +26,19 @@ using Publisher = rclcpp::Publisher<std_msgs::msg::String>::SharedPtr;
 using Topic = struct Topic {
   std::string name;
   string message_type;
-  std::queue<string> message_queue;
+  std::queue<std::string> message_queue;
 };
 
 using TelemetryPublisher = struct TelemetryPublisher {
   Topic topic;  // The going to have a list of the different ECU's that correlate to that topic
   string message_type;
-  Publisher publisher;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher;
+  rclcpp::TimerBase::SharedPtr timer;
 };
 
-
-
-class CanController : rclcpp::Node {
-
+class TelemetryNode : public rclcpp::Node {
 public:
-  explicit CanController(vector<Topic> topics);
+  explicit TelemetryNode(const vector<Topic>* topics);
 
   /**
     Creates the publishers and the TelemetryPublisher struct for each publisher. Uses contents
@@ -54,15 +48,16 @@ public:
 
   TelemetryPublisher create_topic_publisher(Topic topic);
 
+  void create_telemetry_subscriber();
+
   /**
-   Will read from a file containing the topic, and then the arbitration id's it publishes to
+   A more efficient way to create the Topic struct, that includes the topic it
+   publishes to, and arbitration Id's that it listens to.
 
    Topic_One 123456 23456 (more_info_here)
    Topic_Two 345678 456789 (more_info_here)
  **/
-  static vector<string> readFromLoc(string loc);
-
-  void publishToTopic();
+  static vector<string> create_topics_from_text(string loc);
 
 private:
   vector<TelemetryPublisher> publishers_;

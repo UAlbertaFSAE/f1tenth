@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(VCI)
+project(vci)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -28,9 +28,15 @@ endif()
 
 ament_package()
 
-add_executable(CanController src/CanController.cpp)
-ament_target_dependencies(CanController
+add_executable(telemetry_node
+        src/main.cpp
+        src/TelemetryNode.cpp
+        include/SerialHandler.hpp
+        include/TelemetryNode.hpp
+        )
+
+ament_target_dependencies(telemetry_node
 rclcpp
 std_msgs
 )
-install(TARGETS CanController DESTINATION lib/${PROJECT_NAME})
+install(TARGETS telemetry_node DESTINATION lib/${PROJECT_NAME})

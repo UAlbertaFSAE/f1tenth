@@ -28,8 +28,15 @@ public:
     SerialReceiver calls this method to the message queue of a specific topic. A function
     in the CanController checks the topic's message queue incrementally and publishes the message
     to the topic
+
+    Waits for a message and publishes it incrementally
+
    **/
   void publishToTopic(std::string message, Topic topic);
+
+private:
+  int socket_;
+  sockaddr_in address_;
 };
 
 /*
