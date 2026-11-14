@@ -71,7 +71,7 @@ Copyright (c) 2026 UAlbertaFSAE
 ## Persistent cone-map input
 
 Issue #168 adds the independent `cone_slam` package. The hardware profile
-`ros2 launch launch_pkg fsae.launch.py config:=slam_config.yaml` feeds the planner
+`ros2 launch launch_pkg fsae.launch.py config:=config.yaml` feeds the planner
 confirmed local landmarks from `/slam/planner_cones`. That adapter publishes in
 `odom`, preserving the existing controller frame contract; the full corrected map
 and vehicle pose are published separately in `map`.

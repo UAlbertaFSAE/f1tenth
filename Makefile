@@ -192,7 +192,7 @@ lint-cpp: ## clang-format and clang-tidy over all first-party C++
 run_auto: ## Launch the autonomous stack with camera/LiDAR cone SLAM
 	@$(SOURCE_ENV); \
 	source $(WS_ROOT)/install/setup.bash; \
-	ros2 launch launch_pkg fsae.launch.py config:=slam_config.yaml
+	ros2 launch launch_pkg fsae.launch.py config:=config.yaml
 
 # CSV=<path> points cone_detector_sim, track_map_publisher and the gym's ego
 # spawn pose at one track file, so changing track is one argument rather than

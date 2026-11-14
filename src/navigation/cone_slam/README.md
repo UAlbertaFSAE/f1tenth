@@ -23,14 +23,14 @@ make -C src run_auto
 
 Do not run those two launches simultaneously. Only SLAM may publish `map -> odom`.
 The integrated profile removes the configured static transform and rejects ZED
-map-TF publication. The original `config.yaml` keeps SLAM disabled. Standalone
+map-TF publication. The default `config.yaml` enables SLAM. Standalone
 launch users must disable other map-TF owners themselves. `odom -> base_link`
 continues to come from the existing odometry system. Frames are deliberately fixed
 to `map`, `odom`, `base_link`; input mismatches are rejected rather than relabeled.
 
 To include the actual source revision in a map, supply `source_commit` at launch.
 Also retain the working-tree diff alongside validation results if testing uncommitted
-changes. Camera detection is enabled in `slam_config.yaml`, using existing model
+changes. Camera detection is enabled in `config.yaml`, using existing model
 selection. Check calibration and camera availability before driving.
 
 ```bash

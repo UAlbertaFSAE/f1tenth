@@ -5,13 +5,13 @@ launch:
   simulator: false
   cone_detector_sim: false
   track_map_publisher: false
-  camera_detection: false
+  camera_detection: true
   lidar_cone_filtering: true
-  cone_slam: false
+  cone_slam: true
   path_planning: true
   safety_node: true
   pure_pursuit: true
-  visualizer: true
+  visualizer: false
   rosbag: true
 
 f1tenth_stack:
@@ -52,6 +52,8 @@ rosbag:
   - /slam/map
   - /slam/pose
   - /slam/status
+  - /slam/planner_landmarks
+  - /planning/corridors
   - /slam/planner_cones
   - /cone_positions
   - /current_waypoint
@@ -75,3 +77,8 @@ rosbag:
   - /zed/zed_node/depth/depth_registered
   - /zed/zed_node/depth/depth_registered/camera_info
   - /zed/zed_node/imu/data
+
+# SLAM settings for the default hardware launch and make run_auto.
+cone_slam:
+  mode: mapping
+  output_map_path: ""
