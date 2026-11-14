@@ -20,6 +20,7 @@
   <exec_depend>camera_detection</exec_depend>
   <exec_depend>lidar_cone_filtering</exec_depend>
   <exec_depend>path_planning</exec_depend>
+  <exec_depend>cone_slam</exec_depend>
   <exec_depend>safety_node</exec_depend>
   <exec_depend>pure_pursuit</exec_depend>
   <exec_depend>rviz2</exec_depend>

@@ -51,7 +51,7 @@ class PathPlanner : public rclcpp::Node {
   std::string left_color_, right_color_;
   double position_tolerance_, cluster_distance_, min_track_width_, max_track_width_;
   int qos_depth_;
-  bool gate_enabled_;
+  bool gate_enabled_, lidar_corridor_enabled_;
   std::vector<std::string> start_colors_, stop_colors_;
   int gate_min_cone_count_;
   double gate_max_distance_, stop_distance_, extrapolation_step_;

@@ -7,6 +7,7 @@ launch:
   track_map_publisher: false
   camera_detection: false
   lidar_cone_filtering: true
+  cone_slam: false
   path_planning: true
   safety_node: true
   pure_pursuit: true
@@ -46,6 +47,12 @@ rosbag:
   - /clicked_point
   - /commands/motor/speed
   - /commands/servo/position
+  - /perception/camera/observations
+  - /perception/lidar/observations
+  - /slam/map
+  - /slam/pose
+  - /slam/status
+  - /slam/planner_cones
   - /cone_positions
   - /current_waypoint
   - /diagnostics

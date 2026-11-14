@@ -1,0 +1,14 @@
+std_msgs/Header header
+string mode
+string map_id
+uint64 revision
+bool map_available
+bool pose_available
+string quality
+string reason
+float64 observation_age_s
+float64 optimization_ms
+uint32 keyframes
+uint32 factors
+uint64 dropped_batches
+uint64 accepted_closures

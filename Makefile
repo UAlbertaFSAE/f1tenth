@@ -33,6 +33,10 @@ SOURCE_ENV = set +u; \
 	source $(ROS_SETUP); \
 	if [ -f "$(VENV_DIR)/bin/activate" ]; then source "$(VENV_DIR)/bin/activate"; fi
 
+# Run colcon with the activated Python, not the system interpreter embedded in
+# /usr/bin/colcon. Python package entry points must use the same dependency env.
+COLCON = python3 "$$(command -v colcon)"
+
 CMAKE_BUILD_TYPE ?= RelWithDebInfo
 PARALLEL_WORKERS = 4
 
@@ -112,11 +116,11 @@ deps_jetson: ## Full environment setup on a Jetson (JetPack 6 / CUDA 12.6)
 
 build: ## colcon build, minus PACKAGES_IGNORE (livox, zed)
 	@$(SOURCE_ENV); \
-	cd $(WS_ROOT) && colcon build $(COLCON_BUILD_ARGS) --packages-ignore $(PACKAGES_IGNORE)
+	cd $(WS_ROOT) && $(COLCON) build $(COLCON_BUILD_ARGS) --packages-ignore $(PACKAGES_IGNORE)
 
 build_all: ## colcon build, everything including the vendored LiDAR and ZED packages
 	@$(SOURCE_ENV); \
-	cd $(WS_ROOT) && colcon build $(COLCON_BUILD_ARGS)
+	cd $(WS_ROOT) && $(COLCON) build $(COLCON_BUILD_ARGS)
 
 # `make package pure_pursuit path_planning` -- the package names arrive as extra
 # goals, so they are filtered out of MAKECMDGOALS and absorbed by the catch-all
@@ -129,7 +133,7 @@ package: ## Build only the named packages: make package <pkg> [<pkg>..]
 		echo "usage: make package <pkg> [<pkg>..]"; exit 2; \
 	fi
 	@$(SOURCE_ENV); \
-	cd $(WS_ROOT) && colcon build $(COLCON_BUILD_ARGS) --packages-select $(PACKAGE_ARGS)
+	cd $(WS_ROOT) && $(COLCON) build $(COLCON_BUILD_ARGS) --packages-select $(PACKAGE_ARGS)
 
 ifneq (,$(filter package,$(MAKECMDGOALS)))
 $(PACKAGE_ARGS):
@@ -138,7 +142,7 @@ endif
 
 livox: ## Build the vendored Livox SDK and ROS 2 driver (both skipped by `make build`)
 	@$(SOURCE_ENV); \
-	cd $(WS_ROOT) && colcon build $(COLCON_BUILD_ARGS) --packages-up-to livox_ros_driver2
+	cd $(WS_ROOT) && $(COLCON) build $(COLCON_BUILD_ARGS) --packages-up-to livox_ros_driver2
 
 clean: ## Remove build/, install/ and log/ from the workspace root
 	@echo "Removing $(WS_ROOT)/{build,install,log}"
@@ -148,9 +152,9 @@ rebuild: clean build ## clean followed by build
 
 test: ## Run colcon test and print the full results
 	@$(SOURCE_ENV); \
-	cd $(WS_ROOT) && colcon test --base-paths $(SRC_DIR) --log-base $(WS_ROOT)/log \
+	cd $(WS_ROOT) && $(COLCON) test --base-paths $(SRC_DIR) --log-base $(WS_ROOT)/log \
 		--packages-ignore $(PACKAGES_IGNORE) $(VENDORED_PACKAGES) \
-		&& colcon test-result --verbose --test-result-base $(WS_ROOT)/build
+		&& $(COLCON) test-result --verbose --test-result-base $(WS_ROOT)/build
 
 lint: lint-python lint-cpp ## Run every linter CI runs, over all of src/
 
@@ -185,10 +189,10 @@ lint-cpp: ## clang-format and clang-tidy over all first-party C++
 	if [ -z "$$units" ]; then echo "No first-party translation units found."; exit 0; fi; \
 	echo "$$units" | xargs $(CLANG_TIDY) -p $(WS_ROOT)/build --quiet
 
-run_auto: ## Launch the autonomous stack on the car
+run_auto: ## Launch the autonomous stack with camera/LiDAR cone SLAM
 	@$(SOURCE_ENV); \
 	source $(WS_ROOT)/install/setup.bash; \
-	ros2 launch launch_pkg fsae.launch.py config:=config.yaml
+	ros2 launch launch_pkg fsae.launch.py config:=slam_config.yaml
 
 # CSV=<path> points cone_detector_sim, track_map_publisher and the gym's ego
 # spawn pose at one track file, so changing track is one argument rather than

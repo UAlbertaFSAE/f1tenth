@@ -13,6 +13,7 @@
 #include "bspline.hpp"
 #include "filtering.hpp"
 #include "geometry_msgs/msg/quaternion.hpp"
+#include "lidar_corridor.hpp"
 
 namespace {
 
@@ -71,6 +72,7 @@ void PathPlanner::read_parameters() {
   qos_depth_ = declare_parameter<int>("qos_depth", 1);
 
   gate_enabled_ = declare_parameter<bool>("gate_enabled", false);
+  lidar_corridor_enabled_ = declare_parameter<bool>("lidar_corridor_enabled", false);
   start_colors_ =
       declare_parameter<std::vector<std::string>>("start_colors", {"orange", "small_orange"});
   stop_colors_ =
@@ -345,10 +347,42 @@ void PathPlanner::read_cones(rc_interfaces::msg::Cones::ConstSharedPtr msg) {
     } else {
       update_track_width(gates);
     }
+    bool used_lidar_corridor = false;
+    if (lidar_corridor_enabled_) {
+      std::vector<path_planning::BoundaryCone> boundaries;
+      for (const auto& cone : cones) boundaries.push_back({cone.x, cone.y, cone.is_left ? 1 : 0});
+      for (const auto& cone : msg->cones) {
+        if (!normalize_color(cone.color).empty() || !std::isfinite(cone.x) ||
+            !std::isfinite(cone.y))
+          continue;
+        const bool duplicate =
+            std::any_of(boundaries.begin(), boundaries.end(), [&](const auto& other) {
+              return std::hypot(cone.x - other.x, cone.y - other.y) <= position_tolerance_;
+            });
+        if (!duplicate) boundaries.push_back({cone.x, cone.y, -1});
+      }
+      const auto corridor =
+          path_planning::trace_lidar_corridor(boundaries, car_pose_, track_width_m_);
+      if (corridor.uses_unknown && corridor.gates.size() >= 2) {
+        std::vector<path_planning::Point2D> centres;
+        for (const auto& gate : corridor.gates) centres.push_back(gate.mid_pos);
+        auto candidate = path_planning::smooth_and_resample(centres, waypoint_spacing_m_);
+        const auto length = [](const std::vector<path_planning::Point2D>& points) {
+          double result = 0.0;
+          for (std::size_t i = 1; i < points.size(); ++i)
+            result += std::hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+          return result;
+        };
+        if (path.empty() || length(candidate) > length(path) + 0.3) {
+          path = std::move(candidate);
+          used_lidar_corridor = true;
+        }
+      }
+    }
     if (path.empty()) {
       publish_held_path();
     } else {
-      held_path_ = extend_end(path);
+      held_path_ = used_lidar_corridor ? path : extend_end(path);
       held_stamp_ = now();
       publish_path(held_path_);
     }

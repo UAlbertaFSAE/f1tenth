@@ -67,3 +67,33 @@ Replacing a loop with `std::transform` alone does not guarantee vectorization or
 MIT License — see [LICENSE](LICENSE).
 
 Copyright (c) 2026 UAlbertaFSAE
+
+## Persistent cone-map input
+
+Issue #168 adds the independent `cone_slam` package. The hardware profile
+`ros2 launch launch_pkg fsae.launch.py config:=slam_config.yaml` feeds the planner
+confirmed local landmarks from `/slam/planner_cones`. That adapter publishes in
+`odom`, preserving the existing controller frame contract; the full corrected map
+and vehicle pose are published separately in `map`.
+
+For a separately running mapper:
+
+```bash
+ros2 launch path_planning path_planner.launch.py cones_topic:=/slam/planner_cones frame_id:=odom hold_timeout_s:=0.0 lidar_corridor_enabled:=true
+```
+
+Disable path holding for this input so unavailable mapping/localization cannot
+reuse a previous path. SLAM continues without this planner or any path topic.
+The SLAM hardware profile enables `lidar_corridor_enabled` (default false for
+other launches). Confirmed cones without camera labels can extend a locally
+supported corridor. Gate widths must be within 30% of the configured/observed
+track width, successive gates within 2 m, and successive turns within 0.8 rad.
+The tracer follows successive gate geometry through bends, keeps measured color
+constraints, and stops at ambiguous branches. It replaces the normal colored
+path only when that path is absent or the supported corridor is over 0.3 m longer.
+It does not extrapolate beyond the final LiDAR gate or write inferred colors to
+the map. Both boundaries are needed for this unknown-color fallback; visibility
+of a single unknown boundary cannot establish a track centerline.
+Global route selection, hairpins and nearby parallel sections remain #170 work.
+See `../cone_slam/README.md` and `../cone_slam/VALIDATION.md` for mapping, saved-map
+localization and Jetson validation instructions.

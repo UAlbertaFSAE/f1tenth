@@ -267,7 +267,31 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
         if action is not None:
             actions.append(action)
 
-    actions.extend(_static_transform_nodes(config.get("static_transforms", [])))
+    transforms = config.get("static_transforms", [])
+    if enabled.get("cone_slam", False):
+        if config.get("zed", {}).get("publish_map_tf", False):
+            raise ValueError("cone_slam must be the sole map -> odom publisher")
+        transforms = [
+            t for t in transforms if (t["parent"], t["child"]) != ("map", "odom")
+        ]
+        actions.append(
+            Node(
+                package="cone_slam",
+                executable="cone_slam",
+                name="cone_slam",
+                output="screen",
+                parameters=[
+                    os.path.join(
+                        get_package_share_directory("cone_slam"),
+                        "config",
+                        "cone_slam.yaml",
+                    ),
+                    config.get("cone_slam", {}),
+                ],
+                additional_env={"OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1"},
+            )
+        )
+    actions.extend(_static_transform_nodes(transforms))
 
     if enabled.get("camera_detection", False):
         actions.append(
@@ -325,7 +349,19 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                         get_package_share_directory("path_planning"),
                         "config",
                         "config.yaml",
-                    )
+                    ),
+                    # The local adapter publishes in odom so the existing
+                    # controller frame contract stays consistent. Do not hold a
+                    # path after an unavailable SLAM output or a map correction.
+                    {
+                        "cones_topic": "/slam/planner_cones",
+                        "frame_id": "odom",
+                        "hold_timeout_s": 0.0,
+                        "heading_smoothing_alpha": 1.0,
+                        "lidar_corridor_enabled": True,
+                    }
+                    if enabled.get("cone_slam", False)
+                    else {},
                 ],
             )
         )

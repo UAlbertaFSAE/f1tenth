@@ -1,0 +1,34 @@
+cone_slam:
+  ros__parameters:
+    mode: mapping
+    odom_topic: /odom
+    camera_topic: /perception/camera/observations
+    lidar_topic: /perception/lidar/observations
+    publish_tf: true
+    map_path: ""
+    output_map_path: ""
+    source_commit: unknown
+    calibration_id: uncalibrated-cone-base-xy-v1
+    # Initial Orin Nano 25 W budgets, pending combined-workload measurements.
+    max_keyframes: 600
+    max_landmarks: 1000
+    max_factors: 12000
+    key_distance: 0.5
+    key_angle: 0.2
+    key_seconds: 1.0
+    optimization_interval_s: 1.0
+    optimization_budget_s: 0.25
+    confirmation_hits: 3
+    tentative_ttl: 3.0
+    inactive_after: 15.0
+    association_distance: 0.8
+    closure_after: 12.0
+    closure_translation: 3.0
+    closure_angle: 0.6
+    closure_confirmations: 3
+    unknown_noise_m: 0.2
+    calibration_noise_m: 0.08
+    min_range_m: 0.2
+    max_range_m: 20.0
+    planner_range_m: 8.0
+    pose_timeout_s: 1.0

@@ -18,6 +18,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Cones.msg"
   "msg/ConeObservation.msg"
   "msg/ConeObservations.msg"
+  "msg/ConeLandmark.msg"
+  "msg/ConeMap.msg"
+  "msg/SlamStatus.msg"
   DEPENDENCIES std_msgs geometry_msgs sensor_msgs
 )
 

@@ -9,7 +9,7 @@ setup(
             "share/ament_index/resource_index/packages",
             ["resource/perception_observation"],
         ),
-        ("share/perception_observation", ["package.xml", "README.md", "VALIDATION.md"]),
+        ("share/perception_observation", ["package.xml"]),
     ],
     install_requires=["setuptools"],
     extras_require={"test": ["pytest"]},
