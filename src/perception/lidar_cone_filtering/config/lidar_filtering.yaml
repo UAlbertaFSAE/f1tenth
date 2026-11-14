@@ -5,6 +5,9 @@ lidar_cone_filtering:
     input_topic: "/livox/lidar"
     no_ground_topic: "/lidar/no_ground"
     centroids_topic: "/lidar/cone_cluster_centroids"
+    observation_topic: "/perception/lidar/observations"
+    target_frame: "odom"
+    infer_color_from_heading: true
 
     # Axis-aligned crop in the LiDAR frame, metres.
     roi_x_min: 0.0

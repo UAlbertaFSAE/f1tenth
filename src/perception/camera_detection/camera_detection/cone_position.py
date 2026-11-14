@@ -18,6 +18,7 @@ import math
 import os
 import threading
 import traceback
+from collections import OrderedDict
 
 import cv2
 import numpy as np
@@ -26,14 +27,21 @@ import tf2_geometry_msgs  # noqa: F401  (registers PointStamped with tf2)
 import torch
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped
-from rc_interfaces.msg import Cone, Cones
+from perception_observation.transport import (
+    ObservationPublisher,
+    legacy_cones,
+    observation,
+    stamp_ns,
+)
+from rc_interfaces.msg import Cones
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import Header
-from tf2_ros import Buffer, TransformException, TransformListener
+from tf2_ros import TransformException
 from ultralytics import YOLO
 
 
@@ -48,6 +56,7 @@ class ConePublisher(Node):
         self.declare_parameter("depth_node", "/zed/zed_node")
         self.declare_parameter("camera_node", "/zed/zed_node")
         self.declare_parameter("publishing_topic", "/cone_positions")
+        self.declare_parameter("observation_topic", "/perception/camera/observations")
         self.declare_parameter("model_file", "")
         self.declare_parameter("classes_file", "")
         self.declare_parameter("include_depth", True)
@@ -58,6 +67,7 @@ class ConePublisher(Node):
         self.declare_parameter("apply_tf", True)
         self.declare_parameter("target_frame", "odom")
         self.declare_parameter("tf_timeout_sec", 0.5)
+        self.declare_parameter("depth_sync_tolerance_ms", 30.0)
 
         # Get parameters
         self.depth_node = self.get_parameter("depth_node").value
@@ -73,6 +83,10 @@ class ConePublisher(Node):
         self.apply_tf = self.get_parameter("apply_tf").value
         self.target_frame = self.get_parameter("target_frame").value
         self.tf_timeout_sec = self.get_parameter("tf_timeout_sec").value
+        tolerance_ms = float(self.get_parameter("depth_sync_tolerance_ms").value)
+        if not math.isfinite(tolerance_ms) or tolerance_ms < 0:
+            raise ValueError("depth_sync_tolerance_ms must be finite and nonnegative")
+        self.depth_sync_tolerance_ns = int(tolerance_ms * 1_000_000)
 
         self.get_logger().info("Starting detection camera node")
         self.get_logger().info(f"  Model file: {self.model_file}")
@@ -85,23 +99,14 @@ class ConePublisher(Node):
         self.get_logger().info(f"  Apply TF: {self.apply_tf}")
         self.get_logger().info(f"  Target frame: {self.target_frame}")
 
-        # TF is only set up when it is actually going to be used; a Buffer and
-        # TransformListener that nothing queries still costs a subscription to
-        # /tf and /tf_static.
-        self.tf_buffer: Buffer | None = None
-        self.tf_listener: TransformListener | None = None
+        self.observation_output = ObservationPublisher(
+            self,
+            "camera",
+            self.get_parameter("observation_topic").value,
+            self.target_frame if self.apply_tf else "",
+        )
+        self.tf_buffer = self.observation_output.buffer if self.apply_tf else None
         self.tf_timeout = Duration(seconds=float(self.tf_timeout_sec))
-        if self.apply_tf:
-            self.tf_buffer = Buffer()
-            self.tf_listener = TransformListener(self.tf_buffer, self)
-            self.get_logger().info(
-                f"TF enabled: cone positions will be published in '{self.target_frame}'"
-            )
-        else:
-            self.get_logger().warn(
-                "TF disabled: cone positions are published in the camera optical "
-                "frame, not a fixed frame. Downstream planning expects a fixed frame."
-            )
 
         # Detect available device (GPU/CPU)
         self.cuda_available = False
@@ -138,6 +143,7 @@ class ConePublisher(Node):
         self._sensor_cb_group = MutuallyExclusiveCallbackGroup()
         self._pending_image: Image | None = None
         self._pending_lock = threading.Lock()
+        self._sensor_lock = threading.Lock()
         self._frame_ready = threading.Event()
         self._shutdown = threading.Event()
 
@@ -145,7 +151,7 @@ class ConePublisher(Node):
             Image,
             f"{self.camera_node}/rgb/color/rect/image",
             self._enqueue_image,
-            1,
+            qos_profile_sensor_data,
             callback_group=self._image_cb_group,
         )
 
@@ -154,23 +160,24 @@ class ConePublisher(Node):
                 Image,
                 f"{self.depth_node}/depth/depth_registered",
                 self.depth_callback,
-                1,
+                qos_profile_sensor_data,
                 callback_group=self._sensor_cb_group,
             )
 
-            self.caminfo_sub = self.create_subscription(
-                CameraInfo,
-                f"{self.camera_node}/depth/depth_registered/camera_info",
-                self.caminfo_callback,
-                10,
-                callback_group=self._sensor_cb_group,
-            )
             self.get_logger().info(
                 f"Subscribed to depth at: {self.depth_node}/depth/depth_registered"
             )
             self.get_logger().info(
                 f"Subscribed to camera info at: {self.camera_node}/depth/depth_registered/camera_info"
             )
+
+        self.caminfo_sub = self.create_subscription(
+            CameraInfo,
+            f"{self.camera_node}/depth/depth_registered/camera_info",
+            self.caminfo_callback,
+            qos_profile_sensor_data,
+            callback_group=self._sensor_cb_group,
+        )
 
         self.get_logger().info(
             f"Subscribed to image at: {self.camera_node}/rgb/color/rect/image"
@@ -180,6 +187,10 @@ class ConePublisher(Node):
         self.bridge = CvBridge()
         self.model = self.load_model()
         self.classes = self.load_classes(self.classes_file)
+        self._depth_frames: OrderedDict[tuple[str, int], tuple[Image, np.ndarray]] = (
+            OrderedDict()
+        )
+        self._last_sensor_time: int | None = None
         self.latest_depth: np.ndarray | None = None  # numpy array (meters)
         self.latest_depth_msg = None  # original ROS message for visualization
         self.latest_caminfo: CameraInfo | None = None  # sensor_msgs/CameraInfo
@@ -202,9 +213,15 @@ class ConePublisher(Node):
             # depth_registered commonly published as 32FC1 (meters)
             depth_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="32FC1")
             # Convert to numpy float32 for safePoseWithCovariancer operations
-            self.latest_depth = np.array(depth_image, dtype=np.float32)
-            # Store original message for visualization
-            self.latest_depth_msg = msg
+            with self._sensor_lock:
+                self._check_sensor_clock()
+                self.latest_depth = np.array(depth_image, dtype=np.float32)
+                self.latest_depth_msg = msg
+                self._depth_frames[
+                    (msg.header.frame_id, stamp_ns(msg.header.stamp))
+                ] = (msg, self.latest_depth)
+                while len(self._depth_frames) > 10:
+                    self._depth_frames.popitem(last=False)
         except CvBridgeError as e:
             self.get_logger().error(f"CvBridge depth conversion failed: {e}")
         except Exception:
@@ -217,7 +234,6 @@ class ConePublisher(Node):
 
         Parsed once here rather than per frame in the detection path.
         """
-        self.latest_caminfo = msg
         try:
             k = msg.k if hasattr(msg, "k") else msg.K
             fx, fy, cx, cy = float(k[0]), float(k[4]), float(k[2]), float(k[5])
@@ -225,7 +241,9 @@ class ConePublisher(Node):
             self.get_logger().warn(
                 "Failed to read camera intrinsics from CameraInfo message."
             )
-            self.intrinsics = None
+            with self._sensor_lock:
+                self.intrinsics = None
+                self.latest_caminfo = msg
             return
 
         if (
@@ -239,10 +257,14 @@ class ConePublisher(Node):
             self.get_logger().warn(
                 f"Unusable camera intrinsics: fx={fx}, fy={fy}, cx={cx}, cy={cy}"
             )
-            self.intrinsics = None
+            with self._sensor_lock:
+                self.intrinsics = None
+                self.latest_caminfo = msg
             return
 
-        self.intrinsics = (fx, fy, cx, cy)
+        with self._sensor_lock:
+            self.intrinsics = (fx, fy, cx, cy)
+            self.latest_caminfo = msg
 
     # -------------------------
     # Main image processing callback (YOLO runs here)
@@ -313,54 +335,84 @@ class ConePublisher(Node):
             self.get_logger().error("YOLO model run failed:\n" + traceback.format_exc())
             return
 
-        # Build Cones
-        cone_list, detections_info = self.process_detections(results, msg.header)
-        cones_msg = Cones()
-        cones_msg.header.stamp = msg.header.stamp
-        cones_msg.header.frame_id = (
-            self.target_frame if self.apply_tf else msg.header.frame_id
+        depth, intrinsics, camera_info, depth_header = self.snapshot_measurements(msg)
+        items, detections_info = self.process_detections(
+            results, msg.header, depth, intrinsics, camera_info, depth_header
         )
-        cones_msg.cones = cone_list
-
-        self.publisher_.publish(cones_msg)
+        batch = self.observation_output.publish(msg.header, items)
+        if batch is not None:
+            self.publisher_.publish(
+                legacy_cones(
+                    batch, self.target_frame if self.apply_tf else msg.header.frame_id
+                )
+            )
 
         # Visualization
         if self.visualize:
             self.publish_visualization(cv_image, detections_info, msg.header)
 
+    def _check_sensor_clock(self) -> None:
+        """Discard cached depth from a previous clock epoch while holding the lock."""
+        now = self.get_clock().now().nanoseconds
+        if self._last_sensor_time is not None and now < self._last_sensor_time:
+            self._depth_frames.clear()
+            self.latest_depth = None
+            self.latest_depth_msg = None
+        self._last_sensor_time = now
+
+    def snapshot_measurements(
+        self, msg: Image
+    ) -> tuple[
+        np.ndarray | None,
+        tuple[float, float, float, float] | None,
+        CameraInfo | None,
+        Header | None,
+    ]:
+        """Match nearest buffered depth within the configured capture-time tolerance."""
+        with self._sensor_lock:
+            self._check_sensor_clock()
+            camera_info = self.latest_caminfo
+            intrinsics = self.intrinsics
+            candidates = [
+                (abs(stamp - stamp_ns(msg.header.stamp)), stamp, pair)
+                for (frame, stamp), pair in self._depth_frames.items()
+                if frame == msg.header.frame_id
+            ]
+            nearest = (
+                min(candidates, key=lambda candidate: candidate[:2])
+                if candidates
+                else None
+            )
+        if (
+            self.include_depth
+            and nearest is not None
+            and nearest[0] <= self.depth_sync_tolerance_ns
+            and camera_info is not None
+            and camera_info.header.frame_id == msg.header.frame_id
+            and camera_info.width == msg.width
+            and camera_info.height == msg.height
+            and nearest[2][0].width == msg.width
+            and nearest[2][0].height == msg.height
+        ):
+            depth_msg, depth = nearest[2]
+            return depth, intrinsics, camera_info, depth_msg.header
+        return None, intrinsics, camera_info, None
+
     # -------------------------
     # Detection -> Object conversion
     # -------------------------
-    def process_detections(self, results: list, source_header: Header) -> tuple:
-        """Convert YOLO results into a list of rc_interfaces/Cone messages.
-
-        Uses latest_depth and the parsed camera intrinsics to compute a 3D position for each
-        detection, then transforms it into the configured target frame. A
-        detection is dropped rather than published in the wrong place when its
-        label is not a known cone color, when no valid depth is available, or
-        when the TF lookup fails.
-
-        Args:
-            results: YOLO results for one frame.
-            source_header: Header of the image the detections came from; carries
-                the frame_id and stamp the TF lookup needs.
-
-        Returns:
-            tuple: (cones, detections_info) where detections_info is for visualization.
-        """
+    def process_detections(
+        self,
+        results: list,
+        source_header: Header,
+        depth: np.ndarray | None,
+        intrinsics: tuple[float, float, float, float] | None,
+        camera_info: CameraInfo | None,
+        depth_header: Header | None = None,
+    ) -> tuple:
+        """Keep image-only evidence and raw camera coordinates for shared transport."""
         cones = []
-        detections_info = []  # Store bbox, label, confidence, position for visualization
-
-        # Bound to a local so it cannot be swapped out by the depth callback
-        # part-way through this frame's detections.
-        depth = self.latest_depth if self.include_depth else None
-        if depth is None or self.intrinsics is None:
-            # Throttled: this fires per frame while depth or CameraInfo is
-            # missing, which is every frame until the ZED comes up.
-            self.get_logger().warn(
-                "No depth or intrinsics available; no cone positions can be computed.",
-                throttle_duration_sec=5.0,
-            )
+        detections_info = []
 
         for result in results:
             for box in result.boxes:
@@ -380,23 +432,37 @@ class ConePublisher(Node):
                         )
                         continue
 
+                if not np.isfinite([x1, y1, x2, y2]).all() or x2 <= x1 or y2 <= y1:
+                    continue
+
                 class_label = (
                     self.classes[class_id]
-                    if class_id < len(self.classes)
+                    if 0 <= class_id < len(self.classes)
                     else f"unknown_{class_id}"
                 )
 
-                # A detection whose label is not a cone color cannot be placed on
-                # a track boundary, so it is dropped here rather than published
-                # with an empty color for a downstream node to filter out.
                 color = self.normalize_color(class_label)
-                if not color:
-                    self.get_logger().debug(
-                        f"Dropping detection with unrecognized label '{class_label}'"
+                position_3d = self.locate_cone(
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    depth,
+                    source_header,
+                    intrinsics=intrinsics,
+                    transform=False,
+                )
+                cones.append(
+                    observation(
+                        depth_header if depth_header is not None else source_header,
+                        position_3d,
+                        confidence=confidence,
+                        color=color,
+                        box=(x1, y1, x2, y2),
+                        camera_info=camera_info,
+                        image_header=source_header,
                     )
-                    continue
-
-                position_3d = self.locate_cone(x1, y1, x2, y2, depth, source_header)
+                )
 
                 # Recorded even when no position could be computed, so the
                 # visualization still shows what the model saw.
@@ -409,20 +475,6 @@ class ConePublisher(Node):
                     }
                 )
 
-                if position_3d is None:
-                    continue
-
-                x, y, _z = position_3d
-                cone = Cone()
-                cone.x = float(x)
-                cone.y = float(y)
-                cone.color = color
-                cones.append(cone)
-
-                self.get_logger().debug(
-                    f"Cone '{color}' at x={x:.2f}, y={y:.2f} (conf={confidence:.2f})"
-                )
-
         return cones, detections_info
 
     def locate_cone(
@@ -433,6 +485,9 @@ class ConePublisher(Node):
         y2: float,
         depth: np.ndarray | None,
         source_header: Header,
+        *,
+        intrinsics: tuple[float, float, float, float] | None = None,
+        transform: bool = True,
     ) -> tuple[float, float, float] | None:
         """Compute a cone position from a bounding box and the depth map.
 
@@ -446,16 +501,22 @@ class ConePublisher(Node):
             y1: Top edge of the bounding box, in pixels.
             x2: Right edge of the bounding box, in pixels.
             y2: Bottom edge of the bounding box, in pixels.
-            depth: Latest depth image in meters, or None when unavailable.
+            depth: Capture-matched depth image in meters, or None when unavailable.
+            intrinsics: Calibration snapshot (fx, fy, cx, cy).
+            transform: Whether to apply TF here; rich transport transforms separately.
             source_header: Header carrying the source frame_id and stamp.
 
         Returns:
             The (x, y, z) position, or None when it could not be determined.
         """
-        if depth is None or self.intrinsics is None:
+        if (
+            depth is None
+            or intrinsics is None
+            or not np.isfinite([x1, y1, x2, y2]).all()
+        ):
             return None
 
-        fx, fy, cx, cy = self.intrinsics
+        fx, fy, cx, cy = intrinsics
         h, w = depth.shape[:2]
 
         # clamp bbox to image bounds
@@ -489,7 +550,7 @@ class ConePublisher(Node):
         x = (u - cx) * z / fx
         y = (v - cy) * z / fy
 
-        if not self.apply_tf:
+        if not transform or not self.apply_tf:
             return (x, y, z)
 
         # Publishing an untransformed position on a topic documented as being in
@@ -551,36 +612,11 @@ class ConePublisher(Node):
                 timeout=self.tf_timeout,
             )
         except TransformException as ex:
-            # An exact-stamp lookup fails whenever the image stamp falls outside
-            # the odom TF buffer window. The detector runs at a few FPS while
-            # odom is published at 50 Hz, so one slow inference pass is enough to
-            # miss it, and dropping the cone there makes the whole pipeline see
-            # zero cones while detection is working perfectly. Fall back to the
-            # latest available transform (stamp 0) before giving up: the car
-            # moves centimetres in that interval, which beats publishing nothing.
-            fallback_point = PointStamped()
-            fallback_point.header.frame_id = source_header.frame_id
-            fallback_point.point = input_point.point
-            try:
-                output_point = self.tf_buffer.transform(
-                    fallback_point,
-                    self.target_frame,
-                    timeout=self.tf_timeout,
-                )
-            except TransformException as fallback_ex:
-                # Throttled: a missing transform fails for every cone in every
-                # frame, and one line per cone drowns the log.
-                self.get_logger().warn(
-                    f"TF transform to '{self.target_frame}' failed: {ex} "
-                    f"(latest-transform fallback also failed: {fallback_ex})",
-                    throttle_duration_sec=5.0,
-                )
-                return None
             self.get_logger().warn(
-                f"TF transform to '{self.target_frame}' at the image stamp "
-                f"failed ({ex}); using the latest available transform instead.",
+                f"Capture-time TF to '{self.target_frame}' unavailable: {ex}",
                 throttle_duration_sec=5.0,
             )
+            return None
 
         return (
             float(output_point.point.x),

@@ -3,6 +3,8 @@ camera_detection:
     depth_node: "/zed/zed_node"
     camera_node: "/zed/zed_node"
     publishing_topic: "/cone_positions"
+    observation_topic: "/perception/camera/observations"
+    depth_sync_tolerance_ms: 30.0
 
     model_file: ""
     classes_file: ""

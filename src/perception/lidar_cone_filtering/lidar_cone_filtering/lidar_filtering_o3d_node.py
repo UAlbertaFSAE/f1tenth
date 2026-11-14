@@ -16,6 +16,8 @@ from typing import cast
 import numpy as np
 import rclpy
 import sensor_msgs_py.point_cloud2 as pc2
+from perception_observation.transport import ObservationPublisher, observation
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import PointCloud2
@@ -46,6 +48,16 @@ class LidarFilteringOpen3D(Node):
         self.declare_parameter("input_topic", "/livox/lidar")
         self.declare_parameter("no_ground_topic", "/lidar/no_ground")
         self.declare_parameter("centroids_topic", "/lidar/cone_cluster_centroids")
+
+        self.declare_parameter("observation_topic", "/perception/lidar/observations")
+        self.declare_parameter("target_frame", "odom")
+        self.declare_parameter("infer_color_from_heading", True)
+        self.observation_output = ObservationPublisher(
+            self,
+            "lidar",
+            self.get_parameter("observation_topic").value,
+            self.get_parameter("target_frame").value,
+        )
 
         # limiting roi
         self.declare_parameter("roi_x_min", 0.0)
@@ -134,6 +146,7 @@ class LidarFilteringOpen3D(Node):
         """Process one ``PointCloud2`` message and publish filtered output."""
         xyz = self.pc2_to_xyz(msg)
         if xyz.shape[0] < 50:
+            self.observation_output.publish(msg.header, [])
             return
 
         x_min = float(self.get_parameter("roi_x_min").value)
@@ -145,9 +158,16 @@ class LidarFilteringOpen3D(Node):
 
         xyz = roi_crop(xyz, x_min, x_max, y_min, y_max, z_min, z_max)
         if xyz.shape[0] < 50:
+            self.observation_output.publish(msg.header, [])
             return
 
         objects_xyz, centroids = self.process_with_open3d(xyz)
+
+        self.observation_output.publish(
+            msg.header,
+            [observation(msg.header, centroid) for centroid in centroids],
+            infer_color=bool(self.get_parameter("infer_color_from_heading").value),
+        )
 
         # Publish no-ground cloud
         self.pub_noground.publish(self.xyz_to_pc2(objects_xyz, msg.header))
@@ -272,9 +292,15 @@ def main() -> None:
     """Run the node until shutdown."""
     rclpy.init()
     node = LidarFilteringOpen3D()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    # Keep TF callbacks serviced while Open3D processes a cloud.
+    executor = MultiThreadedExecutor(num_threads=2)
+    executor.add_node(node)
+    try:
+        executor.spin()
+    finally:
+        executor.shutdown()
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
