@@ -35,3 +35,21 @@ path_planner:
     hold_timeout_s: 2.0
     # One-sided paths sit half this from the visible boundary; updated from the narrowest gate seen.
     track_width_m: 0.92
+
+    # Provisional vehicle measurements: update before hardware testing.
+    # base_link is assumed at the rear axle; measure overhangs separately.
+    corridor_enabled: false
+    vehicle_wheelbase_m: 0.335
+    vehicle_width_m: 0.150
+    vehicle_front_overhang_m: 0.0
+    vehicle_rear_overhang_m: 0.0
+    clearance_margin_m: 0.10
+    cone_radius_m: 0.065
+    steering_limit_deg: 25.0
+    corridor_beam_width: 12
+    corridor_max_gates: 20
+    corridor_max_gap_m: 2.0
+    corridor_width_tolerance: 0.30
+    corridor_switch_margin: 0.25
+    corridor_memory_s: 0.5
+    heading_side_fallback: false

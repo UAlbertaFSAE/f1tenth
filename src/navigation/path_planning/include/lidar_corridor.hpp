@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <vector>
 
@@ -17,6 +18,8 @@ namespace path_planning {
 struct BoundaryCone {
   double x, y;
   int side = -1;  // -1 unknown, 0 measured right, 1 measured left
+  double uncertainty = 0;
+  uint64_t id = 0;
 };
 
 struct LocalCorridor {

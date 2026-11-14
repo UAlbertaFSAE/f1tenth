@@ -359,6 +359,7 @@ def _launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Any
                         "hold_timeout_s": 0.0,
                         "heading_smoothing_alpha": 1.0,
                         "lidar_corridor_enabled": True,
+                        "corridor_enabled": True,
                     }
                     if enabled.get("cone_slam", False)
                     else {},

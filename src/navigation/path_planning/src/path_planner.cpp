@@ -45,10 +45,41 @@ PathPlanner::PathPlanner() : Node("path_planner") {
   odom_subscriber_ = create_subscription<nav_msgs::msg::Odometry>(
       odom_topic_, rclcpp::QoS(qos_depth_),
       [this](nav_msgs::msg::Odometry::ConstSharedPtr msg) { read_odom(msg); });
-  cones_subscriber_ = create_subscription<rc_interfaces::msg::Cones>(
-      cones_topic_, rclcpp::QoS(qos_depth_),
-      [this](rc_interfaces::msg::Cones::ConstSharedPtr msg) { read_cones(msg); });
+  if (corridor_enabled_) {
+    landmarks_subscriber_ = create_subscription<rc_interfaces::msg::ConeMap>(
+        "/slam/planner_landmarks", rclcpp::QoS(qos_depth_),
+        [this](rc_interfaces::msg::ConeMap::ConstSharedPtr map) {
+          if (map->map_id != corridor_map_id_) {
+            corridor_memory_.clear();
+            corridor_map_id_ = map->map_id;
+          }
+          auto cones = std::make_shared<rc_interfaces::msg::Cones>();
+          cones->header = map->header;
+          landmark_uncertainties_.clear();
+          landmark_ids_.clear();
+          for (const auto& landmark : map->landmarks) {
+            if (landmark.state != "confirmed") continue;
+            rc_interfaces::msg::Cone cone;
+            cone.x = landmark.position.x;
+            cone.y = landmark.position.y;
+            cone.color = landmark.color;
+            cones->cones.push_back(cone);
+            const auto& c = landmark.covariance;
+            const double variance = .5 * (c[0] + c[3] + std::hypot(c[0] - c[3], c[1] + c[2]));
+            landmark_uncertainties_.push_back(
+                std::isfinite(variance) && variance >= 0 ? std::sqrt(variance) : INFINITY);
+            landmark_ids_.push_back(landmark.id);
+          }
+          read_cones(cones);
+        });
+  } else {
+    cones_subscriber_ = create_subscription<rc_interfaces::msg::Cones>(
+        cones_topic_, rclcpp::QoS(qos_depth_),
+        [this](rc_interfaces::msg::Cones::ConstSharedPtr msg) { read_cones(msg); });
+  }
   path_publisher_ = create_publisher<nav_msgs::msg::Path>(waypoint_topic_, 1);
+  corridor_debug_publisher_ =
+      create_publisher<visualization_msgs::msg::MarkerArray>("/planning/corridors", 1);
   marker_publisher_ = create_publisher<visualization_msgs::msg::MarkerArray>(marker_topic_, 1);
 }
 
@@ -71,6 +102,31 @@ void PathPlanner::read_parameters() {
   max_track_width_ = declare_parameter<double>("max_track_width", 10.0);
   qos_depth_ = declare_parameter<int>("qos_depth", 1);
 
+  corridor_enabled_ = declare_parameter<bool>("corridor_enabled", false);
+  corridor_memory_s_ = declare_parameter<double>("corridor_memory_s", .5);
+  corridor_config_.wheelbase = declare_parameter<double>("vehicle_wheelbase_m", .335);
+  corridor_config_.width = declare_parameter<double>("vehicle_width_m", .150);
+  corridor_config_.front = declare_parameter<double>("vehicle_front_overhang_m", 0.0);
+  corridor_config_.rear = declare_parameter<double>("vehicle_rear_overhang_m", 0.0);
+  corridor_config_.margin = declare_parameter<double>("clearance_margin_m", .10);
+  corridor_config_.cone_radius = declare_parameter<double>("cone_radius_m", .065);
+  corridor_config_.steering = declare_parameter<double>("steering_limit_deg", 25.0);
+  corridor_config_.max_gap = declare_parameter<double>("corridor_max_gap_m", 2.0);
+  corridor_config_.width_tolerance = declare_parameter<double>("corridor_width_tolerance", .30);
+  corridor_config_.switch_margin = declare_parameter<double>("corridor_switch_margin", .25);
+  corridor_config_.beam_width = declare_parameter<int>("corridor_beam_width", 12);
+  corridor_config_.max_gates = declare_parameter<int>("corridor_max_gates", 20);
+  corridor_config_.heading_fallback = declare_parameter<bool>("heading_side_fallback", false);
+  const auto& cfg = corridor_config_;
+  for (double value : {cfg.wheelbase, cfg.width, cfg.max_gap, cfg.steering, corridor_memory_s_})
+    if (!std::isfinite(value) || value <= 0)
+      throw std::invalid_argument("Invalid corridor geometry");
+  for (double value : {cfg.front, cfg.rear, cfg.margin, cfg.cone_radius, cfg.switch_margin})
+    if (!std::isfinite(value) || value < 0) throw std::invalid_argument("Invalid corridor margin");
+  if (!std::isfinite(cfg.width_tolerance) || cfg.width_tolerance <= 0 ||
+      cfg.width_tolerance >= 1 || cfg.steering >= 80 || cfg.beam_width < 1 ||
+      cfg.beam_width > 32 || cfg.max_gates < 2 || cfg.max_gates > 30)
+    throw std::invalid_argument("Invalid corridor search limits");
   gate_enabled_ = declare_parameter<bool>("gate_enabled", false);
   lidar_corridor_enabled_ = declare_parameter<bool>("lidar_corridor_enabled", false);
   start_colors_ =
@@ -328,6 +384,89 @@ void PathPlanner::publish_held_path() {
  * @param msg The message containing the detected cones.
  */
 void PathPlanner::read_cones(rc_interfaces::msg::Cones::ConstSharedPtr msg) {
+  if (corridor_enabled_) {
+    std::vector<path_planning::BoundaryCone> boundaries;
+    for (std::size_t i = 0; i < msg->cones.size(); ++i) {
+      const auto& cone = msg->cones[i];
+      const auto color = normalize_color(cone.color);
+      const int side = color == left_color_ ? 1 : color == right_color_ ? 0 : -1;
+      boundaries.push_back({cone.x, cone.y, side, landmark_uncertainties_[i], landmark_ids_[i]});
+    }
+    path_planning::CorridorResult result;
+    if (!odometry_ready() || !cones_ready(*msg)) {
+      result.reason = "stale_input";
+      corridor_memory_.clear();
+    } else {
+      const double age = (now() - corridor_stamp_).seconds();
+      if (age < 0 || age > corridor_memory_s_) corridor_memory_.clear();
+      result =
+          path_planning::search_corridor(boundaries, car_pose_, track_width_m_,
+                                         waypoint_spacing_m_, corridor_config_, corridor_memory_);
+    }
+    if (!result.path.empty()) {
+      corridor_memory_ = result.path;
+      corridor_stamp_ = now();
+    }
+    held_path_ = result.path;
+    held_stamp_ = now();
+    publish_path(result.path);
+    publish_markers({}, result.gates, result.path);
+    visualization_msgs::msg::MarkerArray diagnostics;
+    visualization_msgs::msg::Marker clear;
+    clear.action = visualization_msgs::msg::Marker::DELETEALL;
+    diagnostics.markers.push_back(clear);
+    auto marker = [&](int id, int type) {
+      visualization_msgs::msg::Marker m;
+      m.header = msg->header;
+      m.ns = "corridor_candidates";
+      m.id = id;
+      m.type = type;
+      m.action = m.ADD;
+      m.pose.orientation.w = 1;
+      m.scale.x = .03;
+      m.scale.z = .12;
+      m.color.a = 1;
+      m.color.r = 1;
+      return m;
+    };
+    auto status = marker(0, visualization_msgs::msg::Marker::TEXT_VIEW_FACING);
+    status.text = result.reason;
+    status.pose.position.x = car_pose_.x;
+    status.pose.position.y = car_pose_.y;
+    diagnostics.markers.push_back(status);
+    auto rejects = marker(1, visualization_msgs::msg::Marker::TEXT_VIEW_FACING);
+    rejects.pose.position = status.pose.position;
+    rejects.pose.position.y += .2;
+    for (const auto& entry : result.rejections)
+      rejects.text += entry.first + ":" + std::to_string(entry.second) + " ";
+    diagnostics.markers.push_back(rejects);
+    int id = 2;
+    int candidate_index = 0;
+    for (const auto& candidate : result.alternatives) {
+      auto line = marker(id++, visualization_msgs::msg::Marker::LINE_STRIP);
+      line.color.g = candidate.rejection.empty() ? .6 : 0;
+      const bool selected = candidate_index++ == result.selected_index;
+      if (selected) {
+        line.color.g = 1;
+        line.color.r = 0;
+        line.scale.x = .06;
+      }
+      for (const auto& p : candidate.path) {
+        geometry_msgs::msg::Point point;
+        point.x = p.x;
+        point.y = p.y;
+        line.points.push_back(point);
+      }
+      diagnostics.markers.push_back(line);
+      auto label = marker(id++, visualization_msgs::msg::Marker::TEXT_VIEW_FACING);
+      label.text = (selected ? "selected " : "alternative ") + std::to_string(candidate.score) +
+                   " " + candidate.rejection;
+      if (!line.points.empty()) label.pose.position = line.points.back();
+      diagnostics.markers.push_back(label);
+    }
+    corridor_debug_publisher_->publish(diagnostics);
+    return;
+  }
   if (!odometry_ready()) {
     held_path_.clear();
     publish_path({});
@@ -433,7 +572,7 @@ void PathPlanner::publish_markers(const std::vector<path_planning::Point2D>& con
     auto& marker = msg.markers[i];
     marker.header.frame_id = frame_id_;
     marker.header.stamp = now();
-    marker.ns = "planning_" + std::to_string(marker_frame_);
+    marker.ns = corridor_enabled_ ? "planning" : "planning_" + std::to_string(marker_frame_);
     marker.id = static_cast<int>(i);
     marker.action = Marker::ADD;
     marker.pose.orientation.w = 1.0;

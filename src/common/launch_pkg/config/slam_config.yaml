@@ -52,6 +52,8 @@ rosbag:
   - /slam/map
   - /slam/pose
   - /slam/status
+  - /slam/planner_landmarks
+  - /planning/corridors
   - /slam/planner_cones
   - /cone_positions
   - /current_waypoint

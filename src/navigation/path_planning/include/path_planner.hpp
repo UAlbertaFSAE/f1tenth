@@ -10,9 +10,11 @@
 #include <string>
 #include <vector>
 
+#include "corridor_search.hpp"
 #include "geometry_types.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "nav_msgs/msg/path.hpp"
+#include "rc_interfaces/msg/cone_map.hpp"
 #include "rc_interfaces/msg/cones.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -51,7 +53,15 @@ class PathPlanner : public rclcpp::Node {
   std::string left_color_, right_color_;
   double position_tolerance_, cluster_distance_, min_track_width_, max_track_width_;
   int qos_depth_;
-  bool gate_enabled_, lidar_corridor_enabled_;
+  bool gate_enabled_, lidar_corridor_enabled_, corridor_enabled_;
+  path_planning::CorridorConfig corridor_config_;
+  double corridor_memory_s_;
+  std::string corridor_map_id_;
+  std::vector<path_planning::Point2D> corridor_memory_;
+  rclcpp::Time corridor_stamp_{0, 0, RCL_ROS_TIME};
+  rclcpp::Subscription<rc_interfaces::msg::ConeMap>::SharedPtr landmarks_subscriber_;
+  std::vector<double> landmark_uncertainties_;
+  std::vector<uint64_t> landmark_ids_;
   std::vector<std::string> start_colors_, stop_colors_;
   int gate_min_cone_count_;
   double gate_max_distance_, stop_distance_, extrapolation_step_;
@@ -69,6 +79,7 @@ class PathPlanner : public rclcpp::Node {
   rclcpp::Subscription<rc_interfaces::msg::Cones>::SharedPtr cones_subscriber_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_publisher_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr corridor_debug_publisher_;
 };
 
 #endif

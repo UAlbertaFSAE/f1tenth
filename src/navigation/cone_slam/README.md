@@ -61,6 +61,7 @@ this explicit reset; it is never connected into the old graph as vehicle motion.
 | `/slam/map` | `rc_interfaces/ConeMap` | Persistent IDs, lifecycle, position covariance, existence and color evidence; transient-local |
 | `/slam/pose` | `nav_msgs/Odometry` | Corrected vehicle pose in map; published only while available |
 | `/slam/status` | `rc_interfaces/SlamStatus` | Map availability, independent pose availability/quality, revision, diagnostics |
+| `/slam/planner_landmarks` | `rc_interfaces/ConeMap` | Same local confirmed landmarks in odom, with persistent IDs and rotated covariance for #170 |
 | `/slam/planner_cones` | `rc_interfaces/Cones` | Confirmed local landmarks transformed into odom, including unknown colors; empty when unavailable |
 
 The map/status publishers run at 10 Hz even without a path or planner. Map revision

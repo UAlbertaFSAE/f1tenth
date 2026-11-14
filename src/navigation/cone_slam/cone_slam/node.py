@@ -119,6 +119,9 @@ class SlamNode(Node):
         self.map_pub = self.create_publisher(ConeMap, "/slam/map", map_qos)
         self.pose_pub = self.create_publisher(Odometry, "/slam/pose", 1)
         self.status_pub = self.create_publisher(SlamStatus, "/slam/status", 1)
+        self.local_map_pub = self.create_publisher(
+            ConeMap, "/slam/planner_landmarks", 1
+        )
         self.cones_pub = self.create_publisher(Cones, "/slam/planner_cones", 1)
         self.create_service(Trigger, "~/save_map", self.on_save)
         self.create_service(Trigger, "~/reset", self.on_reset)
@@ -490,6 +493,10 @@ class SlamNode(Node):
         self.map_pub.publish(map_msg)
         local = Cones()
         local.header.stamp, local.header.frame_id = now.to_msg(), "odom"
+        local_map = ConeMap()
+        local_map.header = local.header
+        local_map.map_id, local_map.revision = map_msg.map_id, map_msg.revision
+        rows = {row.id: row for row in map_msg.landmarks}
         if available and odom is not None:
             p = odom.pose.pose.position
             rot = quaternion_matrix(odom.pose.pose.orientation)
@@ -542,6 +549,19 @@ class SlamNode(Node):
                     landmark.color,
                 )
                 local.cones.append(cone)
+                row = deepcopy(rows[landmark.id])
+                row.position.x, row.position.y = cone.x, cone.y
+                angle = -data["correction"][2]
+                rot2 = np.array(
+                    [
+                        [math.cos(angle), -math.sin(angle)],
+                        [math.sin(angle), math.cos(angle)],
+                    ]
+                )
+                cov2 = np.asarray(row.covariance).reshape(2, 2)
+                row.covariance = (rot2 @ cov2 @ rot2.T).ravel().tolist()
+                local_map.landmarks.append(row)
+        self.local_map_pub.publish(local_map)
         self.cones_pub.publish(local)
 
     def close(self) -> None:
